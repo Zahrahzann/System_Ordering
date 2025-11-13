@@ -1,0 +1,10 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Arahkan semua request yang BUKAN file atau folder sungguhan
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+
+    # ... ke index.php
+    RewriteRule ^ index.php [QSA,L]
+</IfModule>
