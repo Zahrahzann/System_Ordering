@@ -36,26 +36,38 @@ class ApprovalController
 
         $order = ApprovalModel::findOrderById($orderId);
         $items = ApprovalModel::findOrderItemsByOrderId($orderId);
-
         if (!$order) {
             die('Order not found.');
         }
 
         require_once __DIR__ . '/../../views/spv/work_order/detail_approval.php';
-    }
+    }       
 
     public static function processApproval($orderId)
     { 
           SessionMiddleware::requireSpvLogin();
 
+        /** @var int $orderId */
+
         $action = $_POST['action'] ?? '';
         $notes = $_POST['spv_notes'] ?? '';
-        $spvId = $_SESSION['user_data']['id'];
+    $spvId = $_SESSION['user_data']['id'];
+    /** @var int $spvId */
 
         if ($action === 'approve') {
-            ApprovalModel::updateApprovalStatus($orderId, $spvId, 'approve', $notes);
+            $ok = ApprovalModel::updateApprovalStatus($orderId, $spvId, 'approve', $notes);
+            if (!$ok) {
+                error_log("[ApprovalController] Failed to update approval status to 'approve' for order_id={$orderId}, spv_id={$spvId}");
+                if (session_status() === PHP_SESSION_NONE) session_start();
+                $_SESSION['flash_error'] = 'Gagal menyetujui order. Silakan hubungi admin.';
+            }
         } elseif ($action === 'reject') {
-            ApprovalModel::updateApprovalStatus($orderId, $spvId, 'reject', $notes);
+            $ok = ApprovalModel::updateApprovalStatus($orderId, $spvId, 'reject', $notes);
+            if (!$ok) {
+                error_log("[ApprovalController] Failed to update approval status to 'reject' for order_id={$orderId}, spv_id={$spvId}");
+                if (session_status() === PHP_SESSION_NONE) session_start();
+                $_SESSION['flash_error'] = 'Gagal menolak order. Silakan hubungi admin.';
+            }
         }
 
         header('Location: /system_ordering/public/spv/work_order/approval');

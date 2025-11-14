@@ -105,7 +105,7 @@ class CartModel
                 return ['success' => false, 'message' => 'Gagal: SPV Approval untuk departemen & plant Anda tidak ditemukan. Hubungi admin.'];
             }
             $spvId = $spv['id'];
-            
+
             // 2. Buat record di tabel 'orders' (tanpa production_status, karena itu per-item di tabel items)
             $stmtOrder = $pdo->prepare(
                 "INSERT INTO orders (customer_id, plant_id) VALUES (?, ?)"
@@ -136,4 +136,33 @@ class CartModel
             return ['success' => false, 'message' => 'Error Sebenarnya: ' . $e->getMessage()];
         }
     }
-}
+
+    public static function addItemToCart($customerId, array $item)
+    {
+        $pdo = Database::connect();
+
+        $sql = "INSERT INTO items (
+                customer_id, item_name, quantity, category, material, material_type,
+                file_path, needed_date, note, is_emergency, emergency_type, item_type, created_at
+            ) VALUES (
+                :customer_id, :item_name, :quantity, :category, :material, :material_type,
+                :file_path, :needed_date, :note, :is_emergency, :emergency_type, :item_type, NOW()
+            )";
+
+        $stmt = $pdo->prepare($sql);
+        return $stmt->execute([
+            'customer_id'     => $customerId,
+            'item_name'       => $item['item_name'],
+            'quantity'        => $item['quantity'],
+            'category'        => $item['category'],
+            'material'        => $item['material'] ?? null,
+            'material_type'   => $item['material_type'] ?? null,
+            'file_path'       => $item['file_path'] ?? null,
+            'needed_date'     => date('Y-m-d'), 
+            'note'            => $item['note'] ?? null,
+            'is_emergency'    => $item['is_emergency'] ?? 0,
+            'emergency_type'  => $item['emergency_type'] ?? null,
+            'item_type'       => $item['item_type'] ?? 'work_order'
+        ]);
+    }
+ }

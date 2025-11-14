@@ -14,7 +14,7 @@ class View {
             return;
         }
 
-        extract($data); // Ubah array jadi variabel
+        extract($data);
         include $filePath;
     }
 }

@@ -71,12 +71,12 @@ body {
     border-left-color: #f6c23e;
 }
 
-.order-card.done {
-    border-left-color: #36b9cc;
+.order-card.finish {
+    border-left-color: #1cc88a;
 }
 
 .order-card.completed {
-    border-left-color: #1cc88a;
+    border-left-color: #36b9cc;
 }
 
 .order-card.rejected {
@@ -155,14 +155,14 @@ body {
     color: #856404;
 }
 
-.badge-info {
+.badge-success {
     background: #d1ecf1;
-    color: #0c5460;
+    color: #155724;
 }
 
-.badge-success {
+.badge-info {
     background: #d4edda;
-    color: #155724;
+    color: #0c5460;
 }
 
 .badge-danger {

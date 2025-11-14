@@ -41,6 +41,7 @@ switch ($route) {
     case '/admin/manage/customer';
         UserManagementController::listCustomers();
         break;
+        
 
     default:
         http_response_code(404);

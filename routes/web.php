@@ -7,6 +7,7 @@ global $route;
 use App\Controllers\AuthController;
 use App\Controllers\CustomerAuthController;
 use App\Controllers\TrackingController;
+use App\Controllers\HistoryController;
 
 // ROUTING DINAMIS
 $matches = [];
@@ -19,6 +20,13 @@ if (preg_match('#^/admin/tracking/update_item/(\d+)$#', $route, $matches)) {
     TrackingController::updateItemDetails($matches[1]);
     exit;
 }
+
+if (preg_match('#^/customer/history/reorder/(\d+)$#', $route, $matches)) {
+    HistoryController::reorderItem($matches[1]);
+    exit;
+}
+
+
 
 
 // ROUTING STATIS
@@ -36,7 +44,7 @@ switch ($route) {
         }
         break;
 
-        // Rute tracking statis
+    // Rute tracking statis
     case '/customer/tracking':
     case '/spv/tracking':
     case '/admin/tracking':
@@ -51,9 +59,11 @@ switch ($route) {
             echo "Error: item_id tidak ditemukan.";
         }
         break;
-    
-    case '/admin/work_order/riwayat_wo':
-        TrackingController::showTrackingPage();
+
+    case '/admin/history':
+    case '/spv/history':
+    case '/customer/history':
+        HistoryController::showHistoryPage();
         break;
 
     // --- Default 404 ---

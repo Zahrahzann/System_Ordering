@@ -62,7 +62,7 @@ if ($currentRole === 'customer') {
 
     <a class="sidebar-brand d-flex align-items-center justify-content-center" href="<?= $dashboardPath ?>">
         <div class="sidebar-brand-icon rotate-n-15">
-            <i class="fas fa-laugh-wink"></i>
+            <i class="fas fa-cog"></i>
         </div>
         <div class="sidebar-brand-text mx-3"><?= ucfirst(htmlspecialchars($currentRole)) ?><sup>ME</sup></div>
     </a>
@@ -98,7 +98,7 @@ if ($currentRole === 'customer') {
                     <!-- KOREKSI: Menghilangkan spasi dan memastikan path benar -->
                     <a class="collapse-item" href="<?= $basePath ?>/customer/checkout">Checkout</a>
                     <a class="collapse-item" href="<?= $basePath ?>/customer/tracking">Tracking Work Order</a>
-                    <a class="collapse-item" href="#">History</a>
+                    <a class="collapse-item" href="<?= $basePath ?>/customer/history">Riwayat Pesanan</a>
                 </div>
             </div>
         </li>
@@ -122,7 +122,7 @@ if ($currentRole === 'customer') {
                     <a class="collapse-item" href="#">Cart</a>
                     <a class="collapse-item" href="#">Checkout</a>
                     <a class="collapse-item" href="#">Tracking Order</a>
-                    <a class="collapse-item" href="#">History</a>
+                    <a class="collapse-item" href="#">Riwayat Pesanan</a>
                 </div>
             </div>
         </li>
@@ -155,6 +155,7 @@ if ($currentRole === 'customer') {
                     <h6 class="collapse-header">Menu</h6>
                     <a class="collapse-item" href="#">Approval Management</a>
                     <a class="collapse-item" href="#">Tracking Pesanan</a>
+                    <a class="collapse-item" href="<?= $basePath ?>/spv/history">History</a>
                 </div>
             </div>
         </li>
@@ -188,7 +189,7 @@ if ($currentRole === 'customer') {
                 <div class="bg-white py-2 collapse-inner rounded">
                     <h6 class="collapse-header">Menu</h6>
                     <a class="collapse-item" href="<?= $basePath ?>/admin/tracking">Pesanan WO</a>
-                    <a class="collapse-item" href="<?= $basePath ?>/admin/riwayat">Riwayat Pesanan</a>
+                    <a class="collapse-item" href="<?= $basePath ?>/admin/history">History</a>
                     <a class="collapse-item" href="#">Laporan WO</a>
                 </div>
             </div>
@@ -203,7 +204,7 @@ if ($currentRole === 'customer') {
                     <h6 class="collapse-header">Menu</h6>
                     <a class="collapse-item" href="#">Kelola Katalog</a>
                     <a class="collapse-item" href="#">Tracking Pesanan</a>
-                    <a class="collapse-item" href="#">Riwayat Pesanan</a>
+                    <a class="collapse-item" href="#">History</a>
                     <a class="collapse-item" href="#">Laporan Consumable</a>
                 </div>
             </div>

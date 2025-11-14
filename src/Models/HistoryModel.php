@@ -27,7 +27,7 @@ class HistoryModel
                 JOIN approvals a ON o.id = a.order_id
                 WHERE a.approval_status = 'approve'
                 AND i.item_type = 'work_order'
-                AND i.production_status = 'completed'"; // <-- Filter Selesai
+                AND i.production_status = 'completed'"; // Filter
 
         if ($departmentId !== null) {
             $sql .= " AND c.department_id = ?";
@@ -41,9 +41,9 @@ class HistoryModel
             $sql .= " AND MONTH(i.updated_at) = ?";
             $params[] = $month;
         }
-        
+
         $sql .= " ORDER BY i.updated_at DESC, i.id ASC";
-        
+
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -70,7 +70,7 @@ class HistoryModel
                 WHERE o.customer_id = ?
                 AND a.approval_status = 'approve'
                 AND i.item_type = 'work_order'
-                AND i.production_status = 'completed'"; // <-- Filter Selesai
+                AND i.production_status = 'completed'"; // Filter
 
         if ($year !== null) {
             $sql .= " AND YEAR(i.updated_at) = ?";
@@ -80,9 +80,9 @@ class HistoryModel
             $sql .= " AND MONTH(i.updated_at) = ?";
             $params[] = $month;
         }
-        
+
         $sql .= " ORDER BY i.updated_at DESC, i.id ASC";
-        
+
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -106,17 +106,45 @@ class HistoryModel
                 AND YEAR(i.updated_at) = ?
                 GROUP BY MONTH(i.updated_at)
                 ORDER BY month ASC";
-        
+
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$year]);
-        
-        $monthlyData = array_fill(1, 12, 0); 
+
+        $monthlyData = array_fill(1, 12, 0);
         $dbResults = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
+
         foreach ($dbResults as $row) {
             $monthlyData[(int)$row['month']] = (int)$row['total_items'];
         }
-        
+
         return $monthlyData;
+    }
+
+    public static function findItemById($itemId)
+    {
+        $pdo = Database::connect();
+        $sql = "SELECT i.*, o.customer_id
+            FROM items i
+            JOIN orders o ON i.order_id = o.id
+            WHERE i.id = ?";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$itemId]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public static function addItemToCart($customerId, $item)
+    {
+        $pdo = Database::connect();
+        $sql = "INSERT INTO cart_items (customer_id, item_name, quantity, category, material, material_type)
+            VALUES (?, ?, ?, ?, ?, ?)";
+        $stmt = $pdo->prepare($sql);
+        return $stmt->execute([
+            $customerId,
+            $item['item_name'],
+            $item['quantity'],
+            $item['category'],
+            $item['material'],
+            $item['material_type']
+        ]);
     }
 }

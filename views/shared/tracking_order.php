@@ -3,7 +3,6 @@ if (session_status() === PHP_SESSION_NONE) session_start();
 $basePath = '/system_ordering/public';
 $currentRole = $_SESSION['user_data']['role'] ?? '';
 
-// Fungsi helper untuk badge status
 function getStatusBadge($status)
 {
     switch ($status) {

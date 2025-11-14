@@ -1,5 +1,5 @@
 <?php
-// Data $items, $chartData, $availableYears, $year, $month dikirim dari Controller
+
 $basePath = '/system_ordering/public';
 $currentRole = $_SESSION['user_data']['role'] ?? '';
 ?>
@@ -20,7 +20,7 @@ $currentRole = $_SESSION['user_data']['role'] ?? '';
                 <div class="container-fluid">
                     <h1 class="h3 mb-4 text-gray-800">Riwayat Pesanan Work Order</h1>
 
-                    <!-- Filter Form (Untuk semua role) -->
+                    <!-- Filter Form -->
                     <div class="card shadow mb-4">
                         <div class="card-body">
                             <form method="GET" action="" class="form-inline">
@@ -50,7 +50,7 @@ $currentRole = $_SESSION['user_data']['role'] ?? '';
                     <?php if ($currentRole === 'admin'): ?>
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary">Grafik Pesanan Selesai (<?= $year ?>)</h6>
+                            <h6 class="m-0 font-weight-bold text-primary">Grafik Work Order (<?= $year ?>)</h6>
                         </div>
                         <div class="card-body">
                             <div class="chart-area">
@@ -63,7 +63,7 @@ $currentRole = $_SESSION['user_data']['role'] ?? '';
                     <!-- Tabel Riwayat -->
                     <div class="card shadow mb-4">
                         <div class="card-header py-3">
-                            <h6 class="m-0 font-weight-bold text-primary">Daftar Item Selesai</h6>
+                            <h6 class="m-0 font-weight-bold text-primary">Daftar Item</h6>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
@@ -147,7 +147,7 @@ $currentRole = $_SESSION['user_data']['role'] ?? '';
             maintainAspectRatio: false,
             scales: {
               yAxes: [{
-                ticks: { beginAtZero: true, precision: 0 }, // Angka bulat
+                ticks: { beginAtZero: true, precision: 0 }, 
               }],
             },
             legend: { display: false },

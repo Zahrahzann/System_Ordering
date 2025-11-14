@@ -3,7 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\TrackingModel;
-use App\Models\HistoryModel; 
+use App\Models\HistoryModel;
 use App\Middleware\SessionMiddleware;
 
 class TrackingController
@@ -39,7 +39,7 @@ class TrackingController
         SessionMiddleware::requireAdminLogin();
         $newStatus = $_POST['status'] ?? '';
         $picMfg = trim($_POST['pic_mfg'] ?? '');
-        $validStatuses = ['pending', 'on_progress', 'finish', 'completed']; 
+        $validStatuses = ['pending', 'on_progress', 'finish', 'completed'];
 
         if (in_array($newStatus, $validStatuses)) {
             TrackingModel::updateItemDetails($itemId, $newStatus, $picMfg);
@@ -70,7 +70,7 @@ class TrackingController
      */
     public static function showHistoryPage()
     {
-        SessionMiddleware::requireLogin(); 
+        SessionMiddleware::requireLogin();
 
         $role = $_SESSION['user_data']['role'];
 
@@ -78,7 +78,7 @@ class TrackingController
         $month = $_GET['month'] ?? null;
 
         $items = [];
-        $chartData = []; 
+        $chartData = [];
 
         if ($role === 'admin') {
             $items = HistoryModel::getHistoryItems(null, $year, $month);
@@ -94,5 +94,24 @@ class TrackingController
         $availableYears = range(date('Y'), date('Y') - 5);
 
         require_once __DIR__ . '/../../views/shared/history_order.php';
+    }
+
+    public static function reorderItem($itemId)
+    {
+        SessionMiddleware::requireCustomerLogin();
+        $customerId = $_SESSION['user_data']['id'];
+
+        // Ambil item dari histori
+        $item = HistoryModel::findItemById($itemId);
+        if (!$item || $item['customer_id'] != $customerId) {
+            die('Item tidak valid atau bukan milik Anda.');
+        }
+
+        // Tambahkan ke keranjang baru (simulasi)
+        \App\Models\CartModel::addItemToCart($customerId, $item);
+
+        $_SESSION['flash_message'] = 'Item berhasil ditambahkan kembali ke keranjang.';
+        header('Location: /system_ordering/public/customer/cart');
+        exit;
     }
 }
