@@ -72,7 +72,7 @@ $departmentName = DepartmentModel::getNameById($userData['department_id']);
                         <div class="stat-card">
                             <div class="stat-header">
                                 <div>
-                                    <div class="stat-value">12</div>
+                                    <div class="stat-value"><?= $stats['total'] ?></div>
                                     <div class="stat-label">Total Orders</div>
                                 </div>
                                 <div class="stat-icon blue">
@@ -84,7 +84,7 @@ $departmentName = DepartmentModel::getNameById($userData['department_id']);
                         <div class="stat-card">
                             <div class="stat-header">
                                 <div>
-                                    <div class="stat-value">8</div>
+                                    <div class="stat-value"><?= $stats['pending'] ?></div>
                                     <div class="stat-label">Pending</div>
                                 </div>
                                 <div class="stat-icon orange">
@@ -96,7 +96,7 @@ $departmentName = DepartmentModel::getNameById($userData['department_id']);
                         <div class="stat-card">
                             <div class="stat-header">
                                 <div>
-                                    <div class="stat-value">2</div>
+                                    <div class="stat-value"><?= $stats['on_progress'] ?></div>
                                     <div class="stat-label">On Progress</div>
                                 </div>
                                 <div class="stat-icon yellow">
@@ -108,7 +108,7 @@ $departmentName = DepartmentModel::getNameById($userData['department_id']);
                         <div class="stat-card">
                             <div class="stat-header">
                                 <div>
-                                    <div class="stat-value">4</div>
+                                    <div class="stat-value"><?= $stats['finish'] ?></div>
                                     <div class="stat-label">Done/Finish</div>
                                 </div>
                                 <div class="stat-icon green">

@@ -8,6 +8,9 @@ use App\Controllers\WorkOrderController;
 use App\Controllers\CartController;
 use App\Controllers\CustomerAuthController;
 use App\Controllers\TrackingController;
+use App\Controllers\DashboardController;
+use App\Controllers\ConsumableController;
+
 
 // ROUTING DINAMIS
 $matches = [];
@@ -25,17 +28,16 @@ if (preg_match('#^/customer/cart/edit/(\d+)$#', $route, $matches)) {
 // ROUTING STATIS
 switch ($route) {
     case '/customer/login':
-        require __DIR__ . '/../views/customer/login.php'; 
+        require __DIR__ . '/../views/customer/login.php';
         break;
     case '/customer/process_login':
         CustomerAuthController::loginCustomer();
         break;
     case '/customer/dashboard':
-        require __DIR__ . '/../views/customer/dashboard.php'; 
+        DashboardController::showDashboard();
         break;
     case '/customer/work_order/form':
-        unset($item);
-        require __DIR__ . '/../views/customer/work_order/form.php'; 
+        WorkOrderController::showForm();
         break;
     case '/customer/work_order/edit':
         WorkOrderController::editItem([]);
@@ -55,6 +57,13 @@ switch ($route) {
     case '/customer/checkout':
         CartController::showTrackingPage();
         break;
+
+    // CONSUMABLE AREA CUSTOMER
+    case '/customer/consumable/katalog':
+        ConsumableController::showCatalog();
+        break;
+
+
 
     default:
         http_response_code(404);

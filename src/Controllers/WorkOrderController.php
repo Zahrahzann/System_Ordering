@@ -22,10 +22,16 @@ class WorkOrderController
             return;
         }
 
-        $filePathsJson = self::handleMultipleFileUploads($_FILES['file_path']);
-        if ($filePathsJson === false) {
-            self::handleErrors(['Gagal mengupload file. Pastikan formatnya benar (JPG, PNG, PDF) dan ukuran tidak lebih dari 5MB.']);
-            return;
+        $filePathsJson = "[]";
+        if (!empty($_FILES['file_path']['name'][0])) {
+            $filePathsJson = self::handleMultipleFileUploads($_FILES['file_path']);
+            if ($filePathsJson === false) {
+                self::handleErrors(['Gagal mengupload file. Pastikan formatnya benar (JPG, PNG, PDF) dan ukuran tidak lebih dari 5MB.']);
+                return;
+            }
+        } elseif (!empty($_SESSION['reorder_item']['file_path'])) {
+            // fallback ke file lama dari histori
+            $filePathsJson = $_SESSION['reorder_item']['file_path'];
         }
 
         $pdo = Database::connect();
@@ -144,7 +150,7 @@ class WorkOrderController
         if (isset($post['is_emergency']) && empty($post['emergency_type'])) $errors[] = "Jika Emergency dicentang, Jenis Emergency wajib dipilih.";
 
         if (empty($files['file_path']['name'][0])) {
-            if (!isset($post['item_id'])) {
+            if (empty($_SESSION['reorder_item']['file_path']) && !isset($post['item_id'])) {
                 $errors[] = "Minimal satu file gambar drawing wajib diupload.";
             }
         }
@@ -186,6 +192,18 @@ class WorkOrderController
             }
         }
         return json_encode($uploadedPaths);
+    }
+
+    public static function showForm()
+    {
+        SessionMiddleware::requireCustomerLogin();
+
+        // Kalau akses langsung dari sidebar (tanpa ?reorder=1), reset session
+        if (empty($_GET['reorder'])) {
+            unset($_SESSION['reorder_item']);
+        }
+
+        require_once __DIR__ . '/../../views/customer/work_order/form.php';
     }
 
     private static function handleErrors(array $errors, $redirectPath = null)

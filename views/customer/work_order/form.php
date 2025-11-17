@@ -44,8 +44,9 @@ $old = $_SESSION['old_input'] ?? [];
                         echo '</div>';
                         unset($_SESSION['errors']);
                     }
-                    ?>
 
+                    $reorderItem = $_SESSION['reorder_item'] ?? null;
+                    ?>
                     <form action="<?= $isEditMode ? "/system_ordering/public/customer/cart/update/{$item['id']}" : "/system_ordering/public/customer/work_order/process_add_to_cart" ?>" method="POST" enctype="multipart/form-data">
                         <div class="card shadow mb-4">
                             <div class="card-body">
@@ -61,7 +62,7 @@ $old = $_SESSION['old_input'] ?? [];
                                             <div class="form-group">
                                                 <label for="item_name">Nama Barang <span class="required">*</span></label>
                                                 <input type="text" class="form-control" id="item_name" name="item_name" required
-                                                    value="<?= htmlspecialchars($old['item_name'] ?? $item['item_name'] ?? '') ?>"
+                                                    value="<?= htmlspecialchars($old['item_name'] ?? $item['item_name'] ?? $reorderItem['item_name'] ?? '') ?>"
                                                     placeholder="Masukkan nama barang">
                                             </div>
                                         </div>
@@ -72,7 +73,7 @@ $old = $_SESSION['old_input'] ?? [];
                                                     <option value="">-- Pilih Kategori --</option>
                                                     <?php $categories = ['Sparepart', 'Improvement', 'Project', 'Regular']; ?>
                                                     <?php foreach ($categories as $cat) : ?>
-                                                        <option value="<?= $cat ?>" <?= ($old['category'] ?? $item['category'] ?? '') == $cat ? 'selected' : '' ?>><?= $cat ?></option>
+                                                        <option value="<?= $cat ?>" <?= ($old['category'] ?? $item['category'] ?? $reorderItem['category'] ?? '') == $cat ? 'selected' : '' ?>><?= $cat ?></option>
                                                     <?php endforeach; ?>
                                                 </select>
                                             </div>
@@ -84,7 +85,7 @@ $old = $_SESSION['old_input'] ?? [];
                                             <div class="form-group">
                                                 <label for="quantity">Jumlah (Quantity) <span class="required">*</span></label>
                                                 <input type="number" class="form-control" id="quantity" name="quantity" required min="1"
-                                                    value="<?= htmlspecialchars($old['quantity'] ?? $item['quantity'] ?? '1') ?>"
+                                                    value="<?= htmlspecialchars($old['quantity'] ?? $item['quantity'] ?? $reorderItem['quantity'] ?? '1') ?>"
                                                     placeholder="1">
                                             </div>
                                         </div>
@@ -94,8 +95,8 @@ $old = $_SESSION['old_input'] ?? [];
                                                 <label for="material">Material <span class="required">*</span></label>
                                                 <select class="form-control" id="material" name="material" required>
                                                     <option value="">-- Pilih Material --</option>
-                                                    <option value="ordered" <?= ($old['material'] ?? $item['material'] ?? '') == 'ordered' ? 'selected' : '' ?>>Ordered</option>
-                                                    <option value="ready" <?= ($old['material'] ?? $item['material'] ?? '') == 'ready' ? 'selected' : '' ?>>Ready</option>
+                                                    <option value="ordered" <?= ($old['material'] ?? $item['material'] ?? $reorderItem['material'] ?? '') == 'ordered' ? 'selected' : '' ?>>Ordered</option>
+                                                    <option value="ready" <?= ($old['material'] ?? $item['material'] ?? $reorderItem['material'] ?? '') == 'ready' ? 'selected' : '' ?>>Ready</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -104,7 +105,7 @@ $old = $_SESSION['old_input'] ?? [];
                                             <div class="form-group">
                                                 <label for="material_type">Jenis Material <span class="required">*</span></label>
                                                 <input type="text" class="form-control" id="material_type" name="material_type" required
-                                                    value="<?= htmlspecialchars($old['material_type'] ?? $item['material_type'] ?? '') ?>"
+                                                    value="<?= htmlspecialchars($old['material_type'] ?? $item['material_type'] ?? $reorderItem['material_type'] ?? '') ?>"
                                                     placeholder="Contoh: Stainless Steel">
                                             </div>
                                         </div>
@@ -113,7 +114,7 @@ $old = $_SESSION['old_input'] ?? [];
                                     <div class="form-group">
                                         <label for="note">Catatan Tambahan</label>
                                         <textarea class="form-control" id="note" name="note" rows="3"
-                                            placeholder="Tambahkan catatan atau spesifikasi khusus (opsional)"><?= htmlspecialchars($old['note'] ?? $item['note'] ?? '') ?></textarea>
+                                            placeholder="Tambahkan catatan atau spesifikasi khusus (opsional)"><?= htmlspecialchars($old['note'] ?? $item['note'] ?? $reorderItem['note'] ?? '') ?></textarea>
                                         <small class="form-text">Tuliskan informasi tambahan yang diperlukan</small>
                                     </div>
                                 </div>
@@ -125,33 +126,35 @@ $old = $_SESSION['old_input'] ?? [];
                                         File Drawing
                                     </div>
 
-                                    <?php if ($isEditMode && !empty($item['file_path'])): ?>
+                                    <?php
+                                    $currentFiles = null;
+                                    if ($isEditMode && !empty($item['file_path'])) {
+                                        $currentFiles = json_decode($item['file_path'], true);
+                                    } elseif (!$isEditMode && !empty($reorderItem['file_path'])) {
+                                        $currentFiles = json_decode($reorderItem['file_path'], true);
+                                    }
+                                    ?>
+
+                                    <?php if (is_array($currentFiles)): ?>
                                         <div class="current-files">
-                                            <div class="current-files-title">File Saat Ini:</div>
-                                            <?php
-                                            $files = json_decode($item['file_path'], true);
-
-                                            if (is_array($files)) {
-                                                foreach ($files as $file) {
-                                                    if (empty($file) || !is_string($file)) {
-                                                        continue;
-                                                    }
-
+                                            <div class="current-files-title">File dari Pesanan Sebelumnya:</div>
+                                            <?php foreach ($currentFiles as $file): ?>
+                                                <?php if (!empty($file) && is_string($file)): ?>
+                                                    <?php
                                                     $extension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
                                                     $icon = 'fa-file-alt';
-
                                                     if (in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
                                                         $icon = 'fa-file-image';
                                                     } elseif ($extension === 'pdf') {
                                                         $icon = 'fa-file-pdf';
                                                     }
-                                                    echo '<div class="file-item">';
-                                                    echo '<i class="fas ' . $icon . '"></i>';
-                                                    echo '<a href="' . htmlspecialchars($file) . '" target="_blank">' . basename($file) . '</a>';
-                                                    echo '</div>';
-                                                }
-                                            }
-                                            ?>
+                                                    ?>
+                                                    <div class="file-item">
+                                                        <i class="fas <?= $icon ?>"></i>
+                                                        <a href="<?= htmlspecialchars($file) ?>" target="_blank"><?= basename($file) ?></a>
+                                                    </div>
+                                                <?php endif; ?>
+                                            <?php endforeach; ?>
                                         </div>
                                     <?php endif; ?>
 
@@ -163,7 +166,7 @@ $old = $_SESSION['old_input'] ?? [];
                                                 <?= $isEditMode ? 'Upload file baru untuk mengganti file lama' : 'Format: PDF, JPG, PNG' ?>
                                             </p>
                                         </div>
-                                        <input type="file" class="form-control-file" id="file_path" name="file_path[]" multiple <?= $isEditMode ? '' : 'required' ?>>
+                                        <input type="file" class="form-control-file" id="file_path" name="file_path[]" multiple>
                                     </div>
                                     <small class="form-text">Anda bisa memilih lebih dari satu file</small>
                                 </div>
@@ -179,7 +182,11 @@ $old = $_SESSION['old_input'] ?? [];
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label for="needed_date">Tanggal Dibutuhkan <span class="required">*</span></label>
-                                                <?php $dateValue = $old['needed_date'] ?? ($isEditMode ? date('Y-m-d\TH:i', strtotime($item['needed_date'])) : ''); ?>
+                                                <?php
+                                                $dateValue = $old['needed_date']
+                                                    ?? ($isEditMode ? date('Y-m-d\TH:i', strtotime($item['needed_date']))
+                                                        : ($reorderItem ? date('Y-m-d\TH:i', strtotime($reorderItem['needed_date'])) : ''));
+                                                ?>
                                                 <input type="datetime-local" class="form-control" id="needed_date" name="needed_date" required value="<?= $dateValue ?>">
                                             </div>
                                         </div>
@@ -189,14 +196,15 @@ $old = $_SESSION['old_input'] ?? [];
                                             <div class="emergency-wrapper">
                                                 <div class="form-check">
                                                     <input class="form-check-input" type="checkbox" id="is_emergency" name="is_emergency" value="1"
-                                                        <?= (isset($old['is_emergency']) || ($item['is_emergency'] ?? false)) ? 'checked' : '' ?>>
-                                                    <label class="form-check-label" for="is_emergency">   ❗Emergency</label>
+                                                        <?= (isset($old['is_emergency']) || ($item['is_emergency'] ?? false) || ($reorderItem['is_emergency'] ?? false)) ? 'checked' : '' ?>>
+                                                    <label class="form-check-label" for="is_emergency"> ❗Emergency</label>
                                                     <small class="form-text">Bila tidak emergency, checkbox tidak perlu dicentang</small>
                                                 </div>
                                                 <select class="form-control" id="emergency_type" name="emergency_type">
                                                     <option value="">-- Pilih Jenis Emergency --</option>
-                                                    <option value="Safety" <?= ($old['emergency_type'] ?? $item['emergency_type'] ?? '') == 'Safety' ? 'selected' : '' ?>>Safety</option>
-                                                    <option value="line_stop" <?= ($old['emergency_type'] ?? $item['emergency_type'] ?? '') == 'line_stop' ? 'selected' : '' ?>>Line Stop</option>
+                                                    <option value="Safety" <?= ($old['emergency_type'] ?? $item['emergency_type'] ?? $reorderItem['emergency_type'] ?? '') == 'Safety' ? 'selected' : '' ?>>Safety</option>
+                                                    <option value="line_stop" <?= ($old['emergency_type'] ?? $item['emergency_type'] ?? $reorderItem['emergency_type'] ?? '') == 'line_stop' ? 'selected' : '' ?>>Line Stop</option>
+
                                                 </select>
                                             </div>
                                         </div>
@@ -244,7 +252,7 @@ $old = $_SESSION['old_input'] ?? [];
                     fileInput.click();
                 });
             }
-            
+
             fileInput.addEventListener('change', function(e) {
                 const display = document.querySelector('.file-input-display');
                 const files = e.target.files;

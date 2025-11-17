@@ -16,15 +16,19 @@ class HistoryController
 
         $role = $_SESSION['user_data']['role'];
         $year = $_GET['year'] ?? date('Y');
-        $month = $_GET['month'] ?? null;
+        $month = !empty($_GET['month']) ? (int)$_GET['month'] : null;
 
         $items = [];
         $chartData = [];
         $availableYears = range(date('Y'), date('Y') - 5);
+        $departmentId = !empty($_GET['department']) ? (int)$_GET['department'] : null;
+
+
 
         switch ($role) {
             case 'admin':
-                $items = HistoryModel::getHistoryItems(null, $year, $month);
+                $items = HistoryModel::getHistoryItems($departmentId, $year, $month);
+                $departments = HistoryModel::getAllDepartments();
                 break;
 
             case 'spv':
@@ -57,13 +61,11 @@ class HistoryController
             die('Item tidak valid atau bukan milik Anda.');
         }
 
-        $success = HistoryModel::addItemToCart($customerId, $item);
+        // Simpan data ke session untuk prefill form
+        $_SESSION['reorder_item'] = $item;
 
-        $_SESSION['flash_message'] = $success
-            ? 'Item berhasil ditambahkan kembali ke keranjang.'
-            : 'Item sudah ada di keranjang Anda.';
-
-        header('Location: /system_ordering/public/customer/cart');
+        // Redirect ke form WO
+        header('Location: /system_ordering/public/customer/work_order/form?reorder=1');
         exit;
     }
 }

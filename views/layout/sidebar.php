@@ -107,13 +107,13 @@ if ($currentRole === 'customer') {
         <div class="sidebar-heading">Consumable</div>
         <li class="nav-item">
             <a class="nav-link" href="<?= $basePath ?>/customer/consumable/form">
-                <i class="fas fa-fw fa-edit"></i>
+                <i class="fas fa-fw fa-book-open"></i>
                 <span>Katalog Product</span>
             </a>
         </li>
         <li class="nav-item">
             <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseCustomerConsumable">
-                <i class="fas fa-fw fa-book-open"></i>
+                <i class="fas fa-fw fa-wrench"></i>
                 <span>Consumable Menu</span>
             </a>
             <div id="collapseCustomerConsumable" class="collapse" data-parent="#accordionSidebar">
@@ -142,6 +142,7 @@ if ($currentRole === 'customer') {
                     <h6 class="collapse-header">Menu</h6>
                     <a class="collapse-item" href="<?= $basePath ?>/spv/work_order/approval">Approval Management</a>
                     <a class="collapse-item" href="<?= $basePath ?>/spv/tracking">Tracking Pesanan</a>
+                    <a class="collapse-item" href="<?= $basePath ?>/spv/history">History</a>
                 </div>
             </div>
         </li>

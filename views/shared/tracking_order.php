@@ -55,6 +55,27 @@ function getStatusBadge($status)
                             <p>Tidak ada data work order untuk ditampilkan saat ini.</p>
                         </div>
                     <?php else: ?>
+                        <?php
+                        usort($items, function ($a, $b) {
+                            $statusOrder = ['finish' => 1, 'on_progress' => 2, 'pending' => 3];
+                            $emergencyOrder = ['line_stop' => 1, 'Safety' => 2, 'Regular' => 3];
+
+                            $statusA = $statusOrder[$a['production_status']] ?? 99;
+                            $statusB = $statusOrder[$b['production_status']] ?? 99;
+
+                            if ($statusA !== $statusB) {
+                                return $statusA - $statusB;
+                            }
+
+                            $typeA = !$a['is_emergency'] ? 'Regular' : ($a['emergency_type'] ?? 'Regular');
+                            $typeB = !$b['is_emergency'] ? 'Regular' : ($b['emergency_type'] ?? 'Regular');
+
+                            $emergencyA = $emergencyOrder[$typeA] ?? 99;
+                            $emergencyB = $emergencyOrder[$typeB] ?? 99;
+
+                            return $emergencyA - $emergencyB;
+                        });
+                        ?>
                         <?php $i = 1;
                         foreach ($items as $item): ?>
                             <div class="order-card <?= htmlspecialchars($item['production_status']) ?>">
@@ -104,6 +125,25 @@ function getStatusBadge($status)
                                                 <?php else: ?>
                                                     <span style="color: #545454ff;">Belum ditentukan</span>
                                                 <?php endif; ?>
+                                            </div>
+                                        </div>
+                                        <div class="detail-item">
+                                            <div class="detail-label">Emergency</div>
+                                            <div class="detail-value">
+                                                <?php
+                                                $isEmergency = isset($item['is_emergency']) && (int)$item['is_emergency'] === 1;
+                                                $emergencyType = strtolower(trim($item['emergency_type'] ?? 'regular'));
+
+                                                if ($isEmergency && in_array($emergencyType, ['line_stop', 'safety'])) {
+                                                    if ($emergencyType === 'line_stop') {
+                                                        echo '<span class="badge badge-danger"><i class="fas fa-exclamation-triangle"></i> Line Stop</span>';
+                                                    } else {
+                                                        echo '<span class="badge badge-info"><i class="fas fa-shield-alt"></i> Safety</span>';
+                                                    }
+                                                } else {
+                                                    echo '<span class="badge badge-success"><i class="fas fa-check"></i> Regular</span>';
+                                                }
+                                                ?>
                                             </div>
                                         </div>
                                     </div>

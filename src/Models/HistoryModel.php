@@ -6,7 +6,19 @@ use ManufactureEngineering\SystemOrdering\Config\Database;
 use PDO;
 
 class HistoryModel
-{
+{   
+     /**
+      * Mengambil semua department untuk filter (bagian admin)
+      * @return array
+      */
+     public static function getAllDepartments()
+    {
+        $pdo = Database::connect();
+        $sql = "SELECT id, name FROM departments ORDER BY name ASC";
+        $stmt = $pdo->query($sql);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     /**
      * UNTUK ADMIN/SPV: Mengambil riwayat (SEMUA ITEM YANG 'completed')
      */
@@ -27,7 +39,7 @@ class HistoryModel
                 JOIN approvals a ON o.id = a.order_id
                 WHERE a.approval_status = 'approve'
                 AND i.item_type = 'work_order'
-                AND i.production_status = 'completed'"; // Filter
+                AND i.production_status = 'completed'"; 
 
         if ($departmentId !== null) {
             $sql .= " AND c.department_id = ?";
@@ -70,7 +82,7 @@ class HistoryModel
                 WHERE o.customer_id = ?
                 AND a.approval_status = 'approve'
                 AND i.item_type = 'work_order'
-                AND i.production_status = 'completed'"; // Filter
+                AND i.production_status = 'completed'";  
 
         if ($year !== null) {
             $sql .= " AND YEAR(i.updated_at) = ?";
@@ -135,7 +147,7 @@ class HistoryModel
     public static function addItemToCart($customerId, $item)
     {
         $pdo = Database::connect();
-        $sql = "INSERT INTO cart_items (customer_id, item_name, quantity, category, material, material_type)
+        $sql = "INSERT INTO items (customer_id, item_name, quantity, category, material, material_type)
             VALUES (?, ?, ?, ?, ?, ?)";
         $stmt = $pdo->prepare($sql);
         return $stmt->execute([

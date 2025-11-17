@@ -24,7 +24,7 @@ $currentRole = $_SESSION['user_data']['role'] ?? '';
                         <?php if ($currentRole === 'admin'): ?>
                             Riwayat Pesanan Work Order (Semua Departemen)
                         <?php elseif ($currentRole === 'spv'): ?>
-                            Riwayat Pesanan Departemen Saya
+                            Riwayat Pesanan yang telah di Approve
                         <?php else: ?>
                             Riwayat Pesanan Saya
                         <?php endif; ?>
@@ -53,6 +53,19 @@ $currentRole = $_SESSION['user_data']['role'] ?? '';
                                         <?php endfor; ?>
                                     </select>
                                 </div>
+                                <?php if ($currentRole === 'admin'): ?>
+                                    <div class="form-group mr-2">
+                                        <label for="department" class="mr-2">Departemen:</label>
+                                        <select name="department" id="department" class="form-control">
+                                            <option value="">Semua Departemen</option>
+                                            <?php foreach ($departments as $dept): ?>
+                                                <option value="<?= $dept['id'] ?>" <?= ($dept['id'] == ($department ?? '')) ? 'selected' : '' ?>>
+                                                    <?= htmlspecialchars($dept['name']) ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                <?php endif; ?>
                                 <button type="submit" class="btn btn-primary">Filter</button>
                             </form>
                         </div>
@@ -99,9 +112,10 @@ $currentRole = $_SESSION['user_data']['role'] ?? '';
                                                         <td>
                                                             <a href="<?= $basePath ?>/customer/history/reorder/<?= $item['item_id'] ?>"
                                                                 class="btn btn-success btn-sm"
-                                                                onclick="return confirm('Item ini akan ditambahkan kembali ke keranjang Anda. Lanjutkan?')">
+                                                                onclick="return confirm('Item ini akan dibuka di Form Work Order untuk diedit sebelum dipesan ulang. Lanjutkan?')">
                                                                 <i class="fas fa-redo"></i> Pesan Lagi
                                                             </a>
+
                                                         </td>
                                                     <?php endif; ?>
                                                 </tr>

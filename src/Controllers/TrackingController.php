@@ -101,17 +101,16 @@ class TrackingController
         SessionMiddleware::requireCustomerLogin();
         $customerId = $_SESSION['user_data']['id'];
 
-        // Ambil item dari histori
         $item = HistoryModel::findItemById($itemId);
         if (!$item || $item['customer_id'] != $customerId) {
             die('Item tidak valid atau bukan milik Anda.');
         }
 
-        // Tambahkan ke keranjang baru (simulasi)
-        \App\Models\CartModel::addItemToCart($customerId, $item);
+        // Simpan data ke session untuk prefill form
+        $_SESSION['reorder_item'] = $item;
 
-        $_SESSION['flash_message'] = 'Item berhasil ditambahkan kembali ke keranjang.';
-        header('Location: /system_ordering/public/customer/cart');
+        // Redirect ke form WO
+        header('Location: /system_ordering/public/customer/work_order/form?reorder=1');
         exit;
     }
 }
