@@ -95,7 +95,6 @@ if ($currentRole === 'customer') {
                 <div class="bg-white py-2 collapse-inner rounded">
                     <h6 class="collapse-header">Menu</h6>
                     <a class="collapse-item" href="<?= $basePath ?>/customer/cart">Cart</a>
-                    <!-- KOREKSI: Menghilangkan spasi dan memastikan path benar -->
                     <a class="collapse-item" href="<?= $basePath ?>/customer/checkout">Checkout</a>
                     <a class="collapse-item" href="<?= $basePath ?>/customer/tracking">Tracking Work Order</a>
                     <a class="collapse-item" href="<?= $basePath ?>/customer/history">Riwayat Pesanan</a>
@@ -106,7 +105,7 @@ if ($currentRole === 'customer') {
         <hr class="sidebar-divider">
         <div class="sidebar-heading">Consumable</div>
         <li class="nav-item">
-            <a class="nav-link" href="<?= $basePath ?>/customer/consumable/form">
+            <a class="nav-link" href="<?= $basePath ?>/customer/consumable/katalog">
                 <i class="fas fa-fw fa-book-open"></i>
                 <span>Katalog Product</span>
             </a>

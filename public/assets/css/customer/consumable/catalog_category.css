@@ -1,0 +1,282 @@
+body {
+    font-family: 'Poppins', sans-serif;
+    background: #f5f5f5;
+}
+
+.container-fluid {
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+/* Page Header */
+.page-header {
+    margin-bottom: 30px;
+}
+
+.page-title {
+    font-size: 24px;
+    font-weight: 600;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.page-title i {
+    color: #667eea;
+    font-size: 28px;
+}
+
+.page-subtitle {
+    font-size: 14px;
+    color: #666;
+    margin-left: 40px;
+}
+
+/* Categories Container */
+.categories-container {
+    display: flex;
+    gap: 15px;
+    overflow-x: auto;
+    padding: 20px 0;
+    scroll-behavior: smooth;
+}
+
+.categories-container::-webkit-scrollbar {
+    height: 8px;
+}
+
+.categories-container::-webkit-scrollbar-track {
+    background: #f0f0f0;
+    border-radius: 10px;
+}
+
+.categories-container::-webkit-scrollbar-thumb {
+    background: #667eea;
+    border-radius: 10px;
+}
+
+/* Category Card (DIUBAH) */
+.category-card {
+    position: relative;
+    min-width: 220px;
+    width: 220px;
+    height: 320px;
+    border-radius: 20px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.06);
+    /* DIUBAH: Border lebih halus */
+    border: 1px solid #e3e6f0;
+}
+
+.category-card:hover {
+    min-width: 400px;
+    width: 400px;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12);
+    z-index: 10;
+    /* DIUBAH: Border hover jadi warna biru */
+    border-color: rgba(102, 126, 234, 0.4);
+}
+
+/* DIUBAH: Latar belakang putih solid */
+.category-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #ffffff;
+    /* Putih bersih */
+    transition: all 0.5s;
+}
+
+/* DIHAPUS: Latar belakang belang-belang (nth-child) */
+
+/* DIHAPUS: Pola titik-titik (::after) untuk tampilan lebih bersih */
+
+/* Category Content */
+.category-content {
+    position: relative;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 25px;
+    color: #2c3e50;
+    z-index: 1;
+}
+
+/* DIUBAH: Icon Area (tanpa gradient) */
+.category-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    height: 80px;
+    background: #667eea;
+    /* Biru solid */
+    border-radius: 18px;
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.15);
+    margin-bottom: auto;
+    transition: all 0.5s;
+}
+
+.category-card:hover .category-icon {
+    transform: scale(1.08) translateY(-3px);
+    box-shadow: 0 8px 30px rgba(102, 126, 234, 0.25);
+}
+
+.category-icon i {
+    font-size: 38px;
+    color: white;
+}
+
+/* Category Info */
+.category-info {
+    transition: all 0.5s;
+}
+
+.category-name {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #2c3e50;
+}
+
+.category-desc {
+    font-size: 13px;
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: all 0.5s;
+    line-height: 1.7;
+    margin-bottom: 15px;
+    color: #7f8c8d;
+}
+
+.category-card:hover .category-desc {
+    opacity: 0.95;
+    max-height: 100px;
+}
+
+/* DIUBAH: View Button (tanpa gradient) */
+.view-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: #667eea;
+    /* Biru solid */
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-weight: 500;
+    font-size: 13px;
+    text-decoration: none;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.5s;
+    letter-spacing: 0.5px;
+}
+
+.category-card:hover .view-button {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.view-button:hover {
+    background: #5a6ed0;
+    /* Biru lebih gelap saat hover */
+    color: white;
+    text-decoration: none;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(102, 126, 234, 0.35);
+}
+
+.view-button i {
+    font-size: 14px;
+}
+
+/* DIUBAH: Item Count Badge (abu-abu soft pastel) */
+.item-count {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: #f8f9fa;
+    /* Abu-abu sangat muda */
+    backdrop-filter: blur(10px);
+    padding: 6px 12px;
+    border-radius: 18px;
+    font-size: 11px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: #5a5c69;
+    /* Teks abu-abu gelap */
+    border: 1px solid #e3e6f0;
+    /* Border abu-abu */
+    letter-spacing: 0.5px;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 80px 20px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.empty-state i {
+    font-size: 80px;
+    color: #ddd;
+    margin-bottom: 20px;
+}
+
+.empty-state h4 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.empty-state p {
+    color: #999;
+    font-size: 14px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .categories-container {
+        flex-direction: column;
+    }
+
+    .category-card {
+        width: 100%;
+        min-width: 100%;
+    }
+
+    .category-card:hover {
+        width: 100%;
+        min-width: 100%;
+    }
+
+    .category-desc {
+        opacity: 0.95;
+        max-height: 100px;
+    }
+
+    .view-button {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
