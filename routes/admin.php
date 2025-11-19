@@ -8,6 +8,7 @@ use App\Controllers\AuthController;
 use App\Controllers\TrackingController;
 use App\Controllers\AdminController;
 use App\Controllers\UserManagementController;
+use App\Controllers\Admin\ConsumableController;
 
 // ROUTING DINAMIS
 $matches = [];
@@ -35,14 +36,51 @@ switch ($route) {
     case '/admin/dashboard':
         AdminController::showDashboard();
         break;
+
+    // MANAGEMENT USER
     case '/admin/manage/spv':
         UserManagementController::listSpv();
         break;
     case '/admin/manage/customer';
         UserManagementController::listCustomers();
         break;
-        
 
+    // MANAGEMENT CONSUMABLE
+
+    case '/admin/consumable/katalog_kategori':
+        \App\Controllers\ConsumableController::listCategories();
+        break;
+
+    case '/admin/consumable/katalog_kategori/add':
+        \App\Controllers\ConsumableController::addCategory();
+        break;
+
+    case '/admin/consumable/katalog_kategori/edit':
+        \App\Controllers\ConsumableController::editCategory($_GET['id']);
+        break;
+
+    case '/admin/consumable/katalog_kategori/delete':
+        \App\Controllers\ConsumableController::deleteCategory($_GET['id']);
+        break;
+
+    case '/admin/consumable/katalog_produk':
+        \App\Controllers\ConsumableController::listProducts();
+        break;
+
+    case '/admin/consumable/katalog_produk/add':
+        \App\Controllers\ConsumableController::addProduct();
+        break;
+
+    case '/admin/consumable/katalog_produk/edit':
+        \App\Controllers\ConsumableController::editProduct($_GET['id']);
+        break;
+
+    case '/admin/consumable/katalog_produk/delete':
+        \App\Controllers\ConsumableController::deleteProduct($_GET['id']);
+        break;
+
+
+    // 404 NOT FOUND RESPON
     default:
         http_response_code(404);
         echo "404 Not Found :) <br>";

@@ -2,24 +2,88 @@
 
 namespace App\Controllers;
 
+use App\Models\CategoryModel;
 use App\Models\ProductModel;
 
 class ConsumableController
 {
-    public static function showCatalog()
+    // List kategori
+    public static function listCategories()
     {
-        $category = $_GET['category'] ?? null;
+        $categories = CategoryModel::getAll();
+        require_once __DIR__ . '/../../views/admin/consumable/katalog_kategori.php';
+    }
 
-        if (!$category) {
-            // tampilkan daftar kategori slipper
-            $categories = ['Presub', 'K-Line 3', 'SPS K4', 'K-Line 5', 'Delivery'];
-            require_once __DIR__ . '/../../views/customer/consumable/catalog_category.php';
-            return;
+    // Tambah kategori
+    public static function addCategory()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $name = $_POST['name'];
+            CategoryModel::create($name);
+            header('Location: /admin/consumable/katalog_kategori');
+            exit;
         }
+        require_once __DIR__ . '/../../views/admin/consumable/kategori_form.php';
+    }
 
-        // ambil produk consumable berdasarkan kategori
-        $products = ProductModel::getConsumableByCategory($category);
+    // Edit kategori
+    public static function editCategory($id)
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $name = $_POST['name'];
+            CategoryModel::update($id, $name);
+            header('Location: /admin/consumable/katalog_kategori');
+            exit;
+        }
+        $category = CategoryModel::find($id);
+        require_once __DIR__ . '/../../views/admin/consumable/category_form.php';
+    }
 
-        require_once __DIR__ . '/../../views/customer/consumable/catalog_list.php';
+    // Hapus kategori
+    public static function deleteCategory($id)
+    {
+        CategoryModel::delete($id);
+        header('Location: /admin/consumable/katalog_kategori');
+        exit;
+    }
+
+    // List produk consumable
+    public static function listProducts()
+    {
+        $products = ProductModel::getAllConsumables();
+        require_once __DIR__ . '/../../views/admin/consumable/katalog_produk.php';
+    }
+
+    // Tambah produk
+    public static function addProduct()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            ProductModel::createConsumable($_POST);
+            header('Location: /admin/consumable/katalog_produk');
+            exit;
+        }
+        $categories = CategoryModel::getAll();
+        require_once __DIR__ . '/../../views/admin/consumable/product_form.php';
+    }
+
+    // Edit produk
+    public static function editProduct($id)
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            ProductModel::updateConsumable($id, $_POST);
+            header('Location: /admin/consumable/katalog_produk');
+            exit;
+        }
+        $product = ProductModel::find($id);
+        $categories = CategoryModel::getAll();
+        require_once __DIR__ . '/../../views/admin/consumable/product_form.php';
+    }
+
+    // Hapus produk
+    public static function deleteProduct($id)
+    {
+        ProductModel::delete($id);
+        header('Location: /admin/consumable/katalog_produk');
+        exit;
     }
 }

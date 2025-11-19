@@ -59,9 +59,9 @@ switch ($route) {
         break;
 
     // CONSUMABLE AREA CUSTOMER
-    case '/customer/consumable/katalog':
-        \App\Controllers\ConsumableController::showCatalog();
-        break;
+    // case '/customer/consumable/katalog':
+    //     \App\Controllers\ConsumableController::showCatalog();
+    //     break;
 
     // case '/customer/consumable/detail':
     //     \App\Controllers\ConsumableController::showDetail();
