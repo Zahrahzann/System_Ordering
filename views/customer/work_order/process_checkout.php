@@ -68,7 +68,7 @@ if (session_status() === PHP_SESSION_NONE) {
                             $status = $orderData['order_details']['approval_status'];
                             $badgeClass = 'badge-warning'; // Default (waiting)
                             $badgeIcon = 'fa-clock';
-                            if ($status === 'rejected') {
+                            if ($status === 'reject') {
                                 $badgeClass = 'badge-danger';
                                 $badgeIcon = 'fa-times-circle';
                             }

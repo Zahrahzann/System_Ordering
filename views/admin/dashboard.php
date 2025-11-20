@@ -1,6 +1,6 @@
 <?php
 if (!isset($userData)) die('Controller tidak menyediakan data user.');
-if (!isset($qtyData) || !is_array($qtyData)) $qtyData = array_fill(1, 12, 0); // fallback kosong
+if (!isset($qtyData) || !is_array($qtyData)) $qtyData = [];
 $basePath = '/system_ordering/public';
 ?>
 <!DOCTYPE html>
@@ -29,20 +29,22 @@ $basePath = '/system_ordering/public';
                     <p class="lead">Halo, <strong><?= htmlspecialchars($userData['name']) ?></strong></p>
 
                     <div class="row">
-                        <!-- Area Chart -->
-                        <div class="col-md-12">
+                        <!-- Bar Chart -->
+                        <div class="col-12 col-xl-10 mx-auto">
                             <div class="card shadow mb-4">
                                 <div class="card-header py-3">
                                     <h6 class="m-0 font-weight-bold text-primary">
-                                        <i class="fas fa-chart-area"></i> QTY WO Completed per Bulan
+                                        <i class="fas fa-chart-bar"></i> Report QTY Manufacture Work Order
                                     </h6>
                                 </div>
-                                <div class="card-body">
-                                    <div class="chart-area">
-                                        <canvas id="qtyAreaChart"></canvas>
+                                <div class="card-body p-3">
+                                    <div class="mx-auto" style="max-width: 900px;">
+                                        <div class="chart-bar" style="height: 300px;">
+                                            <canvas id="qtyBarChart"></canvas>
+                                        </div>
                                     </div>
                                     <hr>
-                                    Data diambil dari item Work Order yang sudah <code>completed</code> berdasarkan bulan penyelesaian.
+                                    <small class="text-muted">Data diambil dari Work Order per bulan: total masuk vs yang sudah <code>completed</code>.</small>
                                 </div>
                             </div>
                         </div>
@@ -61,40 +63,48 @@ $basePath = '/system_ordering/public';
     <script src="<?= $basePath ?>/assets/js/sb-admin-2.min.js"></script>
     <script src="<?= $basePath ?>/assets/vendor/chart.js/Chart.min.js"></script>
 
-    <!-- Area Chart Script -->
+    <!-- Bar Chart Script -->
     <?php
     $monthNames = [1 => 'Jan', 2 => 'Feb', 3 => 'Mar', 4 => 'Apr', 5 => 'Mei', 6 => 'Jun', 7 => 'Jul', 8 => 'Agu', 9 => 'Sep', 10 => 'Okt', 11 => 'Nov', 12 => 'Des'];
-    $labels = array_values($monthNames);
-    $values = array_values($qtyData); // langsung ambil dari HistoryModel
+    $labels = array_map(fn($d) => $monthNames[$d['month']], $qtyData);
+    $totalIn = array_map(fn($d) => $d['total_in'], $qtyData);
+    $totalCompleted = array_map(fn($d) => $d['total_completed'], $qtyData);
     ?>
     <script>
-        const qtyLabels = <?= json_encode($labels) ?>;
-        const qtyValues = <?= json_encode($values) ?>;
+        const labels = <?= json_encode($labels) ?>;
+        const totalIn = <?= json_encode($totalIn) ?>;
+        const totalCompleted = <?= json_encode($totalCompleted) ?>;
 
-        const ctxQty = document.getElementById("qtyAreaChart").getContext("2d");
-        new Chart(ctxQty, {
-            type: 'line',
+        new Chart(document.getElementById("qtyBarChart"), {
+            type: 'bar',
             data: {
-                labels: qtyLabels,
+                labels,
                 datasets: [{
-                    label: "WO Completed",
-                    data: qtyValues,
-                    backgroundColor: "rgba(78, 115, 223, 0.1)",
-                    borderColor: "rgba(78, 115, 223, 1)",
-                    borderWidth: 2,
-                    pointRadius: 3,
-                    pointBackgroundColor: "rgba(78, 115, 223, 1)",
-                    fill: true
-                }]
+                        label: "Total WO Masuk",
+                        data: totalIn,
+                        backgroundColor: "rgba(54, 162, 235, 0.7)"
+                    },
+                    {
+                        label: "WO Completed",
+                        data: totalCompleted,
+                        backgroundColor: "rgba(75, 192, 192, 0.7)"
+                    }
+                ]
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 scales: {
                     y: {
                         beginAtZero: true,
                         ticks: {
                             stepSize: 1
                         }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'bottom'
                     }
                 }
             }

@@ -8,11 +8,11 @@ if (!isset($categories)) die('Controller tidak menyediakan data kategori.');
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Katalog Kategori</title>
+    <title>Katalog Jalur</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="/system_ordering/public/assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
     <link href="/system_ordering/public/assets/css/sb-admin-2.min.css" rel="stylesheet">
-    <link href="/system_ordering/public/assets/css/admin/consumable/kategori.css" rel="stylesheet">
+    <link href="/system_ordering/public/assets/css/admin/consumable/kategori.css?v=<?= time() ?>" rel="stylesheet">
 
 </head>
 
@@ -28,9 +28,9 @@ if (!isset($categories)) die('Controller tidak menyediakan data kategori.');
                         <div class="page-header-left">
                             <h1>
                                 <i class="fas fa-shopping-bag"></i>
-                                Kategori Katalog Consumable
+                                Katalog Jalur Consumable
                             </h1>
-                            <p class="page-subtitle">Kelola kategori untuk produk consumable</p>
+                            <p class="page-subtitle">Kelola jalur untuk produk consumable</p>
                         </div>
                         <button class="btn-add" onclick="document.getElementById('addForm').style.display='block'">
                             <i class="fas fa-plus"></i> Buat Consumable
@@ -41,7 +41,7 @@ if (!isset($categories)) die('Controller tidak menyediakan data kategori.');
                     <div id="addForm" style="display:none;" class="form-card">
                         <form action="/admin/consumable/katalog_kategori/add" method="POST">
                             <div class="form-group">
-                                <label for="name">Nama Kategori</label>
+                                <label for="name">Nama Jalur</label>
                                 <input type="text" class="form-control" id="name" name="name" required placeholder="Masukkan nama kategori">
                             </div>
                             <button type="submit" class="btn-success">
@@ -56,8 +56,8 @@ if (!isset($categories)) die('Controller tidak menyediakan data kategori.');
                     <?php if (empty($categories)): ?>
                         <div class="empty-state">
                             <i class="fas fa-box-open"></i>
-                            <h4>Belum Ada Kategori</h4>
-                            <p>Tidak ada kategori produk yang tersedia saat ini.</p>
+                            <h4>Belum Ada Jalur yang mendaftar</h4>
+                            <p>Tidak ada jalur produk yang tersedia saat ini.</p>
                         </div>
                     <?php else: ?>
                         <div class="categories-container">
@@ -75,7 +75,7 @@ if (!isset($categories)) die('Controller tidak menyediakan data kategori.');
                                         <div class="category-info">
                                             <div class="category-name"><?= strtoupper(htmlspecialchars($cat['name'])) ?></div>
                                             <div class="category-desc">
-                                                Klik untuk melihat semua produk dalam kategori <?= htmlspecialchars($cat['name']) ?>.
+                                                Klik untuk melihat semua produk dalam jalur <?= htmlspecialchars($cat['name']) ?>.
                                             </div>
 
                                             <div class="category-actions">

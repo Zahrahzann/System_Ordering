@@ -1,11 +1,16 @@
 <?php
-if (!isset($pendingOrders)) {
+$basePath = '/system_ordering/public';
+
+// Gunakan fallback jika controller kirim variabel dengan nama berbeda
+$orders = $pendingOrders ?? $orders ?? [];
+
+if (!is_array($orders)) {
     die('Controller tidak menyediakan data.');
 }
-$basePath = '/system_ordering/public';
+
 ?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 
 <head>
     <meta charset="UTF-8">
@@ -14,7 +19,7 @@ $basePath = '/system_ordering/public';
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="<?= $basePath ?>/assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
     <link href="<?= $basePath ?>/assets/css/sb-admin-2.min.css" rel="stylesheet">
-    <link href="<?= $basePath ?>/assets/css/spv/work_order/approval.css" rel="stylesheet">
+    <link href="<?= $basePath ?>/assets/css/spv/work_order/approval.css?v=<?= time() ?>" rel="stylesheet">
 </head>
 
 <body id="page-top">
@@ -34,22 +39,36 @@ $basePath = '/system_ordering/public';
                     <!-- Stats Bar -->
                     <div class="stats-bar">
                         <div class="stats-info">
-                            <h3>Total WO Waiting Approval</h3>
-                            <p class="count"><?= count($pendingOrders) ?></p>
+                            <h3>Total WO (Waiting)</h3>
+                            <?php
+                            $waitingCount = count(array_filter($orders, fn($o) => $o['approval_status'] === 'waiting'));
+                            ?>
+                            <p class="count"><?= $waitingCount ?></p>
                         </div>
                         <div class="stats-icon">
-                            <i class="fas fa-hourglass-half"></i>
+                            <i class="fas fa-tasks"></i>
                         </div>
                     </div>
 
-                    <?php if (empty($pendingOrders)): ?>
+                    <?php if (empty($orders)): ?>
                         <div class="empty-state">
                             <i class="fas fa-check-circle"></i>
                             <h4>Semua Work Order Sudah Diproses</h4>
-                            <p>Tidak ada work order yang menunggu persetujuan Anda saat ini.</p>
+                            <p>Tidak ada work order yang menunggu persetujuan atau ditolak saat ini.</p>
                         </div>
                     <?php else: ?>
-                        <?php foreach ($pendingOrders as $order): ?>
+                        <?php foreach ($orders as $order):
+                            $status = $order['approval_status'] ?? 'waiting';
+                            $badgeClass = 'badge-warning';
+                            $badgeText  = 'Menunggu Approval';
+                            $badgeIcon  = 'fa-clock';
+
+                            if ($status === 'reject') {
+                                $badgeClass = 'badge-danger';
+                                $badgeText  = 'Ditolak SPV';
+                                $badgeIcon  = 'fa-times-circle';
+                            }
+                        ?>
                             <div class="order-card">
                                 <div class="order-header">
                                     <div class="order-id-section">
@@ -62,9 +81,9 @@ $basePath = '/system_ordering/public';
                                         </div>
                                     </div>
                                     <div>
-                                        <span class="pending-badge">
-                                            <i class="fas fa-clock"></i>
-                                            Menunggu Approval
+                                        <span class="badge <?= $badgeClass ?>">
+                                            <i class="fas <?= $badgeIcon ?>"></i>
+                                            <?= $badgeText ?>
                                         </span>
                                     </div>
                                 </div>
@@ -83,7 +102,7 @@ $basePath = '/system_ordering/public';
                                             <i class="fas fa-building"></i>
                                             <?= htmlspecialchars($order['department_name']) ?>
                                         </div>
-                                    </div>                           
+                                    </div>
                                     <div class="detail-item">
                                         <div class="detail-label">Tanggal Order</div>
                                         <div class="detail-value">
@@ -94,7 +113,7 @@ $basePath = '/system_ordering/public';
                                 </div>
 
                                 <div class="order-action">
-                                    <a href="<?= $basePath ?>/spv/work_order/detail/<?php echo $order['order_id']; ?>" class="btn btn-info">
+                                    <a href="<?= $basePath ?>/spv/work_order/detail/<?= $order['order_id'] ?>" class="btn btn-info">
                                         <i class="fas fa-search"></i>
                                         Lihat Detail & Approve
                                     </a>

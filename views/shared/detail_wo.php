@@ -19,7 +19,7 @@ if (!isset($order) || !isset($items) || !isset($approval)) {
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="<?= $basePath ?>/assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
     <link href="<?= $basePath ?>/assets/css/sb-admin-2.min.css" rel="stylesheet">
-    <link href="<?= $basePath ?>/assets/css/tracking/detail_wo.css" rel="stylesheet">
+    <link href="<?= $basePath ?>/assets/css/tracking/detail_wo.css?v=<?= time() ?>" rel="stylesheet">
 </head>
 
 <body id="page-top">

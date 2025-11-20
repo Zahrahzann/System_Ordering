@@ -192,8 +192,9 @@ body {
 
 .detail-label {
     font-size: 12px;
-    color: #999;
+    color: #333;
     font-weight: 500;
+
 }
 
 .detail-value {
@@ -203,7 +204,7 @@ body {
 }
 
 .detail-value.highlight {
-    color: #667eea;
+    color: #4f69dc;
     font-weight: 600;
 }
 

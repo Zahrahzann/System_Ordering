@@ -29,7 +29,7 @@ $departmentName = DepartmentModel::getNameById($userData['department_id']);
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="/system_ordering/public/assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
     <link href="/system_ordering/public/assets/css/sb-admin-2.min.css" rel="stylesheet">
-    <link href="/system_ordering/public/assets/css/customer/dashboard.css" rel="stylesheet">
+    <link href="/system_ordering/public/assets/css/customer/dashboard.css?v=<?= time() ?>" rel="stylesheet">
 </head>
 
 <body id="page-top">

@@ -42,7 +42,7 @@ body {
 
 /* Tombol dan Form */
 .btn-add {
-    background: #93a3cd;
+    background: #7d9ff6;
     border: none;
     padding: 12px 24px;
     border-radius: 10px;
@@ -57,7 +57,7 @@ body {
 }
 
 .btn-add:hover {
-    background: #87CEEB;
+    background: #305779;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(174, 198, 207, 0.3);
 }
@@ -76,7 +76,7 @@ body {
 }
 
 .form-group label {
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 500;
     color: #555;
     margin-bottom: 8px;
@@ -93,7 +93,7 @@ body {
 }
 
 .form-control:focus {
-    border-color: #AEC6CF;
+    border-color: #83c3da;
     box-shadow: 0 0 0 3px rgba(174, 198, 207, 0.1);
     outline: none;
 }
@@ -170,7 +170,7 @@ body {
     transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     box-shadow: 0 2px 20px rgba(0, 0, 0, 0.06);
     border: 1px solid #e9ecef;
-    background: white;
+    background: #feffff;
     display: flex;
     flex-direction: column;
 }
@@ -183,23 +183,20 @@ body {
     border-color: #dee2e6;
 }
 
-/* BARU: Placeholder untuk Gambar */
+/* Gambar */
 .category-image {
-    height: 160px;
-    /* Tinggi gambar */
-    background-color: #f0f2f5;
-    /* Warna placeholder */
+    height: 200px;
+    background-color: #d8d8d8;
     background-size: cover;
     background-position: center;
     transition: all 0.5s;
-    border-bottom: 1px solid #e9ecef;
+    border-bottom: 1px solid #d8d8d8;
 }
 
 .category-card:hover .category-image {
     transform: scale(1.03);
 
 }
-
 
 /* Category Content */
 .category-content {
@@ -235,7 +232,7 @@ body {
     transition: all 0.5s;
     line-height: 1.7;
     margin-bottom: 15px;
-    color: #7f8c8d;
+    color: #363b3b;
 }
 
 .category-card:hover .category-desc {
@@ -262,7 +259,7 @@ body {
     z-index: 2;
 }
 
-/* Category Actions (Sudah bagus) */
+/* Category Actions */
 .category-actions {
     display: flex;
     flex-direction: column;
@@ -292,12 +289,12 @@ body {
 }
 
 .btn-warning {
-    background: #AEC6CF;
+    background: #40b1de;
     color: white;
 }
 
 .btn-warning:hover {
-    background: #87CEEB;
+    background: #8ccdff;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(174, 198, 207, 0.3);
     color: white;
@@ -305,12 +302,12 @@ body {
 }
 
 .btn-danger {
-    background: #AEC6CF;
+    background: #40b1de;
     color: white;
 }
 
 .btn-danger:hover {
-    background: #87CEEB;
+    background: #8ccdff;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(174, 198, 207, 0.3);
     color: white;
@@ -318,19 +315,19 @@ body {
 }
 
 .btn-info {
-    background: #AEC6CF;
+    background: #40b1de;
     color: white;
 }
 
 .btn-info:hover {
-    background: #87CEEB;
+    background: #8ccdff;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(174, 198, 207, 0.3);
     color: white;
     text-decoration: none;
 }
 
-/* Empty State (Sudah bagus) */
+/* Empty State */
 .empty-state {
     text-align: center;
     padding: 80px 20px;
@@ -358,7 +355,7 @@ body {
     font-size: 14px;
 }
 
-/* Responsive (Sudah bagus) */
+/* Responsive */
 @media (max-width: 768px) {
     .categories-container {
         flex-direction: column;

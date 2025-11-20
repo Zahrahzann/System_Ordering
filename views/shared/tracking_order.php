@@ -31,7 +31,7 @@ function getStatusBadge($status)
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="<?= $basePath ?>/assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
     <link href="<?= $basePath ?>/assets/css/sb-admin-2.min.css" rel="stylesheet">
-    <link href="<?= $basePath ?>/assets/css/tracking/tracking_order.css" rel="stylesheet">
+    <link href="<?= $basePath ?>/assets/css/tracking/tracking_order.css?v=<?= time() ?>" rel="stylesheet">
 </head>
 
 <body id="page-top">
