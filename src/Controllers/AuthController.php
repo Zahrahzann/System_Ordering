@@ -19,7 +19,7 @@ class AuthController
 
         if ($role === 'admin') {
             require_once __DIR__ . '/../../views/admin/register_admin.php';
-        } else { 
+        } else {
             require_once __DIR__ . '/../../views/spv/register_spv.php';
         }
     }
@@ -91,18 +91,30 @@ class AuthController
         $password = $_POST['password'] ?? '';
 
         $pdo = Database::connect();
-        $stmt = $pdo->prepare("SELECT * FROM users WHERE email = ? AND role = ?");
+
+        $sql = "SELECT 
+            u.*, 
+            d.name AS department_name, 
+            p.name AS plant_name
+        FROM users u
+        LEFT JOIN departments d ON u.department_id = d.id
+        LEFT JOIN plants p ON u.plant_id = p.id
+        WHERE u.email = ? AND u.role = ?";
+
+        $stmt = $pdo->prepare($sql);
         $stmt->execute([$email, $role]);
         $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($user && password_verify($password, $user['password'])) {
             $_SESSION['user_data'] = [
-                'id'              => $user['id'],
-                'name'            => $user['name'],
-                'phone'           => $user['phone'],
-                'role'            => $user['role'],
-                'plant_id'        => $user['plant_id'],
-                'department_id'   => $user['department_id'],
+                'id'            => $user['id'],
+                'name'          => $user['name'],
+                'phone'         => $user['phone'],
+                'role'          => $user['role'],
+                'plant_id'      => $user['plant_id'],
+                'department_id' => $user['department_id'],
+                'department'    => $user['department_name'],
+                'plant'         => $user['plant_name']
             ];
 
             if ($role === 'spv') {
@@ -131,10 +143,8 @@ class AuthController
         session_destroy();
 
         if ($role === 'admin') {
-            // KOREKSI 7: Redirect logout admin harus ke PUBLIC
             header("Location: /system_ordering/public/admin/login");
-        } else { // Asumsi spv
-            // KOREKSI 8: Redirect logout spv harus ke PUBLIC
+        } else {
             header("Location: /system_ordering/public/spv/login");
         }
         exit;

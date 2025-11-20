@@ -13,7 +13,6 @@ class ApprovalModel
     public static function getPendingOrdersForSpv($spvId)
     {
         $pdo = Database::connect();
-        // KOREKSI: a.status -> a.approval_status
         $sql = "SELECT 
                     o.id as order_id, o.created_at, c.name as customer_name, d.name as department_name
                 FROM approvals a
@@ -26,6 +25,15 @@ class ApprovalModel
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$spvId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public static function countByStatusForSpv($spvId, $status)
+    {
+        $pdo = Database::connect();
+        $sql = "SELECT COUNT(*) FROM approvals WHERE spv_id = ? AND approval_status = ?";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$spvId, $status]);
+        return (int) $stmt->fetchColumn();
     }
 
     /**

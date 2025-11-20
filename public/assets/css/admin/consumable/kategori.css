@@ -243,27 +243,23 @@ body {
     max-height: 100px;
 }
 
-/* Item Count Badge (Sudah bagus) */
+/* Item Count Badge */
 .item-count {
     position: absolute;
-    top: 25px;
-    /* Disesuaikan dengan padding content */
-    right: 25px;
-    /* Disesuaikan dengan padding content */
-    background: rgba(174, 198, 207, 0.1);
-    backdrop-filter: blur(10px);
-    padding: 6px 12px;
-    border-radius: 18px;
+    top: 12px;
+    right: 12px;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(6px);
+    padding: 6px 10px;
+    border-radius: 12px;
     font-size: 11px;
     font-weight: 600;
     display: flex;
     align-items: center;
     gap: 5px;
-    color: #AEC6CF;
-    border: 1px solid rgba(174, 198, 207, 0.2);
-    letter-spacing: 0.5px;
+    color: #305779;
+    border: 1px solid rgba(174, 198, 207, 0.3);
     z-index: 2;
-    /* Pastikan di atas */
 }
 
 /* Category Actions (Sudah bagus) */

@@ -7,14 +7,43 @@ use PDO;
 
 class OrderModel
 {
+    public static function countByStatus($status)
+    {
+        $pdo = Database::connect();
+        $stmt = $pdo->prepare("
+        SELECT COUNT(*) 
+        FROM orders o
+        JOIN approvals a ON o.id = a.order_id
+        WHERE a.approval_status = :status
+    ");
+        $stmt->bindParam(':status', $status);
+        $stmt->execute();
+        return (int) $stmt->fetchColumn();
+    }
+
+
+    public static function getRecentOrders($limit = 5)
+    {
+        $pdo = Database::connect();
+        $limit = (int) $limit; // pastikan integer
+        $sql = "SELECT o.code, o.created_at AS date, a.approval_status AS status, u.name AS requested_by
+            FROM orders o
+            JOIN approvals a ON o.id = a.order_id
+            LEFT JOIN users u ON o.customer_id = u.id
+            ORDER BY o.created_at DESC 
+            LIMIT $limit";
+
+        $stmt = $pdo->query($sql);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
     /**
-     * KOREKSI: Mengambil semua pesanan berdasarkan 'approvals.approval_status'
+     * Mengambil semua pesanan berdasarkan 'approvals.approval_status'
      */
     public static function getAllPendingItemsForCustomer($customerId)
     {
         $db = Database::connect();
-
-        // KOREKSI: a.status -> a.approval_status
         $sql = "SELECT 
                     o.id AS order_id, 
                     i.production_status AS order_status, 
@@ -97,5 +126,33 @@ class OrderModel
             $pdo->rollBack();
             return false;
         }
+    }
+
+    /**
+     * Mengambil jumlah Work Order masuk per bulan (berdasarkan created_at)
+     */
+    public static function getMonthlyWoInData(int $year): array
+    {
+        $pdo = Database::connect();
+
+        $sql = "SELECT 
+                MONTH(created_at) AS month,
+                COUNT(*) AS total_in
+            FROM orders
+            WHERE YEAR(created_at) = :year
+            GROUP BY MONTH(created_at)
+            ORDER BY MONTH(created_at)";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([':year' => $year]);
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Normalisasi: isi array 12 bulan dengan default 0
+        $monthlyData = array_fill(1, 12, 0);
+        foreach ($results as $row) {
+            $monthlyData[(int)$row['month']] = (int)$row['total_in'];
+        }
+
+        return $monthlyData;
     }
 }

@@ -19,10 +19,13 @@ class ConsumableController
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $name = $_POST['name'];
-            CategoryModel::create($name);
+            $description = $_POST['description'] ?? null;
+
+            CategoryModel::create($name, $description);
             header('Location: /admin/consumable/katalog_kategori');
             exit;
         }
+
         require_once __DIR__ . '/../../views/admin/consumable/kategori_form.php';
     }
 
@@ -30,13 +33,15 @@ class ConsumableController
     public static function editCategory($id)
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $name = $_POST['name'];
-            CategoryModel::update($id, $name);
+            $description = $_POST['description'] ?? null;
+
+            CategoryModel::update($id, $description);
             header('Location: /admin/consumable/katalog_kategori');
             exit;
         }
+
         $category = CategoryModel::find($id);
-        require_once __DIR__ . '/../../views/admin/consumable/category_form.php';
+        require_once __DIR__ . '/../../views/admin/consumable/kategori_form.php';
     }
 
     // Hapus kategori

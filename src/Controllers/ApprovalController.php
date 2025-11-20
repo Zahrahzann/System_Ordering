@@ -25,7 +25,17 @@ class ApprovalController
         SessionMiddleware::requireSpvLogin();
         $spvId = $_SESSION['user_data']['id'];
 
-        $pendingCount = ApprovalModel::getPendingOrderCountForSpv($spvId);
+        // Ambil count berdasarkan status
+        $pendingCount  = ApprovalModel::countByStatusForSpv($spvId, 'waiting');
+        $approvedCount = ApprovalModel::countByStatusForSpv($spvId, 'approve');
+        $rejectedCount = ApprovalModel::countByStatusForSpv($spvId, 'reject');
+
+        // Ambil data user untuk bagian welcome
+        $user = [
+            'name'       => $_SESSION['user_data']['name'] ?? 'Supervisor',
+            'department' => $_SESSION['user_data']['department'] ?? 'Unknown',
+            'plant'      => $_SESSION['user_data']['plant'] ?? 'Unknown'
+        ];
 
         require_once __DIR__ . '/../../views/spv/dashboard.php';
     }
@@ -41,18 +51,18 @@ class ApprovalController
         }
 
         require_once __DIR__ . '/../../views/spv/work_order/detail_approval.php';
-    }       
+    }
 
     public static function processApproval($orderId)
-    { 
-          SessionMiddleware::requireSpvLogin();
+    {
+        SessionMiddleware::requireSpvLogin();
 
         /** @var int $orderId */
 
         $action = $_POST['action'] ?? '';
         $notes = $_POST['spv_notes'] ?? '';
-    $spvId = $_SESSION['user_data']['id'];
-    /** @var int $spvId */
+        $spvId = $_SESSION['user_data']['id'];
+        /** @var int $spvId */
 
         if ($action === 'approve') {
             $ok = ApprovalModel::updateApprovalStatus($orderId, $spvId, 'approve', $notes);

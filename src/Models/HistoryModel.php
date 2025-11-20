@@ -6,12 +6,12 @@ use ManufactureEngineering\SystemOrdering\Config\Database;
 use PDO;
 
 class HistoryModel
-{   
-     /**
-      * Mengambil semua department untuk filter (bagian admin)
-      * @return array
-      */
-     public static function getAllDepartments()
+{
+    /**
+     * Mengambil semua department untuk filter (bagian admin)
+     * @return array
+     */
+    public static function getAllDepartments()
     {
         $pdo = Database::connect();
         $sql = "SELECT id, name FROM departments ORDER BY name ASC";
@@ -39,7 +39,7 @@ class HistoryModel
                 JOIN approvals a ON o.id = a.order_id
                 WHERE a.approval_status = 'approve'
                 AND i.item_type = 'work_order'
-                AND i.production_status = 'completed'"; 
+                AND i.production_status = 'completed'";
 
         if ($departmentId !== null) {
             $sql .= " AND c.department_id = ?";
@@ -82,7 +82,7 @@ class HistoryModel
                 WHERE o.customer_id = ?
                 AND a.approval_status = 'approve'
                 AND i.item_type = 'work_order'
-                AND i.production_status = 'completed'";  
+                AND i.production_status = 'completed'";
 
         if ($year !== null) {
             $sql .= " AND YEAR(i.updated_at) = ?";
@@ -100,38 +100,6 @@ class HistoryModel
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    /**
-     * UNTUK ADMIN: Mengambil data chart bulanan
-     */
-    public static function getMonthlyChartData($year)
-    {
-        $pdo = Database::connect();
-        $sql = "SELECT 
-                    MONTH(i.updated_at) as month,
-                    COUNT(i.id) as total_items
-                FROM items i
-                JOIN orders o ON i.order_id = o.id
-                JOIN approvals a ON o.id = a.order_id
-                WHERE a.approval_status = 'approve'
-                AND i.item_type = 'work_order'
-                AND i.production_status = 'completed'
-                AND YEAR(i.updated_at) = ?
-                GROUP BY MONTH(i.updated_at)
-                ORDER BY month ASC";
-
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([$year]);
-
-        $monthlyData = array_fill(1, 12, 0);
-        $dbResults = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-        foreach ($dbResults as $row) {
-            $monthlyData[(int)$row['month']] = (int)$row['total_items'];
-        }
-
-        return $monthlyData;
-    }
-
     public static function findItemById($itemId)
     {
         $pdo = Database::connect();
@@ -144,6 +112,9 @@ class HistoryModel
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
+    /**
+     * UNTUK ADMIN: Mengambil data chart bulanan
+     */
     public static function addItemToCart($customerId, $item)
     {
         $pdo = Database::connect();
@@ -158,5 +129,34 @@ class HistoryModel
             $item['material'],
             $item['material_type']
         ]);
+    }
+
+    public static function getMonthlyChartData($year)
+    {
+        $pdo = Database::connect();
+        $sql = "SELECT 
+                MONTH(i.updated_at) as month,
+                COUNT(i.id) as total_items
+            FROM items i
+            JOIN orders o ON i.order_id = o.id
+            JOIN approvals a ON o.id = a.order_id
+            WHERE a.approval_status = 'approve'
+            AND i.item_type = 'work_order'
+            AND i.production_status = 'completed'
+            AND YEAR(i.updated_at) = ?
+            GROUP BY MONTH(i.updated_at)
+            ORDER BY month ASC";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$year]);
+
+        $monthlyData = array_fill(1, 12, 0);
+        $dbResults = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($dbResults as $row) {
+            $monthlyData[(int)$row['month']] = (int)$row['total_items'];
+        }
+
+        return $monthlyData;
     }
 }

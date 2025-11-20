@@ -150,14 +150,6 @@ if ($currentRole === 'customer') {
                 <i class="fas fa-fw fa-box-open"></i>
                 <span>CONSUMABLE</span> 
             </a>
-            <div id="collapseSpvConsumable" class="collapse" data-parent="#accordionSidebar">
-                <div class="bg-white py-2 collapse-inner rounded">
-                    <h6 class="collapse-header">Menu</h6>
-                    <a class="collapse-item" href="#">Approval Management</a>
-                    <a class="collapse-item" href="#">Tracking Pesanan</a>
-                    <a class="collapse-item" href="<?= $basePath ?>/spv/history">History</a>
-                </div>
-            </div>
         </li>
     <?php endif; ?>
 

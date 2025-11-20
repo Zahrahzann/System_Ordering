@@ -63,11 +63,9 @@ if (!isset($categories)) die('Controller tidak menyediakan data kategori.');
                         <div class="categories-container">
                             <?php foreach ($categories as $cat): ?>
                                 <div class="category-card">
-
                                     <div class="category-image"
-                                        style="background-image: url('<?= htmlspecialchars($cat['image_url'] ?? '/system_ordering/public/assets/img/default_category.jpg') ?>');">
+                                        style="background-image: url('/system_ordering/public/assets/img/kategori.jpeg');">
                                     </div>
-
                                     <div class="category-content">
                                         <div class="item-count">
                                             <i class="fas fa-cube"></i>

@@ -3,21 +3,36 @@
 namespace App\Controllers;
 
 use App\Middleware\SessionMiddleware;
+use App\Models\HistoryModel;
+use App\Models\OrderModel;
 
 class AdminController
 {
     /**
      * Menampilkan halaman dashboard Admin.
-     * DILINDUNGI OLEH MIDDLEWARE.
      */
+
     public static function showDashboard()
     {
-        // PENTING: Panggil middleware untuk cek login admin
         SessionMiddleware::requireAdminLogin();
 
         $userData = $_SESSION['user_data'];
+        $year = date('Y');
 
-        // Jika lolos, baru tampilkan halaman dashboard
+        // Ambil data WO masuk dan WO completed
+        $totalInData = OrderModel::getMonthlyWoInData($year);
+        $completedData = HistoryModel::getMonthlyChartData($year);
+
+        // Gabungkan ke satu array untuk view
+        $qtyData = [];
+        for ($m = 1; $m <= 12; $m++) {
+            $qtyData[] = [
+                'month' => $m,
+                'total_in' => $totalInData[$m],
+                'total_completed' => $completedData[$m]
+            ];
+        }
+
         require_once __DIR__ . '/../../views/admin/dashboard.php';
     }
 
