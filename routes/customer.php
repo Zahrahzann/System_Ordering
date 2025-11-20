@@ -57,6 +57,11 @@ switch ($route) {
     case '/customer/checkout':
         CartController::showTrackingPage();
         break;
+    case (preg_match('#^/customer/order/delete/(\d+)$#', $route, $matches) ? true : false):
+        CartController::deleteRejectedOrder($matches[1]);
+        break;
+
+
 
     // CONSUMABLE AREA CUSTOMER
     // case '/customer/consumable/katalog':

@@ -16,7 +16,8 @@ if (session_status() === PHP_SESSION_NONE) {
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="<?= $basePath ?>/assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
     <link href="<?= $basePath ?>/assets/css/sb-admin-2.min.css" rel="stylesheet">
-    <link href="<?= $basePath ?>/assets/css/customer/work_order/checkout.css" rel="stylesheet">
+    <link href="<?= $basePath ?>/assets/css/customer/work_order/checkout.css?v=<?= time() ?>" rel="stylesheet">
+
 </head>
 
 <body id="page-top">
@@ -151,12 +152,18 @@ if (session_status() === PHP_SESSION_NONE) {
                                                     ?>
                                                 </div>
                                             </div>
+                                            <?php if (!empty($approval['comments'])): ?>
+                                                <div class="comments-box">
+                                                    <div class="comments-label">Catatan SPV</div>
+                                                    <div class="comments-text"><?= nl2br(htmlspecialchars($approval['comments'])) ?></div>
+                                                </div>
+                                            <?php endif; ?>
                                             <!-- Akhir detail item -->
                                         </div>
                                     <?php endforeach; ?>
 
                                     <!-- Approval = Reject -->
-                                    <?php if ($status === 'rejected'): ?>
+                                    <?php if ($status === 'reject'): ?>
                                         <div class="order-footer-actions">
                                             <a href="<?= $basePath ?>/customer/order/delete/<?= $orderData['order_details']['order_id'] ?>"
                                                 class="btn btn-danger btn-sm"

@@ -61,12 +61,36 @@ class CartController
         header('Location: /system_ordering/public/customer/checkout');
         exit;
     }
-     
+
     /** Menampilkan halaman TRACKING approval */
     public static function showTrackingPage()
     {
         SessionMiddleware::requireCustomerLogin();
-        $latestOrderItems = OrderModel::getAllPendingItemsForCustomer($_SESSION['user_data']['id']);
+        $latestOrderItems = OrderModel::getAllItemsForCustomer($_SESSION['user_data']['id']);
         require_once __DIR__ . '/../../views/customer/work_order/process_checkout.php';
+    }
+
+    public static function deleteRejectedOrder($params)
+    {
+        SessionMiddleware::requireCustomerLogin();
+        $orderId    = (int) $params;
+        $customerId = $_SESSION['user_data']['id'];
+
+        $deleted = OrderModel::deleteRejectedOrder($orderId, $customerId);
+
+        if ($deleted) {
+            $_SESSION['flash_notification'] = [
+                'type'    => 'success',
+                'message' => 'Pesanan yang ditolak berhasil dihapus.'
+            ];
+        } else {
+            $_SESSION['flash_notification'] = [
+                'type'    => 'danger',
+                'message' => 'Pesanan tidak dapat dihapus (mungkin bukan milik Anda atau status bukan reject).'
+            ];
+        }
+
+        header('Location: /system_ordering/public/customer/checkout');
+        exit;
     }
 }

@@ -100,7 +100,7 @@ class OrderModel
             $stmtCheck = $pdo->prepare(
                 "SELECT o.id FROM orders o
                  JOIN approvals a ON o.id = a.order_id
-                 WHERE o.id = ? AND o.customer_id = ? AND a.approval_status = 'rejected'"
+                 WHERE o.id = ? AND o.customer_id = ? AND a.approval_status = 'reject'"
             );
             $stmtCheck->execute([$orderId, $customerId]);
             if ($stmtCheck->fetch() === false) {
@@ -154,5 +154,44 @@ class OrderModel
         }
 
         return $monthlyData;
+    }
+
+    public static function getAllItemsForCustomer($customerId)
+    {
+        $pdo = Database::connect();
+        $sql = "SELECT o.id, o.created_at, a.approval_status, u.name as spv_name
+            FROM orders o
+            JOIN approvals a ON o.id = a.order_id
+            LEFT JOIN users u ON a.spv_id = u.id
+            WHERE o.customer_id = ?
+              AND a.approval_status IN ('waiting','reject')
+            ORDER BY o.created_at DESC";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$customerId]);
+        $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $result = [];
+        foreach ($orders as $order) {
+            $items = self::findOrderItemsByOrderId($order['id']);
+            $result[] = [
+                'order_details' => [
+                    'order_id'        => $order['id'],
+                    'order_date'      => $order['created_at'],
+                    'approval_status' => $order['approval_status'],
+                    'spv_name'        => $order['spv_name'] ?? null
+                ],
+                'items' => $items
+            ];
+        }
+        return $result;
+    }
+
+    public static function findOrderItemsByOrderId($orderId)
+    {
+        $pdo = Database::connect();
+        $sql = "SELECT * FROM items WHERE order_id = ?";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$orderId]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }

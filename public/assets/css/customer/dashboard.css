@@ -187,8 +187,9 @@ body {
 }
 
 .stat-label {
-    font-size: 14px;
-    color: #999;
+    font-size: 18px;
+    color: #393939;
+    font-weight: 700;
 }
 
 /* Section Title */

@@ -133,7 +133,7 @@ class CartModel
             $pdo->rollBack();
             // Debug: log error ke file untuk visibility
             error_log('Checkout Error: ' . $e->getMessage() . ' | Line: ' . $e->getLine());
-            return ['success' => false, 'message' => 'Error Sebenarnya: ' . $e->getMessage()];
+            return ['success' => false, 'message' => 'Error: ' . $e->getMessage()];
         }
     }
 
@@ -143,7 +143,7 @@ class CartModel
 
         $sql = "INSERT INTO items (
                 customer_id, item_name, quantity, category, material, material_type,
-                file_path, needed_date, note, is_emergency, emergency_type, item_type, created_at
+                file_path, needed_date, note, is_emergency, emergency_type, item_type, created_at 
             ) VALUES (
                 :customer_id, :item_name, :quantity, :category, :material, :material_type,
                 :file_path, :needed_date, :note, :is_emergency, :emergency_type, :item_type, NOW()

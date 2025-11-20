@@ -73,7 +73,7 @@ $departmentName = DepartmentModel::getNameById($userData['department_id']);
                             <div class="stat-header">
                                 <div>
                                     <div class="stat-value"><?= $stats['total'] ?></div>
-                                    <div class="stat-label">Total Orders</div>
+                                    <div class="stat-label">Total Orders yang Aktif</div>
                                 </div>
                                 <div class="stat-icon blue">
                                     <i class="fas fa-shopping-cart"></i>
@@ -139,7 +139,7 @@ $departmentName = DepartmentModel::getNameById($userData['department_id']);
                         </div>
 
                         <!-- Consumable Card -->
-                        <div class="menu-card" onclick="window.location.href='/system_ordering/public/customer/consumable/catalog'">
+                        <div class="menu-card" onclick="window.location.href='/system_ordering/public/customer/consumable/katalog_kategori'">
                             <div class="menu-card-header">
                                 <i class="fas fa-box-open"></i>
                             </div>
