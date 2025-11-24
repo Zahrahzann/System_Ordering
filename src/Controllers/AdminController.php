@@ -20,19 +20,23 @@ class AdminController
         $year = date('Y');
 
         // Ambil data WO masuk dan WO completed
-        $totalInData = OrderModel::getMonthlyWoInData($year);
-        $completedData = HistoryModel::getMonthlyChartData($year);
+        $totalInData     = OrderModel::getMonthlyWoInData($year);
+        $completedData   = OrderModel::getMonthlyWoCompletedData($year);
+        $pendingData     = OrderModel::getMonthlyWoPendingData($year);
+        $progressData    = OrderModel::getMonthlyWoOnProgress($year);
+        $finishData      = OrderModel::getMonthlyWoFinishData($year);
 
-        // Gabungkan ke satu array untuk view
         $qtyData = [];
         for ($m = 1; $m <= 12; $m++) {
             $qtyData[] = [
-                'month' => $m,
-                'total_in' => $totalInData[$m],
-                'total_completed' => $completedData[$m]
+                'month'           => $m,
+                'total_in'        => $totalInData[$m] ?? 0,
+                'total_completed' => $completedData[$m] ?? 0,
+                'total_pending'   => $pendingData[$m] ?? 0,
+                'total_onProgress'=> $progressData[$m] ?? 0,
+                'total_finish'    => $finishData[$m] ?? 0
             ];
         }
-
         require_once __DIR__ . '/../../views/admin/dashboard.php';
     }
 

@@ -68,6 +68,10 @@ class CartController
         SessionMiddleware::requireCustomerLogin();
         $latestOrderItems = OrderModel::getAllItemsForCustomer($_SESSION['user_data']['id']);
         require_once __DIR__ . '/../../views/customer/work_order/process_checkout.php';
+        var_dump(OrderModel::class);
+        var_dump(get_class_methods(OrderModel::class));
+        var_dump($_SESSION['user_data']);
+        exit;
     }
 
     public static function deleteRejectedOrder($params)

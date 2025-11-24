@@ -22,9 +22,9 @@ $currentRole = $_SESSION['user_data']['role'] ?? '';
 
                     <h1 class="h3 mb-4 text-gray-800">
                         <?php if ($currentRole === 'admin'): ?>
-                            Riwayat Pesanan Work Order (Semua Departemen)
+                            Riwayat Pesanan Work Order
                         <?php elseif ($currentRole === 'spv'): ?>
-                            Riwayat Pesanan yang telah di Approve
+                            Riwayat Pesanan yang telah selesai
                         <?php else: ?>
                             Riwayat Pesanan Saya
                         <?php endif; ?>
@@ -85,8 +85,11 @@ $currentRole = $_SESSION['user_data']['role'] ?? '';
                                             <th>Nama Item</th>
                                             <th>Qty</th>
                                             <th>Kategori</th>
+                                            <th>Jenis Material</th>
                                             <th>PIC MFG</th>
+                                            <th>SPV</th>
                                             <th>Tgl Selesai</th>
+                                            <th>Catatan</th>
                                             <?php if ($currentRole === 'customer'): ?>
                                                 <th>Aksi</th>
                                             <?php endif; ?>
@@ -95,7 +98,7 @@ $currentRole = $_SESSION['user_data']['role'] ?? '';
                                     <tbody>
                                         <?php if (empty($items)): ?>
                                             <tr>
-                                                <td colspan="<?= $currentRole === 'customer' ? '7' : '6' ?>" class="text-center">
+                                                <td colspan="<?= $currentRole === 'customer' ? '10' : '9' ?>" class="text-center">
                                                     Tidak ada riwayat untuk periode ini.
                                                 </td>
                                             </tr>
@@ -106,8 +109,17 @@ $currentRole = $_SESSION['user_data']['role'] ?? '';
                                                     <td><?= htmlspecialchars($item['item_name']) ?></td>
                                                     <td><?= htmlspecialchars($item['quantity']) ?></td>
                                                     <td><?= htmlspecialchars($item['category'] ?? '-') ?></td>
+                                                    <td><?= htmlspecialchars($item['material_type'] ?? '-') ?></td>
                                                     <td><?= htmlspecialchars($item['pic_mfg'] ?? '-') ?></td>
+                                                    <td><?= htmlspecialchars($item['spv_name'] ?? '-') ?></td>
                                                     <td><?= date('d M Y', strtotime($item['completed_date'])) ?></td>
+                                                    <td>
+                                                        <?php if (!empty($item['note'])): ?>
+                                                            <i class="fas fa-comment-dots text-info" title="<?= htmlspecialchars($item['note']) ?>"></i>
+                                                        <?php else: ?>
+                                                            <span class="text-muted">-</span>
+                                                        <?php endif; ?>
+                                                    </td>
                                                     <?php if ($currentRole === 'customer'): ?>
                                                         <td>
                                                             <a href="<?= $basePath ?>/customer/history/reorder/<?= $item['item_id'] ?>"
@@ -115,7 +127,6 @@ $currentRole = $_SESSION['user_data']['role'] ?? '';
                                                                 onclick="return confirm('Item ini akan dibuka di Form Work Order untuk diedit sebelum dipesan ulang. Lanjutkan?')">
                                                                 <i class="fas fa-redo"></i> Pesan Lagi
                                                             </a>
-
                                                         </td>
                                                     <?php endif; ?>
                                                 </tr>

@@ -78,7 +78,7 @@ if (session_status() === PHP_SESSION_NONE) {
                                 <div class="card-body">
                                     <div class="order-header">
                                         <div class="order-info">
-                                            <h5>Order #<?= htmlspecialchars($orderData['order_details']['order_id']) ?></h5>
+                                            <h5>Order</h5>
                                             <div class="order-date">
                                                 <i class="far fa-calendar"></i>
                                                 <?= date('d F Y', strtotime($orderData['order_details']['order_date'])) ?>

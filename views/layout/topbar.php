@@ -6,49 +6,68 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+use App\Models\NotificationModel;
+
 ?>
+
 <head>
     <style>
-    body {
-        overflow: hidden;
-    }
-
-    #accordionSidebar {
-        position: fixed;
-        height: 100vh;
-        top: 0;
-        left: 0;
-        z-index: 1031;
-    }
-
-    #content-wrapper {
-        padding-left: 224px;
-        height: 100vh;
-        display: flex;
-        flex-direction: column;
-    }
-
-    #content {
-        flex-grow: 1;
-        overflow-y: auto;
-        padding-top: 88px;
-    }
-
-    #content-wrapper .sticky-footer {
-        margin-top: auto;
-    }
-
-    body.sidebar-toggled #content-wrapper {
-        padding-left: 104px;
-    }
-
-    @media (max-width: 768px) {
-        body.sidebar-toggled #content-wrapper {
-            padding-left: 0;
+        body {
+            overflow: hidden;
         }
-    }
-</style>
+
+        #accordionSidebar {
+            position: fixed;
+            height: 100vh;
+            top: 0;
+            left: 0;
+            z-index: 1031;
+        }
+
+        #content-wrapper {
+            padding-left: 224px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #content {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-top: 88px;
+        }
+
+        #content-wrapper .sticky-footer {
+            margin-top: auto;
+        }
+
+        body.sidebar-toggled #content-wrapper {
+            padding-left: 104px;
+        }
+
+        @media (max-width: 768px) {
+            body.sidebar-toggled #content-wrapper {
+                padding-left: 0;
+            }
+        }
+    </style>
 </head>
+
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+$customerId = $_SESSION['user_data']['id'] ?? null;
+
+// Notifikasi
+$alertCount = NotificationModel::countUnread($customerId);
+$alerts     = NotificationModel::getLatest($customerId);
+
+// // Pesan (sementara kosong dulu kalau belum ada MessageModel)
+// $messageCount = 0;
+// $messages     = [];
+?>
+
 <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 fixed-top shadow f">
 
     <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
@@ -96,10 +115,10 @@ if (session_status() === PHP_SESSION_NONE) {
                                     <i class="<?= $alert['icon'] ?? 'fas fa-info-circle' ?> text-white"></i>
                                 </div>
                             </div>
-                            <div>
+                            <!-- <div>
                                 <div class="small text-gray-500"><?= $alert['date'] ?? '-' ?></div>
                                 <span class="font-weight-bold"><?= $alert['message'] ?? 'No message' ?></span>
-                            </div>
+                            </div> -->
                         </a>
                     <?php endforeach; ?>
                 <?php else: ?>

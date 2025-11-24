@@ -20,12 +20,12 @@ if (!isset($products)) die('Controller tidak menyediakan data produk.');
             <div id="content">
                 <?php include __DIR__ . '/../../layout/topbar.php'; ?>
                 <div class="container-fluid">
-                    <h1 class="h3 mb-4 text-gray-800">SLIPPER <?= strtoupper(htmlspecialchars($_GET['category'])) ?></h1>
+                    <h1 class="h3 mb-4 text-gray-800"><?= strtoupper(htmlspecialchars($_GET['category'])) ?></h1>
 
                     <?php if (empty($products)): ?>
                         <div class="empty-cart">
                             <i class="fas fa-box"></i>
-                            <h3>Belum ada produk di kategori ini</h3>
+                            <h3>Belum ada produk di kategori jalur ini</h3>
                         </div>
                     <?php else: ?>
                         <div class="row">

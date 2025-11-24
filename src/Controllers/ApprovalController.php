@@ -41,7 +41,7 @@ class ApprovalController
         require_once __DIR__ . '/../../views/spv/dashboard.php';
     }
 
-    public static function showDetailPage($orderId)
+    public static function showDetailPage($orderId) 
     {
         SessionMiddleware::requireSpvLogin();
 

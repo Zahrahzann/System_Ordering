@@ -6,6 +6,7 @@ use ManufactureEngineering\SystemOrdering\Config\Database;
 use Respect\Validation\Validator as v;
 use App\Models\CartModel;
 use App\Middleware\SessionMiddleware;
+use App\Models\NotificationModel;
 
 class WorkOrderController
 {
@@ -30,13 +31,15 @@ class WorkOrderController
                 return;
             }
         } elseif (!empty($_SESSION['reorder_item']['file_path'])) {
-            // fallback ke file lama dari histori
             $filePathsJson = $_SESSION['reorder_item']['file_path'];
         }
 
         $pdo = Database::connect();
-        $sql = "INSERT INTO items (customer_id, order_id, item_type, item_name, category, quantity, material, material_type, file_path, needed_date, note, is_emergency, emergency_type)
-        VALUES (:customer_id, NULL, 'work_order', :item_name, :category, :quantity, :material, :material_type, :file_path, :needed_date, :note, :is_emergency, :emergency_type)";
+        $sql = "INSERT INTO items (
+    customer_id, order_id, item_type, item_name, category, quantity, material, material_type, file_path, needed_date, note, is_emergency, emergency_type
+) VALUES (
+    :customer_id, NULL, 'work_order', :item_name, :category, :quantity, :material, :material_type, :file_path, :needed_date, :note, :is_emergency, :emergency_type
+)";
         $stmt = $pdo->prepare($sql);
 
         $isEmergency = isset($_POST['is_emergency']) ? 1 : 0;
@@ -56,6 +59,18 @@ class WorkOrderController
             ':emergency_type' => $emergencyType
         ]);
 
+        // ✅ Tambahkan notifikasi di sini
+        $customerId = $_SESSION['user_data']['id'];
+        $itemName   = $_POST['item_name'];
+        NotificationModel::create(
+            $customerId,
+            "Item '$itemName' berhasil ditambahkan ke Work Order",
+            'fas fa-clipboard-list',
+            'success',
+            'work_order' // isi kolom type
+        );
+
+        // ✅ Lanjut redirect seperti biasa
         $action = $_POST['action_type'] ?? 'cart';
         if ($action === 'cart') {
             $_SESSION['success'] = 'Item berhasil ditambahkan ke keranjang!';

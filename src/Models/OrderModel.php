@@ -26,7 +26,7 @@ class OrderModel
     {
         $pdo = Database::connect();
         $limit = (int) $limit; // pastikan integer
-        $sql = "SELECT o.code, o.created_at AS date, a.approval_status AS status, u.name AS requested_by
+        $sql = "SELECT o.order_code, o.created_at AS date, a.approval_status AS status, u.name AS requested_by
             FROM orders o
             JOIN approvals a ON o.id = a.order_id
             LEFT JOIN users u ON o.customer_id = u.id
@@ -136,18 +136,17 @@ class OrderModel
         $pdo = Database::connect();
 
         $sql = "SELECT 
-                MONTH(created_at) AS month,
-                COUNT(*) AS total_in
-            FROM orders
-            WHERE YEAR(created_at) = :year
-            GROUP BY MONTH(created_at)
-            ORDER BY MONTH(created_at)";
+                MONTH(o.created_at) AS month,
+                COUNT(DISTINCT o.id) AS total_in
+            FROM orders o
+            WHERE YEAR(o.created_at) = :year
+            GROUP BY MONTH(o.created_at)
+            ORDER BY MONTH(o.created_at)";
 
         $stmt = $pdo->prepare($sql);
         $stmt->execute([':year' => $year]);
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-        // Normalisasi: isi array 12 bulan dengan default 0
         $monthlyData = array_fill(1, 12, 0);
         foreach ($results as $row) {
             $monthlyData[(int)$row['month']] = (int)$row['total_in'];
@@ -193,5 +192,107 @@ class OrderModel
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$orderId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public static function getMonthlyWoPendingData(int $year): array
+    {
+        $pdo = Database::connect();
+
+        $sql = "SELECT 
+                MONTH(o.created_at) AS month,
+                COUNT(DISTINCT i.order_id) AS total_pending
+            FROM orders o
+            JOIN items i ON o.id = i.order_id
+            JOIN approvals a ON o.id = a.order_id
+            WHERE YEAR(o.created_at) = :year
+              AND a.approval_status = 'approve'
+              AND i.production_status = 'pending'
+            GROUP BY MONTH(o.created_at)
+            ORDER BY MONTH(o.created_at)";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([':year' => $year]);
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $monthlyData = array_fill(1, 12, 0);
+        foreach ($results as $row) {
+            $monthlyData[(int)$row['month']] = (int)$row['total_pending'];
+        }
+
+        return $monthlyData;
+    }
+
+    public static function getMonthlyWoCompletedData(int $year): array
+    {
+        $pdo = Database::connect();
+
+        $sql = "SELECT 
+                MONTH(o.created_at) AS month,
+                COUNT(DISTINCT o.id) AS total_completed
+            FROM orders o
+            JOIN items i ON o.id = i.order_id
+            WHERE YEAR(o.created_at) = :year
+              AND i.production_status = 'completed'
+            GROUP BY MONTH(o.created_at)
+            ORDER BY MONTH(o.created_at)";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([':year' => $year]);
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $monthlyData = array_fill(1, 12, 0);
+        foreach ($results as $row) {
+            $monthlyData[(int)$row['month']] = (int)$row['total_completed'];
+        }
+        return $monthlyData;
+    }
+
+    public static function getMonthlyWoOnProgress(int $year): array
+    {
+        $pdo = Database::connect();
+
+        $sql = "SELECT
+                MONTH(o.created_at) AS month,
+                COUNT(DISTINCT o.id) AS total_onProgress
+            FROM orders o
+            JOIN items i ON o.id = i.order_id
+            WHERE YEAR(o.created_at) = :year
+                AND i.production_status = 'on_progress'
+            GROUP BY MONTH(o.created_at)
+            ORDER BY MONTH(o.created_at)";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([':year' => $year]);
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $monthlyData = array_fill(1, 12, 0);
+        foreach ($results as $row) {
+            $monthlyData[(int)$row['month']] = (int)$row['total_onProgress'];
+        }
+        return $monthlyData;
+    }
+    public static function getMonthlyWoFinishData(int $year): array
+    {
+        $pdo = Database::connect();
+
+        $sql = "SELECT 
+                MONTH(o.created_at) AS month,
+                COUNT(DISTINCT o.id) AS total_finish
+            FROM orders o
+            JOIN items i ON o.id = i.order_id
+            WHERE YEAR(o.created_at) = :year
+              AND i.production_status = 'finish'
+            GROUP BY MONTH(o.created_at)
+            ORDER BY MONTH(o.created_at)";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([':year' => $year]);
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $monthlyData = array_fill(1, 12, 0);
+        foreach ($results as $row) {
+            $monthlyData[(int)$row['month']] = (int)$row['total_finish'];
+        }
+        return $monthlyData;
     }
 }
