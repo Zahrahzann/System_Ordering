@@ -19,10 +19,6 @@ $basePath = '/system_ordering/public';
             background: #f5f5f5;
         }
 
-        .container-fluid {
-            padding: 30px;
-        }
-
         /* Welcome Section */
         .welcome-section {
             background: white;
@@ -85,7 +81,7 @@ $basePath = '/system_ordering/public';
             border-left-color: #3d3d3dff;
         }
 
-        .stat-card-orange {
+        .stat-card.orange {
             border-left-color: #ff9f40;
         }
 
@@ -251,117 +247,87 @@ $basePath = '/system_ordering/public';
             }
         }
     </style>
-</head>
+    </head>
 
-<?php
-if (!isset($userData)) die('Controller tidak menyediakan data user.');
-if (!isset($qtyData) || !is_array($qtyData)) $qtyData = [];
-$basePath = '/system_ordering/public';
-?>
-<!DOCTYPE html>
-<html lang="id">
+    <body id="page-top">
+        <div id="wrapper">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Admin</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="<?= $basePath ?>/assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
-    <link href="<?= $basePath ?>/assets/css/sb-admin-2.min.css" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: #f5f5f5;
-        }
+            <?php include __DIR__ . '/../layout/sidebar.php'; ?>
 
-        .container-fluid {
-            padding: 30px;
-        }
+            <div id="content-wrapper" class="d-flex flex-column w-100">
+                <div id="content">
 
-        /* ... CSS sama seperti sebelumnya ... */
-    </style>
-</head>
+                    <?php include __DIR__ . '/../layout/topbar.php'; ?>
 
-<body id="page-top">
-    <div id="wrapper">
+                    <div class="container-fluid">
+                        <!-- Welcome Section -->
+                        <div class="welcome-section">
+                            <h1><i class="fas fa-home"></i> Dashboard Admin</h1>
+                            <p>Selamat datang, <strong><?= htmlspecialchars($userData['name'] ?? 'Admin') ?></strong></p>
+                        </div>
 
-        <?php include __DIR__ . '/../layout/sidebar.php'; ?>
+                        <!-- Stats Cards -->
+                        <?php
+                        $totalWOIn        = array_sum(array_column($qtyData, 'total_in')) ?: 0;
+                        $totalWOCompleted = array_sum(array_column($qtyData, 'total_completed')) ?: 0;
+                        $totalWOPending   = array_sum(array_column($qtyData, 'total_pending')) ?: 0;
+                        $totalWOOnProgress = array_sum(array_column($qtyData, 'total_onProgress')) ?: 0;
+                        $totalWOFinish    = array_sum(array_column($qtyData, 'total_finish')) ?: 0;
+                        ?>
+                        <div class="stats-row">
+                            <div class="stat-card dark">
+                                <div class="stat-card-content">
+                                    <div class="stat-icon"><i class="fas fa-clipboard-list"></i></div>
+                                    <div class="stat-details">
+                                        <div class="stat-label">Total WO Masuk</div>
+                                        <div class="stat-value"><?= number_format($totalWOIn) ?></div>
+                                    </div>
+                                </div>
+                            </div>
 
-        <div id="content-wrapper" class="d-flex flex-column w-100" style="min-height: 100vh;">
-            <div id="content">
+                            <div class="stat-card blue">
+                                <div class="stat-card-content">
+                                    <div class="stat-icon"><i class="fas fa-calendar-check"></i></div>
+                                    <div class="stat-details">
+                                        <div class="stat-label">WO Completed</div>
+                                        <div class="stat-value"><?= number_format($totalWOCompleted) ?></div>
+                                    </div>
+                                </div>
+                            </div>
 
-                <?php include __DIR__ . '/../layout/topbar.php'; ?>
+                            <div class="stat-card gray">
+                                <div class="stat-card-content">
+                                    <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                                    <div class="stat-details">
+                                        <div class="stat-label">WO Pending</div>
+                                        <div class="stat-value"><?= number_format($totalWOPending) ?></div>
+                                    </div>
+                                </div>
+                            </div>
 
-                <div class="container-fluid">
-                    <!-- Welcome Section -->
-                    <div class="welcome-section">
-                        <h1><i class="fas fa-home"></i> Dashboard Admin</h1>
-                        <p>Selamat datang, <strong><?= htmlspecialchars($userData['name'] ?? 'Admin') ?></strong></p>
-                    </div>
+                            <div class="stat-card orange">
+                                <div class="stat-card-content">
+                                    <div class="stat-icon"><i class="fas fa-hourglass-half"></i></div>
+                                    <div class="stat-details">
+                                        <div class="stat-label">WO On Progress</div>
+                                        <div class="stat-value"><?= number_format($totalWOOnProgress) ?></div>
+                                    </div>
+                                </div>
+                            </div>
 
-                    <!-- Stats Cards -->
-                    <?php
-                    $totalWOIn        = array_sum(array_column($qtyData, 'total_in')) ?: 0;
-                    $totalWOCompleted = array_sum(array_column($qtyData, 'total_completed')) ?: 0;
-                    $totalWOPending   = array_sum(array_column($qtyData, 'total_pending')) ?: 0;
-                    $totalWOOnProgress = array_sum(array_column($qtyData, 'total_onProgress')) ?: 0;
-                    $totalWOFinish    = array_sum(array_column($qtyData, 'total_finish')) ?: 0;
-                    ?>
-                    <div class="stats-row">
-                        <div class="stat-card dark">
-                            <div class="stat-card-content">
-                                <div class="stat-icon"><i class="fas fa-clipboard-list"></i></div>
-                                <div class="stat-details">
-                                    <div class="stat-label">Total WO Masuk</div>
-                                    <div class="stat-value"><?= number_format($totalWOIn) ?></div>
+                            <div class="stat-card green">
+                                <div class="stat-card-content">
+                                    <div class="stat-icon"><i class="fas fa-check-square"></i></div>
+                                    <div class="stat-details">
+                                        <div class="stat-label">WO Finish</div>
+                                        <div class="stat-value"><?= number_format($totalWOFinish) ?></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+                    </div> <!-- end of container-fluid -->
 
-                        <div class="stat-card blue">
-                            <div class="stat-card-content">
-                                <div class="stat-icon"><i class="fas fa-calendar-check"></i></div>
-                                <div class="stat-details">
-                                    <div class="stat-label">WO Completed</div>
-                                    <div class="stat-value"><?= number_format($totalWOCompleted) ?></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="stat-card gray">
-                            <div class="stat-card-content">
-                                <div class="stat-icon"><i class="fas fa-clock"></i></div>
-                                <div class="stat-details">
-                                    <div class="stat-label">WO Pending</div>
-                                    <div class="stat-value"><?= number_format($totalWOPending) ?></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="stat-card orange">
-                            <div class="stat-card-content">
-                                <div class="stat-icon"><i class="fas fa-hourglass-half"></i></div>
-                                <div class="stat-details">
-                                    <div class="stat-label">WO On Progress</div>
-                                    <div class="stat-value"><?= number_format($totalWOOnProgress) ?></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="stat-card green">
-                            <div class="stat-card-content">
-                                <div class="stat-icon"><i class="fas fa-check-square"></i></div>
-                                <div class="stat-details">
-                                    <div class="stat-label">WO Finish</div>
-                                    <div class="stat-value"><?= number_format($totalWOFinish) ?></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div> <!-- end of container-fluid -->
-
-                <!-- Chart Card -->
-                <div class="row">
+                    <!-- Chart Card -->
                     <div class="col-12">
                         <div class="chart-card">
                             <div class="chart-card-header">
@@ -381,114 +347,111 @@ $basePath = '/system_ordering/public';
                         </div>
                     </div>
                 </div>
-            </div> <!-- end of #content -->
-
-            <?php include __DIR__ . '/../layout/footer.php'; ?>
+                <?php include __DIR__ . '/../layout/footer.php'; ?>
+            </div>
         </div>
 
-    </div>
+        <!-- Scripts -->
+        <script src="<?= $basePath ?>/assets/vendor/jquery/jquery.min.js"></script>
+        <script src="<?= $basePath ?>/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+        <script src="<?= $basePath ?>/assets/vendor/jquery-easing/jquery.easing.min.js"></script>
+        <script src="<?= $basePath ?>/assets/js/sb-admin-2.min.js"></script>
+        <script src="<?= $basePath ?>/assets/vendor/chart.js/Chart.min.js"></script>
 
-    <!-- Scripts -->
-    <script src="<?= $basePath ?>/assets/vendor/jquery/jquery.min.js"></script>
-    <script src="<?= $basePath ?>/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="<?= $basePath ?>/assets/vendor/jquery-easing/jquery.easing.min.js"></script>
-    <script src="<?= $basePath ?>/assets/js/sb-admin-2.min.js"></script>
-    <script src="<?= $basePath ?>/assets/vendor/chart.js/Chart.min.js"></script>
+        <!-- Bar Chart Script -->
+        <?php
+        $monthNames = [1 => 'Jan', 2 => 'Feb', 3 => 'Mar', 4 => 'Apr', 5 => 'Mei', 6 => 'Jun', 7 => 'Jul', 8 => 'Agu', 9 => 'Sep', 10 => 'Okt', 11 => 'Nov', 12 => 'Des'];
+        $labels = array_map(fn($d) => $monthNames[$d['month']], $qtyData);
+        $totalIn = array_map(fn($d) => $d['total_in'], $qtyData);
+        $totalCompleted = array_map(fn($d) => $d['total_completed'], $qtyData);
+        ?>
+        <script>
+            const labels = <?= json_encode($labels) ?>;
+            const totalIn = <?= json_encode($totalIn) ?>;
+            const totalCompleted = <?= json_encode($totalCompleted) ?>;
 
-    <!-- Bar Chart Script -->
-    <?php
-    $monthNames = [1 => 'Jan', 2 => 'Feb', 3 => 'Mar', 4 => 'Apr', 5 => 'Mei', 6 => 'Jun', 7 => 'Jul', 8 => 'Agu', 9 => 'Sep', 10 => 'Okt', 11 => 'Nov', 12 => 'Des'];
-    $labels = array_map(fn($d) => $monthNames[$d['month']], $qtyData);
-    $totalIn = array_map(fn($d) => $d['total_in'], $qtyData);
-    $totalCompleted = array_map(fn($d) => $d['total_completed'], $qtyData);
-    ?>
-    <script>
-        const labels = <?= json_encode($labels) ?>;
-        const totalIn = <?= json_encode($totalIn) ?>;
-        const totalCompleted = <?= json_encode($totalCompleted) ?>;
-
-        new Chart(document.getElementById("qtyBarChart"), {
-            type: 'bar',
-            data: {
-                labels,
-                datasets: [{
-                        label: "Total WO Masuk",
-                        data: totalIn,
-                        backgroundColor: "rgba(54, 162, 235, 0.7)",
-                        borderColor: "rgba(54, 162, 235, 1)",
-                        borderWidth: 1,
-                        borderRadius: 6
-                    },
-                    {
-                        label: "WO Completed",
-                        data: totalCompleted,
-                        backgroundColor: "rgba(75, 192, 192, 0.7)",
-                        borderColor: "rgba(75, 192, 192, 1)",
-                        borderWidth: 1,
-                        borderRadius: 6
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            stepSize: 1,
-                            font: {
-                                family: 'Poppins',
-                                size: 12
-                            }
+            new Chart(document.getElementById("qtyBarChart"), {
+                type: 'bar',
+                data: {
+                    labels,
+                    datasets: [{
+                            label: "Total WO Masuk",
+                            data: totalIn,
+                            backgroundColor: "rgba(62, 178, 255, 0.7)",
+                            borderColor: "rgba(54, 117, 235, 1)",
+                            borderWidth: 1,
+                            borderRadius: 6
                         },
-                        grid: {
-                            color: 'rgba(0, 0, 0, 0.05)'
+                        {
+                            label: "WO Completed",
+                            data: totalCompleted,
+                            backgroundColor: "rgba(86, 221, 221, 0.7)",
+                            borderColor: "rgba(75, 192, 192, 1)",
+                            borderWidth: 1,
+                            borderRadius: 6
                         }
-                    },
-                    x: {
-                        ticks: {
-                            font: {
-                                family: 'Poppins',
-                                size: 12
-                            }
-                        },
-                        grid: {
-                            display: false
-                        }
-                    }
+                    ]
                 },
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            padding: 15,
-                            font: {
-                                family: 'Poppins',
-                                size: 13
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1,
+                                font: {
+                                    family: 'Poppins',
+                                    size: 12
+                                }
                             },
-                            usePointStyle: true,
-                            pointStyle: 'circle'
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                font: {
+                                    family: 'Poppins',
+                                    size: 12
+                                }
+                            },
+                            grid: {
+                                display: false
+                            }
                         }
                     },
-                    tooltip: {
-                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                        padding: 12,
-                        titleFont: {
-                            family: 'Poppins',
-                            size: 13,
-                            weight: '600'
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                font: {
+                                    family: 'Poppins',
+                                    size: 13
+                                },
+                                usePointStyle: true,
+                                pointStyle: 'circle'
+                            }
                         },
-                        bodyFont: {
-                            family: 'Poppins',
-                            size: 12
-                        },
-                        cornerRadius: 6
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            titleFont: {
+                                family: 'Poppins',
+                                size: 13,
+                                weight: '600'
+                            },
+                            bodyFont: {
+                                family: 'Poppins',
+                                size: 12
+                            },
+                            cornerRadius: 6
+                        }
                     }
                 }
-            }
-        });
-    </script>
-</body>
+            });
+        </script>
+    </body>
 
 </html>

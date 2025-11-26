@@ -8,7 +8,7 @@ use App\Controllers\AuthController;
 use App\Controllers\TrackingController;
 use App\Controllers\AdminController;
 use App\Controllers\UserManagementController;
-use App\Controllers\Admin\ConsumableController;
+use App\Controllers\ConsumableController;
 
 // ROUTING DINAMIS
 $matches = [];
@@ -47,37 +47,38 @@ switch ($route) {
 
     // MANAGEMENT CONSUMABLE
 
-    case '/admin/consumable/katalog_kategori':
-        \App\Controllers\ConsumableController::listCategories();
+    case '/admin/consumable/sections':
+        ConsumableController::listSection();
         break;
 
-    case '/admin/consumable/katalog_kategori/add':
-        \App\Controllers\ConsumableController::addCategory();
+    case '/admin/consumable/sections/add':
+        ConsumableController::addSection();
         break;
 
-    case '/admin/consumable/katalog_kategori/edit':
-        \App\Controllers\ConsumableController::editCategory($_GET['id']);
+    case '/admin/consumable/sections/edit':
+        ConsumableController::editSection($_GET['id']);
         break;
 
-    case '/admin/consumable/katalog_kategori/delete':
-        \App\Controllers\ConsumableController::deleteCategory($_GET['id']);
-        break;
+    case '/admin/consumable/sections/delete':
+    ConsumableController::deleteSection($_GET['id']);
+    break;
 
-    case '/admin/consumable/katalog_produk':
-        \App\Controllers\ConsumableController::listProducts();
-        break;
 
-    case '/admin/consumable/katalog_produk/add':
-        \App\Controllers\ConsumableController::addProduct();
-        break;
+    // case '/admin/consumable/katalog_produk':
+    //     \App\Controllers\ConsumableController::listProducts();
+    //     break;
 
-    case '/admin/consumable/katalog_produk/edit':
-        \App\Controllers\ConsumableController::editProduct($_GET['id']);
-        break;
+    // case '/admin/consumable/katalog_produk/add':
+    //     \App\Controllers\ConsumableController::addProduct();
+    //     break;
 
-    case '/admin/consumable/katalog_produk/delete':
-        \App\Controllers\ConsumableController::deleteProduct($_GET['id']);
-        break;
+    // case '/admin/consumable/katalog_produk/edit':
+    //     \App\Controllers\ConsumableController::editProduct($_GET['id']);
+    //     break;
+
+    // case '/admin/consumable/katalog_produk/delete':
+    //     \App\Controllers\ConsumableController::deleteProduct($_GET['id']);
+    //     break;
 
 
     // 404 NOT FOUND RESPON

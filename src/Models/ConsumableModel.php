@@ -6,26 +6,26 @@ use PDO;
 
 class ConsumableModel
 {
-    // Ambil semua kategori consumable
-    public static function getCategories()
+    // Mengambil semua Section consumable
+    public static function getSection()
     {
         $pdo = Database::connect();
-        $stmt = $pdo->query("SELECT * FROM categories ORDER BY name ASC");
+        $stmt = $pdo->query("SELECT * FROM sections ORDER BY name ASC");
         return $stmt->fetchAll();
     }
 
-    // Ambil produk consumable berdasarkan kategori
-    public static function getProductsByCategory($categoryName)
+    // Ambil produk consumable berdasarkan Section
+    public static function getProductsBySection($sectionName)
     {
         $pdo = Database::connect();
         $stmt = $pdo->prepare("
             SELECT p.* 
             FROM products p
-            JOIN categories c ON p.category_id = c.id
-            WHERE c.name = :category
+            JOIN sections c ON p.section_id = c.id
+            WHERE c.name = :section
               AND p.item_type = 'Consumable'
         ");
-        $stmt->bindParam(':category', $categoryName);
+        $stmt->bindParam(':section', $sectionName);
         $stmt->execute();
         return $stmt->fetchAll();
     }
@@ -35,9 +35,9 @@ class ConsumableModel
     {
         $pdo = Database::connect();
         $stmt = $pdo->prepare("
-            SELECT p.*, c.name AS category_name
+            SELECT p.*, c.name AS section_name
             FROM products p
-            JOIN categories c ON p.category_id = c.id
+            JOIN sections c ON p.section_id = c.id
             WHERE p.id = :id
               AND p.item_type = 'Consumable'
         ");

@@ -17,8 +17,9 @@ if ($currentRole === 'customer') {
 
 <head>
     <style>
+        /* Hanya sembunyikan scroll horizontal agar content tidak hilang */
         body {
-            overflow: hidden;
+            overflow-x: hidden;
         }
 
         #accordionSidebar {
@@ -32,6 +33,7 @@ if ($currentRole === 'customer') {
         }
 
         #content-wrapper {
+            /* gunakan padding-left mengikuti default sb-admin layout */
             padding-left: 224px;
             height: 100vh;
             display: flex;
@@ -80,7 +82,6 @@ if ($currentRole === 'customer') {
         <hr class="sidebar-divider">
         <div class="sidebar-heading">Work Order</div>
         <li class="nav-item">
-            <!-- KOREKSI: Semua link harus menggunakan $basePath (public) -->
             <a class="nav-link" href="<?= $basePath ?>/customer/work_order/form">
                 <i class="fas fa-fw fa-edit"></i>
                 <span>Form Work Order</span>
@@ -194,7 +195,7 @@ if ($currentRole === 'customer') {
             <div id="collapseAdminConsumable" class="collapse" data-parent="#accordionSidebar">
                 <div class="bg-white py-2 collapse-inner rounded">
                     <h6 class="collapse-header">Menu</h6>
-                    <a class="collapse-item" href="<?= $basePath ?>/admin/consumable/katalog_kategori">Kelola Katalog</a>
+                    <a class="collapse-item" href="<?= $basePath ?>/admin/consumable/sections">Kelola Katalog</a>
                     <a class="collapse-item" href="#">Tracking Pesanan</a>
                     <a class="collapse-item" href="#">History</a>
                     <a class="collapse-item" href="#">Laporan Consumable</a>

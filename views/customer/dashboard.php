@@ -28,7 +28,7 @@ $departmentName = DepartmentModel::getNameById($userData['department_id']);
     <title>Dashboard Customer</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="/system_ordering/public/assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
-    <link href="/system_ordering/public/assets/css/sb-admin-2.min.css" rel="stylesheet">
+    <link href="/system_ordering/public/assets/css/sb-admin-2.css" rel="stylesheet">
     <link href="/system_ordering/public/assets/css/customer/dashboard.css?v=<?= time() ?>" rel="stylesheet">
 </head>
 
@@ -73,7 +73,7 @@ $departmentName = DepartmentModel::getNameById($userData['department_id']);
                             <div class="stat-header">
                                 <div>
                                     <div class="stat-value"><?= $stats['total'] ?></div>
-                                    <div class="stat-label">Total Orders yang Aktif</div>
+                                    <div class="stat-label">Total WO yang Aktif</div>
                                 </div>
                                 <div class="stat-icon blue">
                                     <i class="fas fa-shopping-cart"></i>
@@ -85,7 +85,7 @@ $departmentName = DepartmentModel::getNameById($userData['department_id']);
                             <div class="stat-header">
                                 <div>
                                     <div class="stat-value"><?= $stats['pending'] ?></div>
-                                    <div class="stat-label">Pending</div>
+                                    <div class="stat-label">WO Pending</div>
                                 </div>
                                 <div class="stat-icon orange">
                                     <i class="fas fa-clock"></i>
@@ -97,7 +97,7 @@ $departmentName = DepartmentModel::getNameById($userData['department_id']);
                             <div class="stat-header">
                                 <div>
                                     <div class="stat-value"><?= $stats['on_progress'] ?></div>
-                                    <div class="stat-label">On Progress</div>
+                                    <div class="stat-label">WO On Progress</div>
                                 </div>
                                 <div class="stat-icon yellow">
                                     <i class="fas fa-spinner"></i>
@@ -109,7 +109,7 @@ $departmentName = DepartmentModel::getNameById($userData['department_id']);
                             <div class="stat-header">
                                 <div>
                                     <div class="stat-value"><?= $stats['finish'] ?></div>
-                                    <div class="stat-label">Done/Finish</div>
+                                    <div class="stat-label">WO Done/Finish</div>
                                 </div>
                                 <div class="stat-icon green">
                                     <i class="fas fa-check-circle"></i>

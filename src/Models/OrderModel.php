@@ -57,7 +57,7 @@ class OrderModel
                 LEFT JOIN users u ON a.spv_id = u.id
                 WHERE 
                     o.customer_id = :customer_id 
-                    AND (a.approval_status = 'waiting' OR a.approval_status = 'rejected') 
+                    AND (a.approval_status = 'waiting' OR a.approval_status = 'reject') 
                 ORDER BY 
                     o.created_at DESC, i.item_name ASC";
 
