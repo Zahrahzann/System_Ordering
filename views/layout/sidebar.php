@@ -5,7 +5,7 @@ if (session_status() === PHP_SESSION_NONE) {
 $currentRole = $_SESSION['user_data']['role'] ?? '';
 
 $basePath = '/system_ordering/public';
-$dashboardPath = '#'; 
+$dashboardPath = '#';
 if ($currentRole === 'customer') {
     $dashboardPath = $basePath . '/customer/dashboard';
 } elseif ($currentRole === 'spv') {
@@ -106,7 +106,7 @@ if ($currentRole === 'customer') {
         <hr class="sidebar-divider">
         <div class="sidebar-heading">Consumable</div>
         <li class="nav-item">
-            <a class="nav-link" href="<?= $basePath ?>/customer/consumable/katalog">
+            <a class="nav-link" href="<?= $basePath ?>/customer/consumable/catalog">
                 <i class="fas fa-fw fa-book-open"></i>
                 <span>Katalog Product</span>
             </a>
@@ -149,8 +149,14 @@ if ($currentRole === 'customer') {
         <li class="nav-item">
             <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseSpvConsumable">
                 <i class="fas fa-fw fa-box-open"></i>
-                <span>CONSUMABLE</span> 
+                <span>CONSUMABLE</span>
             </a>
+            <div id="collapseSpvConsumable" class="collapse" data-parent="#accordionSidebar">
+                <div class="bg-white py-2 collapse-inner rounded">
+                    <h6 class="collapse-header">Menu</h6>
+                    <a class="collapse-item" href="<?= $basePath ?>/spv/consumable/catalog">Katalog Product</a>
+                </div>
+            </div>
         </li>
     <?php endif; ?>
 

@@ -6,103 +6,149 @@ use App\Models\SectionModel;
 
 class ConsumableController
 {
-    // List Section
+    // List Section (semua role bisa lihat)
     public static function listSection()
     {
         $sections = SectionModel::getAll();
 
-        // Tambahan: handle create/edit mode
+        // Ambil role dari session
+        $currentRole = $_SESSION['user_data']['role'] ?? 'customer';
+
+        // Tambahan: handle edit mode (khusus admin)
         $isEditMode = false;
         $editData = null;
-
-        if (isset($_GET['edit']) && is_numeric($_GET['edit'])) {
+        if ($currentRole === 'admin' && isset($_GET['edit']) && is_numeric($_GET['edit'])) {
             $isEditMode = true;
             $editData = SectionModel::find($_GET['edit']);
         }
 
-        require_once __DIR__ . '/../../views/admin/consumable/sections.php';
+        // Kirim data ke view shared
+        require_once __DIR__ . '/../../views/shared/sections.php';
     }
 
-    // Tambah Section
+    // Tambah Section (admin only)
     public static function addSection()
     {
+        $currentRole = $_SESSION['user_data']['role'] ?? null;
+        if ($currentRole !== 'admin') {
+            http_response_code(403);
+            echo "Forbidden: hanya admin yang bisa tambah section.";
+            exit;
+        }
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $name = $_POST['name'];
             $description = $_POST['description'] ?? null;
 
             SectionModel::create($name, $description);
-            header('Location: /admin/consumable/sections');
+            header('Location: /system_ordering/public/admin/consumable/sections');
             exit;
         }
 
-        // tampilkan form create
-        require_once __DIR__ . '/../../views/admin/consumable/section_form.php';
+        // tampilkan form create (admin only)
+        require_once __DIR__ . '/../../views/shared/section_form.php';
     }
 
-    // Edit Section
+    // Edit Section (admin only)
     public static function editSection($id)
     {
+        $currentRole = $_SESSION['user_data']['role'] ?? null;
+        if ($currentRole !== 'admin') {
+            http_response_code(403);
+            echo "Forbidden: hanya admin yang bisa edit section.";
+            exit;
+        }
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $name = $_POST['name'];
             $description = $_POST['description'] ?? null;
 
             SectionModel::update($id, $name, $description);
-            header('Location: /admin/consumable/sections');
+            header('Location: /system_ordering/public/admin/consumable/sections');
             exit;
         }
 
-        $section = SectionModel::find($id); // satu record, bukan array
-        require_once __DIR__ . '/../../views/admin/consumable/section_form.php';
+        $section = SectionModel::find($id); // satu record
+        require_once __DIR__ . '/../../views/shared/section_form.php';
     }
 
-    // Hapus Section
+    // Hapus Section (admin only)
     public static function deleteSection($id)
     {
+        $currentRole = $_SESSION['user_data']['role'] ?? null;
+        if ($currentRole !== 'admin') {
+            http_response_code(403);
+            echo "Forbidden: hanya admin yang bisa hapus section.";
+            exit;
+        }
+
         SectionModel::delete($id);
-        header('Location: /admin/consumable/sections');
+        header('Location: /system_ordering/public/admin/consumable/sections');
         exit;
     }
 
-
-
-
-    // // List produk consumable
+    // List produk consumable (semua role bisa lihat)
     // public static function listProducts()
     // {
     //     $products = ProductModel::getAllConsumables();
-    //     require_once __DIR__ . '/../../views/admin/consumable/katalog_produk.php';
+    //     $currentRole = $_SESSION['user_data']['role'] ?? 'customer';
+
+    //     require_once __DIR__ . '/../../views/shared/katalog_produk.php';
     // }
 
-    // // Tambah produk
+    // // Tambah produk (admin only)
     // public static function addProduct()
     // {
+    //     $currentRole = $_SESSION['user_data']['role'] ?? null;
+    //     if ($currentRole !== 'admin') {
+    //         http_response_code(403);
+    //         echo "Forbidden: hanya admin yang bisa tambah produk.";
+    //         exit;
+    //     }
+
     //     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     //         ProductModel::createConsumable($_POST);
-    //         header('Location: /admin/consumable/katalog_produk');
+    //         header('Location: /system_ordering/public/admin/consumable/katalog_produk');
     //         exit;
     //     }
+
     //     $sections = SectionModel::getAll();
-    //     require_once __DIR__ . '/../../views/admin/consumable/product_form.php';
+    //     require_once __DIR__ . '/../../views/shared/product_form.php';
     // }
 
-    // // Edit produk
+    // // Edit produk (admin only)
     // public static function editProduct($id)
     // {
-    //     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    //         ProductModel::updateConsumable($id, $_POST);
-    //         header('Location: /admin/consumable/katalog_produk');
+    //     $currentRole = $_SESSION['user_data']['role'] ?? null;
+    //     if ($currentRole !== 'admin') {
+    //         http_response_code(403);
+    //         echo "Forbidden: hanya admin yang bisa edit produk.";
     //         exit;
     //     }
+
+    //     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    //         ProductModel::updateConsumable($id, $_POST);
+    //         header('Location: /system_ordering/public/admin/consumable/katalog_produk');
+    //         exit;
+    //     }
+
     //     $product = ProductModel::find($id);
     //     $sections = SectionModel::getAll();
-    //     require_once __DIR__ . '/../../views/admin/consumable/product_form.php';
+    //     require_once __DIR__ . '/../../views/shared/product_form.php';
     // }
 
-    // // Hapus produk
+    // // Hapus produk (admin only)
     // public static function deleteProduct($id)
     // {
+    //     $currentRole = $_SESSION['user_data']['role'] ?? null;
+    //     if ($currentRole !== 'admin') {
+    //         http_response_code(403);
+    //         echo "Forbidden: hanya admin yang bisa hapus produk.";
+    //         exit;
+    //     }
+
     //     ProductModel::delete($id);
-    //     header('Location: /admin/consumable/katalog_produk');
+    //     header('Location: /system_ordering/public/admin/consumable/katalog_produk');
     //     exit;
     // }
 }

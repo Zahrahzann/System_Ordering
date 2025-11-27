@@ -8,6 +8,7 @@ use App\Controllers\AuthController;
 use App\Controllers\CustomerAuthController;
 use App\Controllers\TrackingController;
 use App\Controllers\HistoryController;
+use App\Controllers\ConsumableController;
 
 
 
@@ -64,6 +65,13 @@ switch ($route) {
     case '/spv/history':
     case '/customer/history':
         HistoryController::showHistoryPage();
+        break;
+
+    // Katalog consumable bisa diakses semua role
+    case '/customer/consumable/catalog':
+    case '/spv/consumable/catalog':
+    case '/admin/consumable/catalog':
+        ConsumableController::listSection();
         break;
 
     // --- Default 404 ---

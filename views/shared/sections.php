@@ -11,7 +11,7 @@ $isEditMode = isset($_GET['edit']) && isset($editData);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Section Consumable</title>
+    <title>Katalog Consumable</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="<?= $basePath ?>/assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
     <link href="<?= $basePath ?>/assets/css/sb-admin-2.min.css" rel="stylesheet">
@@ -20,10 +20,10 @@ $isEditMode = isset($_GET['edit']) && isset($editData);
 
 <body id="page-top">
     <div id="wrapper">
-        <?php include __DIR__ . '/../../layout/sidebar.php'; ?>
+        <?php include __DIR__ . '/../layout/sidebar.php'; ?>
         <div id="content-wrapper" class="d-flex flex-column">
             <div id="content">
-                <?php include __DIR__ . '/../../layout/topbar.php'; ?>
+                <?php include __DIR__ . '/../layout/topbar.php'; ?>
                 <div class="container-fluid">
 
                     <div class="page-header">
@@ -31,6 +31,7 @@ $isEditMode = isset($_GET['edit']) && isset($editData);
                         <p class="page-subtitle">Pilih section untuk melihat produk yang tersedia</p>
                     </div>
 
+                    <!-- Admin: tombol tambah section -->
                     <?php if ($currentRole === 'admin'): ?>
                         <div class="mb-3">
                             <a href="<?= $basePath ?>/admin/consumable/sections?create=1" class="btn btn-success">
@@ -39,6 +40,7 @@ $isEditMode = isset($_GET['edit']) && isset($editData);
                         </div>
                     <?php endif; ?>
 
+                    <!-- Error messages -->
                     <?php if (isset($_SESSION['errors'])): ?>
                         <div class="alert alert-danger">
                             <?php foreach ($_SESSION['errors'] as $error): ?>
@@ -48,7 +50,8 @@ $isEditMode = isset($_GET['edit']) && isset($editData);
                         <?php unset($_SESSION['errors']); ?>
                     <?php endif; ?>
 
-                    <?php if (isset($_GET['create']) || $isEditMode): ?>
+                    <!-- Form create/edit section (admin only) -->
+                    <?php if (($currentRole === 'admin') && (isset($_GET['create']) || $isEditMode)): ?>
                         <div class="card mb-4">
                             <div class="card-body">
                                 <form method="POST" action="<?= $basePath ?>/admin/consumable/sections/<?= $isEditMode ? 'edit' : 'add' ?>">
@@ -74,6 +77,7 @@ $isEditMode = isset($_GET['edit']) && isset($editData);
                         </div>
                     <?php endif; ?>
 
+                    <!-- List sections -->
                     <?php if (empty($sections)): ?>
                         <div class="empty-state">
                             <i class="fas fa-box-open"></i>
@@ -100,6 +104,8 @@ $isEditMode = isset($_GET['edit']) && isset($editData);
                                             <a href="<?= $basePath ?>/customer/consumable/catalog?section=<?= urlencode($sec['id']) ?>" class="view-button">
                                                 <i class="fas fa-arrow-right"></i><span> Lihat Produk</span>
                                             </a>
+
+                                            <!-- Admin: edit/delete -->
                                             <?php if ($currentRole === 'admin'): ?>
                                                 <div class="section-actions">
                                                     <a href="<?= $basePath ?>/admin/consumable/sections?edit=<?= $sec['id'] ?>" class="btn btn-sm btn-warning">
@@ -110,6 +116,19 @@ $isEditMode = isset($_GET['edit']) && isset($editData);
                                                     </button>
                                                 </div>
                                             <?php endif; ?>
+
+                                            <!-- Customer: order/keranjang -->
+                                            <?php if ($currentRole === 'customer'): ?>
+                                                <div class="section-actions">
+                                                    <button class="btn btn-sm btn-primary" onclick="addToCart(<?= $sec['id'] ?>)">
+                                                        <i class="fas fa-cart-plus"></i> Masukkan Keranjang
+                                                    </button>
+                                                    <button class="btn btn-sm btn-success" onclick="orderNow(<?= $sec['id'] ?>)">
+                                                        <i class="fas fa-shopping-bag"></i> Order Sekarang
+                                                    </button>
+                                                </div>
+                                            <?php endif; ?>
+                                            <!-- Spv: hanya lihat, tidak ada tombol tambahan -->
                                         </div>
                                     </div>
                                 </div>
@@ -119,7 +138,7 @@ $isEditMode = isset($_GET['edit']) && isset($editData);
 
                 </div>
             </div>
-            <?php include __DIR__ . '/../../layout/footer.php'; ?>
+            <?php include __DIR__ . '/../layout/footer.php'; ?>
         </div>
     </div>
 
@@ -131,6 +150,14 @@ $isEditMode = isset($_GET['edit']) && isset($editData);
             if (confirm("Yakin ingin menghapus section ini?")) {
                 window.location.href = "<?= $basePath ?>/admin/consumable/sections/delete?id=" + id;
             }
+        }
+
+        function addToCart(sectionId) {
+            window.location.href = "<?= $basePath ?>/customer/cart/add?section=" + sectionId;
+        }
+
+        function orderNow(sectionId) {
+            window.location.href = "<?= $basePath ?>/customer/order/create?section=" + sectionId;
         }
     </script>
 </body>

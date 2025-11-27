@@ -41,28 +41,32 @@ switch ($route) {
     case '/admin/manage/spv':
         UserManagementController::listSpv();
         break;
-    case '/admin/manage/customer';
+    case '/admin/manage/customer':
         UserManagementController::listCustomers();
         break;
 
-    // MANAGEMENT CONSUMABLE
-
+    // MANAGEMENT CONSUMABLE (admin only)
     case '/admin/consumable/sections':
         ConsumableController::listSection();
         break;
 
     case '/admin/consumable/sections/add':
-        ConsumableController::addSection();
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            ConsumableController::addSection();
+        }
         break;
 
     case '/admin/consumable/sections/edit':
-        ConsumableController::editSection($_GET['id']);
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            ConsumableController::editSection($_POST['id']);
+        }
         break;
 
     case '/admin/consumable/sections/delete':
-    ConsumableController::deleteSection($_GET['id']);
-    break;
-
+        if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+            ConsumableController::deleteSection($_GET['id']);
+        }
+        break;
 
     // case '/admin/consumable/katalog_produk':
     //     \App\Controllers\ConsumableController::listProducts();
