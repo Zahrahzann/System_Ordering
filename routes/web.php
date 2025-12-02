@@ -9,8 +9,10 @@ use App\Controllers\CustomerAuthController;
 use App\Controllers\TrackingController;
 use App\Controllers\HistoryController;
 use App\Controllers\ConsumableController;
+use App\Controllers\ProductTypeController;
+use App\Controllers\ProductItemController;
 
-
+$requestMethod = $_SERVER['REQUEST_METHOD'];
 
 // ROUTING DINAMIS
 $matches = [];
@@ -30,12 +32,14 @@ if (preg_match('#^/customer/history/reorder/(\d+)$#', $route, $matches)) {
 }
 
 
-
-// ROUTING STATIS
+// =====================
+// WORK ORDER ROUTES  
+// =====================
 switch ($route) {
     case '/':
         header('Location: /system_ordering/public/customer/login');
         exit;
+
     case '/logout':
         if (session_status() === PHP_SESSION_NONE) session_start();
         $role = $_SESSION['user_data']['role'] ?? 'customer';
@@ -68,11 +72,68 @@ switch ($route) {
         HistoryController::showHistoryPage();
         break;
 
-    // Katalog consumable bisa diakses semua role
-    case '/customer/consumable/catalog':
-    case '/spv/consumable/catalog':
-    case '/admin/consumable/catalog':
+    // ==================================
+    // CONSUMABLE ROUTES (SECTION LIST) 
+    // ==================================
+    case '/customer/consumable/sections':
+    case '/spv/consumable/sections':
+    case '/admin/consumable/sections':
         ConsumableController::listSection();
+        break;
+}
+
+// ROUTING DINAMIS PRODUCT TYPE & ITEM
+switch (true) {
+    // =========================
+    // PRODUCT TYPE ROUTES
+    // =========================
+    case preg_match('#^/shared/consumable/product-types/(\d+)$#', $route, $matches):
+        ProductTypeController::listBySection($matches[1]);
+        break;
+
+    case preg_match('#^/shared/consumable/product-type/(\d+)$#', $route, $matches):
+        ProductTypeController::detail($matches[1]);
+        break;
+
+    case preg_match('#^/admin/consumable/product-types/create/(\d+)$#', $route, $matches):
+        ProductTypeController::add($matches[1]);
+        break;
+
+    case preg_match('#^/admin/consumable/product-types/edit/(\d+)$#', $route, $matches):
+        ProductTypeController::edit($matches[1]);
+        break;
+
+    case preg_match('#^/admin/consumable/product-types/delete/(\d+)$#', $route, $matches):
+        ProductTypeController::delete($matches[1]);
+        break;
+
+    case preg_match('#^/admin/consumable/product-types$#', $route):
+        $sectionId = $_GET['section'] ?? null;
+        if ($sectionId && is_numeric($sectionId)) {
+            ProductTypeController::listBySection($sectionId);
+        } else {
+            echo "Error: section ID tidak valid.";
+        }
+        break;
+
+
+    // =========================
+    // PRODUCT ITEM ROUTES
+    // =========================
+    case preg_match('#^/shared/consumable/product-items/(\d+)$#', $route, $matches):
+        ProductItemController::listByProductType($matches[1]);
+        break;
+
+    case preg_match('#^/admin/consumable/product-items/create/(\d+)$#', $route, $matches):
+        ProductItemController::add($matches[1]);
+        break;
+
+    case preg_match('#^/admin/consumable/product-items/edit/(\d+)$#', $route, $matches):
+        ProductItemController::edit($matches[1]);
+        break;
+
+    case preg_match('#^/admin/consumable/product-items/delete/(\d+)$#', $route, $matches):
+        ProductItemController::delete($matches[1]);
         break;
 
     // --- Default 404 ---

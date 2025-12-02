@@ -18,7 +18,9 @@ if (
     $route === '/' ||
     $route === '/logout' ||
     strpos($route, '/tracking') !== false||
-    strpos($route, '/history') !== false
+    strpos($route, '/history') !== false||
+    strpos($route, '/shared') !== false||
+    strpos($route, '/admin/consumable') !== false
 ) {
     require __DIR__ . '/../routes/web.php';
 

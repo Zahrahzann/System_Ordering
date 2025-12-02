@@ -64,7 +64,7 @@ $isEditMode = isset($_GET['edit']) && $editData !== null;
                                         <label>Nama Section</label>
                                         <input type="text" name="name" class="form-control" required
                                             value="<?= $isEditMode ? htmlspecialchars($editData['name']) : '' ?>">
-                                    </div> 
+                                    </div>
                                     <button type="submit" class="btn btn-<?= $isEditMode ? 'primary' : 'success' ?>">
                                         <i class="fas fa-<?= $isEditMode ? 'save' : 'plus' ?>"></i>
                                         <?= $isEditMode ? 'Update Section' : 'Tambah Section' ?>
@@ -101,7 +101,7 @@ $isEditMode = isset($_GET['edit']) && $editData !== null;
                                             <div class="section-desc">
                                                 Klik untuk melihat semua produk dalam section.
                                             </div>
-                                            <a href="<?= $basePath ?>/customer/consumable/catalog?section=<?= urlencode($sec['id']) ?>" class="view-button">
+                                            <a href="<?= $basePath ?>/shared/consumable/product-types/<?= urlencode($sec['id']) ?>" class="view-button">
                                                 <i class="fas fa-arrow-right"></i><span> Lihat Produk</span>
                                             </a>
 
