@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Models;
 
 use PDO;
@@ -33,14 +34,14 @@ class ProductItemModel
         $filePath  = self::uploadFile($files['file_path'] ?? null);
 
         $st = self::db()->prepare("
-            INSERT INTO product_items (product_type_id, item_code, name, price, description, image_path, file_path)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        ");
+        INSERT INTO product_items (product_type_id, item_code, name, price, description, image_path, file_path)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    ");
         $st->execute([
             $typeId,
             $data['item_code'],
             $data['name'],
-            !empty($data['price']) ? $data['price'] : null,
+            is_numeric($data['price']) ? $data['price'] : null,
             $data['description'],
             $imagePath,
             $filePath
@@ -54,15 +55,15 @@ class ProductItemModel
         $filePath  = !empty($files['file_path']['name']) ? self::uploadFile($files['file_path']) : $data['old_file'];
 
         $st = self::db()->prepare("
-            UPDATE product_items 
-            SET product_type_id=?, item_code=?, name=?, price=?, description=?, image_path=?, file_path=? 
-            WHERE id=?
-        ");
+        UPDATE product_items 
+        SET product_type_id=?, item_code=?, name=?, price=?, description=?, image_path=?, file_path=? 
+        WHERE id=?
+    ");
         $st->execute([
             $data['product_type_id'],
             $data['item_code'],
             $data['name'],
-            !empty($data['price']) ? $data['price'] : null,
+            is_numeric($data['price']) ? $data['price'] : null,
             $data['description'],
             $imagePath,
             $filePath,
@@ -80,7 +81,7 @@ class ProductItemModel
     private static function uploadFile($file)
     {
         if (!$file || $file['error'] !== UPLOAD_ERR_OK) return null;
-        $target = '/uploads/' . basename($file['name']);
+        $target = '/uploads/consum-product-item/' . basename($file['name']);
         move_uploaded_file($file['tmp_name'], __DIR__ . '/../../public' . $target);
         return $target;
     }

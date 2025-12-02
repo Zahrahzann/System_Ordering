@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Controllers;
 
 use App\Models\ProductItemModel;
@@ -43,7 +44,11 @@ class ProductItemController
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ProductItemModel::update($id, $_POST, $_FILES);
-            header("Location: /admin/consumable/product-items");
+
+            $item = ProductItemModel::find($id);
+            $typeId = $item['product_type_id'] ?? null;
+
+            header("Location: /system_ordering/public/admin/consumable/product-items?type={$typeId}");
             exit;
         } else {
             $item = ProductItemModel::find($id);
@@ -61,8 +66,15 @@ class ProductItemController
             exit;
         }
 
+        // Ambil item dulu untuk tahu typeId
+        $item = ProductItemModel::find($id);
+        $typeId = $item['product_type_id'] ?? null;
+
+        // Baru hapus
         ProductItemModel::delete($id);
-        header("Location: /admin/consumable/product-items");
+
+        // Redirect balik ke halaman item milik jenis produk yang benar
+        header("Location: /system_ordering/public/admin/consumable/product-items?type={$typeId}");
         exit;
     }
 }

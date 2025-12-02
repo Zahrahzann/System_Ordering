@@ -107,42 +107,44 @@ $isEditMode = $editData !== null;
                     <?php else: ?>
                         <div class="product-types-container d-flex flex-wrap gap-3">
                             <?php foreach ($productTypes as $pt): ?>
-                                <div class="product-type-card">
-                                    <div class="product-type-image"
-                                        style="background-image:url('<?= $basePath . (!empty($pt['image_path']) ? $pt['image_path'] : '/assets/img/default.jpeg') ?>');">
-                                    </div>
-                                    <div class="product-type-content">
-                                        <h4 class="product-type-name"><?= htmlspecialchars($pt['name']) ?></h4>
-                                        <p class="product-type-code">Kode: <?= htmlspecialchars($pt['product_code']) ?></p>
-                                        <p class="product-type-price">
-                                            <?= $pt['price'] === null ? 'Harga belum ditentukan' : 'Rp ' . number_format($pt['price'], 0, ',', '.') ?>
-                                        </p>
-                                        <small class="product-type-section">Section: <?= htmlspecialchars($section['name']) ?></small>
+                                <a href="<?= $basePath ?>/customer/consumable/product-items?type=<?= $pt['id'] ?>" class="product-type-card-link">
+                                    <div class="product-type-card">
+                                        <div class="product-type-image"
+                                            style="background-image:url('<?= $basePath . (!empty($pt['image_path']) ? $pt['image_path'] : '/assets/img/default.jpeg') ?>');">
+                                        </div>
+                                        <div class="product-type-content">
+                                            <h4 class="product-type-name"><?= htmlspecialchars($pt['name']) ?></h4>
+                                            <p class="product-type-code">Kode: <?= htmlspecialchars($pt['product_code']) ?></p>
+                                            <p class="product-type-price">
+                                                <?= $pt['price'] === null ? 'Harga belum ditentukan' : 'Rp ' . number_format($pt['price'], 0, ',', '.') ?>
+                                            </p>
+                                            <small class="product-type-section">Section: <?= htmlspecialchars($section['name']) ?></small>
 
-                                        <div class="product-type-actions mt-2">
-                                            <?php if ($currentRole === 'admin'): ?>
-                                                <a href="<?= $basePath ?>/admin/consumable/product-types/edit/<?= $pt['id'] ?>" class="btn btn-sm btn-warning">
-                                                    <i class="fas fa-edit"></i> Edit
-                                                </a>
-                                                <a href="<?= $basePath ?>/admin/consumable/product-types/delete/<?= $pt['id'] ?>" class="btn btn-sm btn-danger"
-                                                    onclick="return confirm('Yakin hapus jenis produk ini?');">
-                                                    <i class="fas fa-trash"></i> Hapus
-                                                </a>
-                                            <?php elseif ($currentRole === 'customer'): ?>
-                                                <a href="<?= $basePath ?>/customer/consumable/product-type?id=<?= $pt['id'] ?>" class="btn btn-sm btn-info">
-                                                    <i class="fas fa-eye"></i> Lihat Detail
-                                                </a>
-                                                <a href="<?= $basePath ?>/customer/cart/add?type=<?= $pt['id'] ?>" class="btn btn-sm btn-success">
-                                                    <i class="fas fa-shopping-cart"></i> Pesan
-                                                </a>
-                                            <?php elseif ($currentRole === 'spv'): ?>
-                                                <a href="<?= $basePath ?>/spv/consumable/product-type?id=<?= $pt['id'] ?>" class="btn btn-sm btn-info">
-                                                    <i class="fas fa-eye"></i> Lihat Detail
-                                                </a>
-                                            <?php endif; ?>
+                                            <div class="product-type-actions mt-2">
+                                                <?php if ($currentRole === 'admin'): ?>
+                                                    <a href="<?= $basePath ?>/admin/consumable/product-types/edit/<?= $pt['id'] ?>" class="btn btn-sm btn-warning">
+                                                        <i class="fas fa-edit"></i> Edit
+                                                    </a>
+                                                    <a href="<?= $basePath ?>/admin/consumable/product-types/delete/<?= $pt['id'] ?>" class="btn btn-sm btn-danger"
+                                                        onclick="return confirm('Yakin hapus jenis produk ini?');">
+                                                        <i class="fas fa-trash"></i> Hapus
+                                                    </a>
+                                                <?php elseif ($currentRole === 'customer'): ?>
+                                                    <a href="<?= $basePath ?>/customer/consumable/product-type?id=<?= $pt['id'] ?>" class="btn btn-sm btn-info">
+                                                        <i class="fas fa-eye"></i> Lihat Detail
+                                                    </a>
+                                                    <a href="<?= $basePath ?>/customer/cart/add?type=<?= $pt['id'] ?>" class="btn btn-sm btn-success">
+                                                        <i class="fas fa-shopping-cart"></i> Pesan
+                                                    </a>
+                                                <?php elseif ($currentRole === 'spv'): ?>
+                                                    <a href="<?= $basePath ?>/spv/consumable/product-type?id=<?= $pt['id'] ?>" class="btn btn-sm btn-info">
+                                                        <i class="fas fa-eye"></i> Lihat Detail
+                                                    </a>
+                                                <?php endif; ?>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                </a>
                             <?php endforeach; ?>
                         </div>
                     <?php endif; ?>
