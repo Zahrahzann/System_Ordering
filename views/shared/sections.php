@@ -1,8 +1,10 @@
 <?php
-$basePath = '/system_ordering/public';
-session_start();
+if (session_status() === PHP_SESSION_NONE) session_start();
+
+$basePath   = '/system_ordering/public';
 $currentRole = $_SESSION['user_data']['role'] ?? null;
-$isEditMode = isset($_GET['edit']) && isset($editData);
+$editData   = $editData ?? null;
+$isEditMode = isset($_GET['edit']) && $editData !== null;
 ?>
 
 <!DOCTYPE html>
@@ -10,12 +12,12 @@ $isEditMode = isset($_GET['edit']) && isset($editData);
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Katalog Consumable</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="<?= $basePath ?>/assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
     <link href="<?= $basePath ?>/assets/css/sb-admin-2.min.css" rel="stylesheet">
     <link href="<?= $basePath ?>/assets/css/admin/consumable/section.css?v=<?= time() ?>" rel="stylesheet">
+
 </head>
 
 <body id="page-top">
@@ -31,12 +33,12 @@ $isEditMode = isset($_GET['edit']) && isset($editData);
                         <p class="page-subtitle">Pilih section untuk melihat produk yang tersedia</p>
                     </div>
 
-                    <!-- Admin: tombol tambah section -->
+                    <!-- Admin: tombol toggle form -->
                     <?php if ($currentRole === 'admin'): ?>
                         <div class="mb-3">
-                            <a href="<?= $basePath ?>/admin/consumable/sections?create=1" class="btn btn-success">
+                            <button class="btn btn-info" onclick="toggleForm()">
                                 <i class="fas fa-plus"></i> Tambah Section
-                            </a>
+                            </button>
                         </div>
                     <?php endif; ?>
 
@@ -50,9 +52,9 @@ $isEditMode = isset($_GET['edit']) && isset($editData);
                         <?php unset($_SESSION['errors']); ?>
                     <?php endif; ?>
 
-                    <!-- Form create/edit section (admin only) -->
-                    <?php if (($currentRole === 'admin') && (isset($_GET['create']) || $isEditMode)): ?>
-                        <div class="card mb-4">
+                    <!-- Form Membuat/edit section (admin only) -->
+                    <?php if ($currentRole === 'admin'): ?>
+                        <div id="sectionForm" class="card mb-4" style="<?= !$isEditMode ? 'display:none;' : '' ?>">
                             <div class="card-body">
                                 <form method="POST" action="<?= $basePath ?>/admin/consumable/sections/<?= $isEditMode ? 'edit' : 'add' ?>">
                                     <?php if ($isEditMode): ?>
@@ -62,16 +64,12 @@ $isEditMode = isset($_GET['edit']) && isset($editData);
                                         <label>Nama Section</label>
                                         <input type="text" name="name" class="form-control" required
                                             value="<?= $isEditMode ? htmlspecialchars($editData['name']) : '' ?>">
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Deskripsi</label>
-                                        <textarea name="description" class="form-control"><?= $isEditMode ? htmlspecialchars($editData['description']) : '' ?></textarea>
-                                    </div>
+                                    </div> 
                                     <button type="submit" class="btn btn-<?= $isEditMode ? 'primary' : 'success' ?>">
                                         <i class="fas fa-<?= $isEditMode ? 'save' : 'plus' ?>"></i>
                                         <?= $isEditMode ? 'Update Section' : 'Tambah Section' ?>
                                     </button>
-                                    <a href="<?= $basePath ?>/admin/consumable/sections" class="btn btn-secondary ml-2">Batal</a>
+                                    <button type="button" class="btn btn-secondary ml-2" onclick="toggleForm()">Batal</button>
                                 </form>
                             </div>
                         </div>
@@ -100,7 +98,9 @@ $isEditMode = isset($_GET['edit']) && isset($editData);
                                         <div class="section-icon"><i class="fas fa-<?= $icon ?>"></i></div>
                                         <div class="section-info">
                                             <div class="section-name"><?= strtoupper(htmlspecialchars($sec['name'])) ?></div>
-                                            <div class="section-desc"><?= htmlspecialchars($sec['description'] ?? 'Klik untuk melihat semua produk dalam section ' . $sec['name']) ?></div>
+                                            <div class="section-desc">
+                                                Klik untuk melihat semua produk dalam section.
+                                            </div>
                                             <a href="<?= $basePath ?>/customer/consumable/catalog?section=<?= urlencode($sec['id']) ?>" class="view-button">
                                                 <i class="fas fa-arrow-right"></i><span> Lihat Produk</span>
                                             </a>
@@ -108,27 +108,14 @@ $isEditMode = isset($_GET['edit']) && isset($editData);
                                             <!-- Admin: edit/delete -->
                                             <?php if ($currentRole === 'admin'): ?>
                                                 <div class="section-actions">
-                                                    <a href="<?= $basePath ?>/admin/consumable/sections?edit=<?= $sec['id'] ?>" class="btn btn-sm btn-warning">
-                                                        <i class="fas fa-edit"></i>
+                                                    <a href="<?= $basePath ?>/admin/consumable/sections?edit=<?= $sec['id'] ?>">
+                                                        <i class="fas fa-edit"> Edit</i>
                                                     </a>
-                                                    <button onclick="confirmDelete(<?= $sec['id'] ?>)" class="btn btn-sm btn-danger">
-                                                        <i class="fas fa-trash"></i>
+                                                    <button onclick="confirmDelete(<?= $sec['id'] ?>)">
+                                                        <i class="fas fa-trash"> Hapus</i>
                                                     </button>
                                                 </div>
                                             <?php endif; ?>
-
-                                            <!-- Customer: order/keranjang -->
-                                            <?php if ($currentRole === 'customer'): ?>
-                                                <div class="section-actions">
-                                                    <button class="btn btn-sm btn-primary" onclick="addToCart(<?= $sec['id'] ?>)">
-                                                        <i class="fas fa-cart-plus"></i> Masukkan Keranjang
-                                                    </button>
-                                                    <button class="btn btn-sm btn-success" onclick="orderNow(<?= $sec['id'] ?>)">
-                                                        <i class="fas fa-shopping-bag"></i> Order Sekarang
-                                                    </button>
-                                                </div>
-                                            <?php endif; ?>
-                                            <!-- Spv: hanya lihat, tidak ada tombol tambahan -->
                                         </div>
                                     </div>
                                 </div>
@@ -138,7 +125,6 @@ $isEditMode = isset($_GET['edit']) && isset($editData);
 
                 </div>
             </div>
-            <?php include __DIR__ . '/../layout/footer.php'; ?>
         </div>
     </div>
 
@@ -146,6 +132,11 @@ $isEditMode = isset($_GET['edit']) && isset($editData);
     <script src="<?= $basePath ?>/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="<?= $basePath ?>/assets/js/sb-admin-2.min.js"></script>
     <script>
+        function toggleForm() {
+            const form = document.getElementById('sectionForm');
+            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+        }
+
         function confirmDelete(id) {
             if (confirm("Yakin ingin menghapus section ini?")) {
                 window.location.href = "<?= $basePath ?>/admin/consumable/sections/delete?id=" + id;

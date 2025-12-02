@@ -21,8 +21,8 @@ class ConsumableModel
         $stmt = $pdo->prepare("
             SELECT p.* 
             FROM products p
-            JOIN sections c ON p.section_id = c.id
-            WHERE c.name = :section
+            JOIN sections s ON p.section_id = s.id
+            WHERE s.name = :section
               AND p.item_type = 'Consumable'
         ");
         $stmt->bindParam(':section', $sectionName);
@@ -35,9 +35,9 @@ class ConsumableModel
     {
         $pdo = Database::connect();
         $stmt = $pdo->prepare("
-            SELECT p.*, c.name AS section_name
+            SELECT p.*, s.name AS section_name
             FROM products p
-            JOIN sections c ON p.section_id = c.id
+            JOIN sections s ON p.section_id = s.id
             WHERE p.id = :id
               AND p.item_type = 'Consumable'
         ");

@@ -5,17 +5,20 @@ body {
     overflow-x: hidden;
 }
 
-/* Page Header */
-.page-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
-    flex-wrap: wrap;
-    gap: 15px;
+#content {
+    padding-top: 64px !important;
 }
 
-.page-header-left h1 {
+.container-fluid {
+    padding: 30px;
+}
+
+/* Page Header */
+.page-header {
+    margin-bottom: 30px;
+}
+
+.page-title {
     font-size: 24px;
     font-weight: 600;
     color: #333;
@@ -25,23 +28,23 @@ body {
     margin: 0 0 5px 0;
 }
 
-.page-header-left h1 i {
-    color: #305779;
+.page-title i {
+    color: #667eea;
     font-size: 28px;
 }
 
 .page-subtitle {
     font-size: 14px;
-    color: #305779;
-    margin-left: 40px;
+    color: #666;
+    margin: 0;
 }
 
 /* Tombol dan Form */
-.btn-add {
-    background: #7d9ff6;
+.btn-info {
+    background: #667eea;
     border: none;
-    padding: 12px 24px;
-    border-radius: 10px;
+    padding: 10px 20px;
+    border-radius: 8px;
     font-weight: 500;
     font-size: 14px;
     color: white;
@@ -52,19 +55,22 @@ body {
     cursor: pointer;
 }
 
-.btn-add:hover {
-    background: #305779;
+.btn-info:hover {
+    background: #7d9ff6;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(174, 198, 207, 0.3);
+    box-shadow: 0 4px 12px rgba(125, 159, 246, 0.3);
 }
 
-.form-card {
+.card.mb-4 {
     background: white;
-    border-radius: 15px;
-    border: 1px solid #e9ecef;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+}
+
+.card-body {
     padding: 25px;
-    margin-bottom: 25px;
 }
 
 .form-group {
@@ -72,72 +78,79 @@ body {
 }
 
 .form-group label {
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 500;
-    color: #555;
+    color: #333;
     margin-bottom: 8px;
     display: block;
 }
 
 .form-control {
-    border: 1px solid #e9ecef;
-    border-radius: 10px;
-    padding: 12px 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 10px 15px;
     font-size: 14px;
     transition: all 0.3s;
     width: 100%;
 }
 
 .form-control:focus {
-    border-color: #83c3da;
-    box-shadow: 0 0 0 3px rgba(174, 198, 207, 0.1);
+    border-color: #7d9ff6;
+    box-shadow: 0 0 0 3px rgba(125, 159, 246, 0.1);
     outline: none;
 }
 
-.btn-success {
-    background: #AEC6CF;
+.btn-primary {
+    background: #396beb;
     border: none;
     padding: 10px 20px;
-    border-radius: 10px;
+    border-radius: 8px;
     font-weight: 500;
-    font-size: 14px;
     color: white;
     transition: all 0.3s;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
 }
 
-.btn-success:hover {
-    background: #87CEEB;
+.btn-primary:hover {
+    background: #6ab5f7;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(174, 198, 207, 0.3);
 }
 
 .btn-secondary {
-    background: #305779;
+    background: #6c757d;
     border: none;
     padding: 10px 20px;
-    border-radius: 10px;
+    border-radius: 8px;
     font-weight: 500;
-    font-size: 14px;
     color: white;
     transition: all 0.3s;
 }
 
 .btn-secondary:hover {
-    background: #305779;
+    background: #5a6268;
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
 }
 
-/* Categories Container */
+/* Alert */
+.alert {
+    border-radius: 8px;
+    padding: 12px 15px;
+    margin-bottom: 20px;
+    border-left: 3px solid;
+}
+
+.alert-danger {
+    background: #ffe0e0;
+    color: #d63031;
+    border-left-color: #d63031;
+}
+
+/* Sections Container */
 .sections-container {
-    display: flex;
-    gap: 15px;
-    overflow-x: auto;
-    padding: 20px 0;
-    scroll-behavior: smooth;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    /* maksimal 5 card sejajar */
+    gap: 20px;
+    padding: 10px 0 10px 0;
 }
 
 .sections-container::-webkit-scrollbar {
@@ -150,89 +163,115 @@ body {
 }
 
 .sections-container::-webkit-scrollbar-thumb {
-    background: #AEC6CF;
+    background: #7d9ff6;
     border-radius: 10px;
 }
 
 /* Section Card */
 .section-card {
     position: relative;
-    min-width: 250px;
-    width: 250px;
-    height: 380px;
-    border-radius: 20px;
+    height: 400px;
+    border-radius: 15px;
     overflow: hidden;
     cursor: pointer;
-    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.06);
-    border: 1px solid #e9ecef;
-    background: #feffff;
+    transition: all 0.4s ease;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    background: white;
     display: flex;
     flex-direction: column;
+    width: 100%;
+    /* biar ikut lebar grid */
 }
 
 .section-card:hover {
-    min-width: 420px;
-    width: 420px;
-    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.12);
+    min-width: 400px;
+    width: 400px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
     z-index: 10;
-    border-color: #dee2e6;
 }
 
 /* Gambar */
 .section-image {
-    height: 200px;
-    background-color: #d8d8d8;
+    height: 180px;
+    background-color: #e9ecef;
     background-size: cover;
     background-position: center;
-    transition: all 0.5s;
-    border-bottom: 1px solid #d8d8d8;
+    transition: all 0.4s;
+    flex-shrink: 0;
 }
 
 .section-card:hover .section-image {
-    transform: scale(1.03);
+    height: 160px;
 }
 
 /* Section Content */
 .section-content {
     position: relative;
-    height: 100%;
+    padding: 20px;
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
-    padding: 25px;
-    color: #2c3e50;
-    z-index: 1;
     flex: 1;
+    overflow: hidden;
+}
+
+.section-icon {
+    font-size: 32px;
+    color: #7d9ff6;
+    margin-bottom: 12px;
 }
 
 .section-info {
-    transition: all 0.5s;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
 }
 
 .section-name {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 600;
-    margin-bottom: 10px;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    color: #2c3e50;
+    margin-bottom: 8px;
+    color: #333;
+    letter-spacing: 0.5px;
 }
 
 .section-desc {
     font-size: 13px;
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 15px;
     opacity: 0;
     max-height: 0;
     overflow: hidden;
-    transition: all 0.5s;
-    line-height: 1.7;
-    margin-bottom: 15px;
-    color: #363b3b;
+    transition: all 0.4s;
 }
 
 .section-card:hover .section-desc {
-    opacity: 0.95;
-    max-height: 100px;
+    opacity: 1;
+    max-height: 80px;
+}
+
+/* View Button */
+.view-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: #3b71f9;
+    color: white;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.3s;
+    width: fit-content;
+    margin-top: auto;
+}
+
+.view-button:hover {
+    background: #60b5ff;
+    transform: translateX(5px);
+    text-decoration: none;
+    color: white;
 }
 
 /* Item Count Badge */
@@ -240,28 +279,28 @@ body {
     position: absolute;
     top: 12px;
     right: 12px;
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(6px);
-    padding: 6px 10px;
-    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 6px 12px;
+    border-radius: 20px;
     font-size: 11px;
     font-weight: 600;
     display: flex;
     align-items: center;
     gap: 5px;
     color: #305779;
-    border: 1px solid rgba(174, 198, 207, 0.3);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     z-index: 2;
 }
 
 /* Section Actions */
 .section-actions {
     display: flex;
-    flex-direction: column;
     gap: 8px;
+    margin-top: 12px;
     opacity: 0;
-    transform: translateY(20px);
-    transition: all 0.5s;
+    transform: translateY(10px);
+    transition: all 0.4s;
 }
 
 .section-card:hover .section-actions {
@@ -269,68 +308,40 @@ body {
     transform: translateY(0);
 }
 
-.btn-sm {
-    padding: 8px 16px;
-    border-radius: 8px;
-    font-weight: 500;
+.section-actions a,
+.section-actions button {
+    flex: 1;
+    padding: 6px 12px;
+    border-radius: 6px;
     font-size: 12px;
+    font-weight: 500;
     border: none;
     transition: all 0.3s;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 5px;
+    cursor: pointer;
     text-decoration: none;
 }
 
-.btn-warning {
-    background: #40b1de;
+.section-actions a {
+    background: #f7cd50;
     color: white;
 }
 
-.btn-warning:hover {
-    background: #8ccdff;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(174, 198, 207, 0.3);
-    color: white;
+.section-actions a:hover {
+    background: #eda02c;
     text-decoration: none;
 }
 
-.btn-danger {
-    background: #40b1de;
+.section-actions button {
+    background: #dc3545;
     color: white;
 }
 
-.btn-danger:hover {
-    background: #8ccdff;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(174, 198, 207, 0.3);
-    color: white;
-    text-decoration: none;
-}
-
-.btn-info {
-    background: #40b1de;
-    color: white;
-}
-
-.btn-info:hover {
-    background: #8ccdff;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(174, 198, 207, 0.3);
-    color: white;
-    text-decoration: none;
-}
-
-.section-actions {
-    margin-top: 10px;
-    display: flex;
-    gap: 10px;
-}
-
-.section-actions .btn {
-    font-size: 12px;
-    padding: 6px 10px;
+.section-actions button:hover {
+    background: #9e1926;
 }
 
 /* Empty State */
@@ -338,9 +349,8 @@ body {
     text-align: center;
     padding: 80px 20px;
     background: white;
-    border-radius: 15px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .empty-state i {
@@ -363,13 +373,20 @@ body {
 
 /* Responsive */
 @media (max-width: 768px) {
-    .section-container {
+    .container-fluid {
+        padding: 20px 15px;
+    }
+
+    .sections-container {
         flex-direction: column;
+        overflow-x: visible;
     }
 
     .section-card {
         width: 100%;
         min-width: 100%;
+        height: auto;
+        min-height: 300px;
     }
 
     .section-card:hover {
@@ -377,18 +394,21 @@ body {
         min-width: 100%;
     }
 
+    .section-image {
+        height: 150px;
+    }
+
+    .section-card:hover .section-image {
+        height: 150px;
+    }
+
     .section-desc {
-        opacity: 0.95;
+        opacity: 1;
         max-height: 100px;
     }
 
     .section-actions {
         opacity: 1;
         transform: translateY(0);
-    }
-
-    .container-fluid {
-        padding-left: 15px;
-        padding-right: 15px;
     }
 }

@@ -1,0 +1,41 @@
+.product-types-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.product-type-card {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.product-type-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+}
+
+.product-type-image {
+  height: 150px;
+  background-size: cover;
+  background-position: center;
+}
+
+.product-type-content {
+  padding: 15px;
+}
+
+.product-type-name {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 5px 0;
+  color: #333;
+}
+
+.product-type-section {
+  font-size: 12px;
+  color: #777;
+}

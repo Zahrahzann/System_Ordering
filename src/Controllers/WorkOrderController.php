@@ -59,7 +59,7 @@ class WorkOrderController
             ':emergency_type' => $emergencyType
         ]);
 
-        // ✅ Tambahkan notifikasi di sini
+        // NOTIFIKASI
         $customerId = $_SESSION['user_data']['id'];
         $itemName   = $_POST['item_name'];
         NotificationModel::create(
@@ -67,10 +67,10 @@ class WorkOrderController
             "Item '$itemName' berhasil ditambahkan ke Work Order",
             'fas fa-clipboard-list',
             'success',
-            'work_order' // isi kolom type
+            'work_order' 
         );
 
-        // ✅ Lanjut redirect seperti biasa
+        // NOTIFIKASI
         $action = $_POST['action_type'] ?? 'cart';
         if ($action === 'cart') {
             $_SESSION['success'] = 'Item berhasil ditambahkan ke keranjang!';

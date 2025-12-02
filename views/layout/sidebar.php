@@ -106,7 +106,7 @@ if ($currentRole === 'customer') {
         <hr class="sidebar-divider">
         <div class="sidebar-heading">Consumable</div>
         <li class="nav-item">
-            <a class="nav-link" href="<?= $basePath ?>/customer/consumable/catalog">
+            <a class="nav-link" href="<?= $basePath ?>/admin/consumable/sections">
                 <i class="fas fa-fw fa-book-open"></i>
                 <span>Katalog Product</span>
             </a>
@@ -154,7 +154,7 @@ if ($currentRole === 'customer') {
             <div id="collapseSpvConsumable" class="collapse" data-parent="#accordionSidebar">
                 <div class="bg-white py-2 collapse-inner rounded">
                     <h6 class="collapse-header">Menu</h6>
-                    <a class="collapse-item" href="<?= $basePath ?>/spv/consumable/catalog">Katalog Product</a>
+                    <a class="collapse-item" href="<?= $basePath ?>/admin/consumable/sections">Katalog Product</a>
                 </div>
             </div>
         </li>
