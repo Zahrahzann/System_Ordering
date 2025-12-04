@@ -88,6 +88,149 @@ body {
     margin: 0;
 }
 
+
+/* Stock Status Panels (Admin) */
+.stock-status-panels {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stock-panel {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.stock-panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+.stock-panel:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+}
+
+.stock-panel:hover::before {
+    width: 6px;
+}
+
+.stock-panel-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.stock-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.stock-info {
+    flex: 1;
+}
+
+.stock-label {
+    font-size: 16px;
+    font-weight: 500;
+    color: #555555;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.stock-count {
+    font-size: 24px;
+    font-weight: 700;
+    color: #282727;
+    line-height: 1;
+}
+
+.stock-subtitle {
+    font-size: 14px;
+    color: #555555;
+    margin-top: 4px;
+}
+
+/* Stock Low (Red) */
+.stock-panel.stock-rendah::before {
+    background: #dc3545;
+}
+
+.stock-panel.stock-rendah .stock-icon {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+}
+
+/* Stock Medium (Orange/Yellow) */
+.stock-panel.stock-menengah::before {
+    background: #ff9800;
+}
+
+.stock-panel.stock-menengah .stock-icon {
+    background: rgba(255, 152, 0, 0.1);
+    color: #ff9800;
+}
+
+/* Stock High (Green) */
+.stock-panel.stock-tinggi::before {
+    background: #28a745;
+}
+
+.stock-panel.stock-tinggi .stock-icon {
+    background: rgba(40, 167, 69, 0.1);
+    color: #28a745;
+}
+
+/* Total Stock (Blue) */
+.stock-panel.stock-total::before {
+    background: #667eea;
+}
+
+.stock-panel.stock-total .stock-icon {
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .stock-status-panels {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .stock-panel {
+        padding: 16px;
+    }
+
+    .stock-icon {
+        width: 45px;
+        height: 45px;
+        font-size: 20px;
+    }
+
+    .stock-count {
+        font-size: 24px;
+    }
+}
+
 /* Product Items Container */
 .product-items-container {
     display: grid;
@@ -106,8 +249,7 @@ body {
     transition: all 0.3s ease;
     display: flex;
     flex-direction: column;
-    height: 380px;
-    /* lebih kecil */
+    height: auto;
 }
 
 .product-item-card:hover {
@@ -115,7 +257,7 @@ body {
     transform: translateY(-3px);
 }
 
-/* Product Image - SMALLER */
+/* Product Image */
 .product-item-image {
     width: 100%;
     height: 140px;
@@ -144,9 +286,10 @@ body {
 /* Product Content - COMPACT */
 .product-item-content {
     padding: 16px;
-    display: flex;
+    display: block;
     flex-direction: column;
     flex: 1;
+    align-items: start;
 }
 
 .product-item-name {
@@ -391,7 +534,7 @@ body {
 }
 
 .btn-warning {
-    background: #ffc107;
+    background: #f6c23e;
     color: white;
     border: none;
 }
@@ -404,7 +547,7 @@ body {
 }
 
 .btn-danger {
-    background: #dc3545;
+    background: #e74a3b;
     color: white;
     border: none;
 }

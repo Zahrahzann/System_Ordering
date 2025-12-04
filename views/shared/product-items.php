@@ -13,7 +13,7 @@ $productTypeId   = $productType['id'] ?? null;
 
 <head>
     <meta charset="UTF-8">
-    <title>Printilan Produk</title>
+    <title>Katalog Produk</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="<?= $basePath ?>/assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
     <link href="<?= $basePath ?>/assets/css/sb-admin-2.min.css" rel="stylesheet">
@@ -31,9 +31,9 @@ $productTypeId   = $productType['id'] ?? null;
 
                     <div class="page-header">
                         <h1 class="page-title">
-                            <i class="fas fa-cogs"></i> Printilan Produk dari <?= $productTypeName ?>
+                            <i class="fas fa-cogs"></i> Katalog Produk dari <?= $productTypeName ?>
                         </h1>
-                        <p class="page-subtitle">Daftar printilan yang termasuk dalam jenis produk ini</p>
+                        <p class="page-subtitle">Daftar produk yang termasuk dalam katalog</p>
                     </div>
 
                     <!-- Admin: tombol tambah item -->
@@ -49,10 +49,70 @@ $productTypeId   = $productType['id'] ?? null;
                     <?php if (empty($items)): ?>
                         <div class="empty-state">
                             <i class="fas fa-cube"></i>
-                            <h4>Belum Ada Printilan</h4>
-                            <p>Jenis produk ini belum memiliki printilan.</p>
+                            <h4>Belum Ada Produk</h4>
+                            <p>Produk pada Katalog ini belum tersedia.</p>
                         </div>
+
                     <?php else: ?>
+                        <?php
+                        $lowStockCount = 0;
+                        $mediumStockCount = 0;
+                        $highStockCount = 0;
+
+                        foreach ($items as $item) {
+                            if ($item['stock'] < 11) {
+                                $lowStockCount++;
+                            } elseif ($item['stock'] < 21) {
+                                $mediumStockCount++;
+                            } else {
+                                $highStockCount++;
+                            }
+                        }
+                        ?>
+
+                        <?php if ($currentRole === 'admin'): ?>
+                            <div class="stock-status-panels">
+                                <div class="stock-panel stock-rendah">
+                                    <div class="stock-panel-content">
+                                        <div class="stock-icon">
+                                            <i class="fas fa-exclamation-circle"></i>
+                                        </div>
+                                        <div class="stock-info">
+                                            <div class="stock-label">Stok Rendah</div>
+                                            <div class="stock-count"><?= $lowStockCount ?></div>
+                                            <div class="stock-subtitle">Stok < 10</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="stock-panel stock-menengah">
+                                    <div class="stock-panel-content">
+                                        <div class="stock-icon">
+                                            <i class="fas fa-adjust"></i>
+                                        </div>
+                                        <div class="stock-info">
+                                            <div class="stock-label">Stok Sedang</div>
+                                            <div class="stock-count"><?= $mediumStockCount ?></div>
+                                            <div class="stock-subtitle">Stok < 20</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="stock-panel stock-tinggi">
+                                    <div class="stock-panel-content">
+                                        <div class="stock-icon">
+                                            <i class="fas fa-check-circle"></i>
+                                        </div>
+                                        <div class="stock-info">
+                                            <div class="stock-label">Stok Tinggi</div>
+                                            <div class="stock-count"><?= $highStockCount ?></div>
+                                            <div class="stock-subtitle">Stok > 20</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+
                         <div class="product-items-container">
                             <?php foreach ($items as $item): ?>
                                 <div class="product-item-card">
@@ -76,11 +136,10 @@ $productTypeId   = $productType['id'] ?? null;
                                         <?php if ($currentRole === 'admin'): ?>
                                             <div class="stock-status">
                                                 <div class="stock-bar 
-        <?php
-                                            if ($item['stock'] < 10) echo 'stock-low';
-                                            elseif ($item['stock'] < 20) echo 'stock-medium';
-                                            else echo 'stock-high';
-        ?>"
+                                        <?php
+                                            if ($item['stock'] < 11) echo 'stock-low';
+                                            elseif ($item['stock'] < 21) echo 'stock-medium';
+                                            else echo 'stock-high'; ?>"
                                                     style="width:<?= min(100, $item['stock']) ?>%">
                                                 </div>
                                             </div>
@@ -133,7 +192,7 @@ $productTypeId   = $productType['id'] ?? null;
                                                 </button>
                                                 <a href="<?= $basePath ?>/admin/consumable/product-items/delete/<?= $item['id'] ?>"
                                                     class="btn btn-sm btn-danger"
-                                                    onclick="return confirm('Yakin hapus printilan ini?');">
+                                                    onclick="return confirm('Yakin hapus produk ini?');">
                                                     <i class="fas fa-trash"></i> Hapus
                                                 </a>
                                             </div>
@@ -155,14 +214,14 @@ $productTypeId   = $productType['id'] ?? null;
             <div class="modal-content">
                 <form id="itemForm" action="<?= $basePath ?>/admin/consumable/product-items/create/<?= $productTypeId ?>" method="post" enctype="multipart/form-data">
                     <div class="modal-header">
-                        <h5 class="modal-title">Tambah Printilan Produk</h5>
+                        <h5 class="modal-title">Tambah Produk</h5>
                         <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
                     </div>
                     <div class="modal-body">
                         <input type="hidden" name="id" id="itemId">
 
                         <div class="form-group">
-                            <label>Nama Printilan</label>
+                            <label>Nama Produk</label>
                             <input type="text" name="name" id="itemName" class="form-control" required>
                         </div>
 
@@ -247,7 +306,7 @@ $productTypeId   = $productType['id'] ?? null;
 
             var modal = $(this);
             if (id) {
-                modal.find('.modal-title').text('Edit Printilan Produk');
+                modal.find('.modal-title').text('Edit Produk');
                 modal.find('#itemForm').attr('action', '<?= $basePath ?>/admin/consumable/product-items/edit/' + id);
                 modal.find('#itemId').val(id);
                 modal.find('#itemName').val(name);
@@ -255,7 +314,7 @@ $productTypeId   = $productType['id'] ?? null;
                 modal.find('#itemDescription').val(desc);
                 modal.find('#itemStock').val(stock);
             } else {
-                modal.find('.modal-title').text('Tambah Printilan Produk');
+                modal.find('.modal-title').text('Tambah Produk');
                 modal.find('#itemForm').attr('action', '<?= $basePath ?>/admin/consumable/product-items/create/<?= $productTypeId ?>');
                 modal.find('#itemId').val('');
                 modal.find('#itemName').val('');
