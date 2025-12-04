@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Dec 01, 2025 at 08:05 AM
+-- Generation Time: Dec 04, 2025 at 03:34 AM
 -- Server version: 8.0.30
 -- PHP Version: 7.4.33
 
@@ -46,7 +46,42 @@ INSERT INTO `approvals` (`id`, `order_id`, `spv_id`, `approval_status`, `comment
 (2, 2, 8, 'approve', '', '2025-11-21 06:14:46', '2025-11-21 06:17:21'),
 (3, 3, 8, 'approve', '', '2025-11-21 06:28:50', '2025-11-21 06:29:04'),
 (4, 4, 8, 'approve', '', '2025-11-21 06:49:39', '2025-11-21 06:49:48'),
-(5, 5, 8, 'approve', '', '2025-11-21 07:10:16', '2025-11-21 07:12:38');
+(5, 5, 8, 'approve', '', '2025-11-21 07:10:16', '2025-11-21 07:12:38'),
+(6, 6, 8, 'approve', '', '2025-12-02 15:31:01', '2025-12-03 00:43:07');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `consum_cart`
+--
+
+CREATE TABLE `consum_cart` (
+  `id` int NOT NULL,
+  `customer_id` int NOT NULL,
+  `product_type_id` int NOT NULL,
+  `product_item_id` int DEFAULT NULL,
+  `quantity` int NOT NULL,
+  `note` text,
+  `added_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `consum_order`
+--
+
+CREATE TABLE `consum_order` (
+  `id` int NOT NULL,
+  `customer_id` int NOT NULL,
+  `product_type_id` int NOT NULL,
+  `product_item_id` int DEFAULT NULL,
+  `quantity` int NOT NULL,
+  `note` text,
+  `order_type` enum('direct','cart') NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -135,10 +170,11 @@ INSERT INTO `items` (`id`, `customer_id`, `order_id`, `item_type`, `quantity`, `
 (1, 1, 1, 'work_order', 18, 'Catatan', '2025-11-30', 0, NULL, NULL, 'PART', 'regular', 'Zanni', 'completed', 'ready', 'stainless steel', '[\"\\/system_ordering\\/public\\/uploads\\/drawings\\/drawing_691ff8d8b2de47.38758967.pdf\"]', '2025-11-21 05:30:00', '2025-11-21 05:32:53'),
 (2, 1, 2, 'work_order', 12, 'Contoh', '2025-11-28', 1, 'line_stop', NULL, 'SLIPER', 'improvement', '', 'on_progress', 'ready', 'Bolt M6', '[\"\\/system_ordering\\/public\\/uploads\\/drawings\\/drawing_6920035003ac32.01717194.pdf\"]', '2025-11-21 06:14:40', '2025-11-21 06:18:01'),
 (3, 1, NULL, 'work_order', 18, 'Catatan', '2025-11-30', 1, 'safety', NULL, 'PART', 'regular', NULL, 'pending', 'ready', 'stainless steel', '[\"\\/system_ordering\\/public\\/uploads\\/drawings\\/drawing_691ff8d8b2de47.38758967.pdf\"]', '2025-11-21 06:25:21', '2025-11-21 06:25:21'),
-(4, 1, NULL, 'work_order', 18, 'Catatan', '2025-11-30', 1, 'safety', NULL, 'PART', 'regular', NULL, 'pending', 'ready', 'stainless steel', '[\"\\/system_ordering\\/public\\/uploads\\/drawings\\/drawing_691ff8d8b2de47.38758967.pdf\"]', '2025-11-21 06:25:24', '2025-11-21 06:25:24'),
+(4, 1, 6, 'work_order', 18, 'Catatan', '2025-11-30', 1, 'safety', NULL, 'PART', 'regular', NULL, 'pending', 'ready', 'stainless steel', '[\"\\/system_ordering\\/public\\/uploads\\/drawings\\/drawing_691ff8d8b2de47.38758967.pdf\"]', '2025-11-21 06:25:24', '2025-12-02 15:31:01'),
 (5, 1, 3, 'work_order', 18, 'Catatan', '2025-11-30', 1, 'safety', NULL, 'PART', 'regular', NULL, 'pending', 'ready', 'stainless steel', '[\"\\/system_ordering\\/public\\/uploads\\/drawings\\/drawing_691ff8d8b2de47.38758967.pdf\"]', '2025-11-21 06:28:33', '2025-11-21 06:28:50'),
 (6, 1, 4, 'work_order', 18, 'Catatan', '2025-11-30', 0, NULL, NULL, 'PART', 'improvement', '', 'pending', 'ready', 'stainless steel', '[\"\\/system_ordering\\/public\\/uploads\\/drawings\\/drawing_691ff8d8b2de47.38758967.pdf\"]', '2025-11-21 06:49:16', '2025-11-24 03:57:56'),
-(7, 1, 5, 'work_order', 2, 'Catatan', '2025-11-23', 1, 'line_stop', NULL, 'PAD 1', 'regular', 'Zanni', 'completed', 'ordered', 'Bolt M6', '[\"\\/system_ordering\\/public\\/uploads\\/drawings\\/drawing_692010157b4ee7.39063466.pdf\"]', '2025-11-21 07:09:09', '2025-11-21 07:18:51');
+(7, 1, 5, 'work_order', 2, 'Catatan', '2025-11-23', 1, 'line_stop', NULL, 'PAD 1', 'regular', 'Zanni', 'completed', 'ordered', 'Bolt M6', '[\"\\/system_ordering\\/public\\/uploads\\/drawings\\/drawing_692010157b4ee7.39063466.pdf\"]', '2025-11-21 07:09:09', '2025-11-21 07:18:51'),
+(8, 1, NULL, 'work_order', 1, 'dxfcgvhjk', '2025-12-12', 0, NULL, NULL, 'PAD 1', 'improvement', NULL, 'pending', 'ordered', 'stainless steel', '[\"\\/system_ordering\\/public\\/uploads\\/drawings\\/drawing_692f061cd039c9.48140176.pdf\"]', '2025-12-02 15:30:36', '2025-12-02 15:30:36');
 
 -- --------------------------------------------------------
 
@@ -165,7 +201,8 @@ CREATE TABLE `notifications` (
 INSERT INTO `notifications` (`id`, `customer_id`, `user_id`, `type`, `message`, `is_read`, `created_at`, `icon`, `color`) VALUES
 (1, 1, NULL, 'work_order', 'Item \'PART\' berhasil ditambahkan ke Work Order', 0, '2025-11-21 06:28:33', 'fas fa-clipboard-list', 'success'),
 (2, 1, NULL, 'work_order', 'Item \'PART\' berhasil ditambahkan ke Work Order', 0, '2025-11-21 06:49:16', 'fas fa-clipboard-list', 'success'),
-(3, 1, NULL, 'work_order', 'Item \'PAD 1\' berhasil ditambahkan ke Work Order', 0, '2025-11-21 07:09:09', 'fas fa-clipboard-list', 'success');
+(3, 1, NULL, 'work_order', 'Item \'PAD 1\' berhasil ditambahkan ke Work Order', 0, '2025-11-21 07:09:09', 'fas fa-clipboard-list', 'success'),
+(4, 1, NULL, 'work_order', 'Item \'PAD 1\' berhasil ditambahkan ke Work Order', 0, '2025-12-02 15:30:36', 'fas fa-clipboard-list', 'success');
 
 -- --------------------------------------------------------
 
@@ -194,7 +231,8 @@ INSERT INTO `orders` (`id`, `order_code`, `customer_id`, `department`, `plant_id
 (2, NULL, 1, NULL, 2, NULL, '2025-11-21 06:14:46', '2025-11-21 06:17:21', 'approve'),
 (3, NULL, 1, NULL, 2, NULL, '2025-11-21 06:28:50', '2025-11-21 06:29:04', 'approve'),
 (4, NULL, 1, NULL, 2, NULL, '2025-11-21 06:49:39', '2025-11-21 06:49:48', 'approve'),
-(5, NULL, 1, NULL, 2, NULL, '2025-11-21 07:10:16', '2025-11-21 07:12:38', 'approve');
+(5, NULL, 1, NULL, 2, NULL, '2025-11-21 07:10:16', '2025-11-21 07:12:38', 'approve'),
+(6, NULL, 1, NULL, 2, NULL, '2025-12-02 15:31:01', '2025-12-03 00:43:07', 'approve');
 
 -- --------------------------------------------------------
 
@@ -269,20 +307,50 @@ CREATE TABLE `products` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `product_items`
+--
+
+CREATE TABLE `product_items` (
+  `id` int NOT NULL,
+  `product_type_id` int NOT NULL,
+  `item_code` varchar(50) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `price` decimal(12,2) DEFAULT NULL,
+  `description` text,
+  `image_path` varchar(255) DEFAULT NULL,
+  `file_path` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `stock` int DEFAULT '0'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `product_types`
 --
 
 CREATE TABLE `product_types` (
   `id` int NOT NULL,
   `section_id` int NOT NULL,
+  `product_code` varchar(50) NOT NULL,
   `name` varchar(255) NOT NULL,
-  `price` decimal(12,2) NOT NULL,
+  `price` decimal(12,2) DEFAULT NULL,
   `description` text,
   `image_path` varchar(255) DEFAULT NULL,
   `file_path` varchar(255) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `product_types`
+--
+
+INSERT INTO `product_types` (`id`, `section_id`, `product_code`, `name`, `price`, `description`, `image_path`, `file_path`, `created_at`, `updated_at`) VALUES
+(7, 1, 'PRESU-3512-CYH', 'CYH', '0.00', 'xdtcfgvhbjn', '/uploads/consum-product-type/gear.jpeg', '/uploads/consum-product-type/Sistem_Microprocessor.jpg', '2025-12-02 04:08:21', '2025-12-02 04:08:21'),
+(9, 1, 'PRESU-1774-CYB', 'CYB', NULL, 'cfgvbhjnk', '/uploads/consum-product-type/Sistem_Microprocessor.jpg', '/uploads/consum-product-type/gear.jpeg', '2025-12-02 06:03:36', '2025-12-02 06:03:36'),
+(10, 1, 'PRESU-9699-CRSH', 'CRSH', '100000.00', 'SRXDTCFYVGUBHINJ', '/uploads/consum-product-type/gear.jpeg', '/uploads/consum-product-type/Sistem_Microprocessor.jpg', '2025-12-02 07:37:23', '2025-12-02 07:37:34');
 
 -- --------------------------------------------------------
 
@@ -307,8 +375,7 @@ INSERT INTO `sections` (`id`, `name`, `description`, `created_at`, `updated_at`)
 (2, 'K-Line 3', 'Klik untuk melihat semua produk dalam section ini.', '2025-11-17 10:23:54', '2025-12-01 11:29:23'),
 (3, 'K-LINE 4 SPS', 'Klik untuk melihat semua produk dalam section ini.', '2025-11-17 10:23:54', '2025-12-01 11:29:15'),
 (4, 'K-Line 5', 'Klik untuk melihat semua produk dalam section ini.\r\n', '2025-11-17 10:23:54', '2025-12-01 11:29:01'),
-(16, 'DELIVERY', 'Klik untuk melihat semua produk dalam section ini.', '2025-11-28 10:46:09', '2025-12-01 11:29:57'),
-(21, 'contoh', '', '2025-12-01 13:12:08', '2025-12-01 13:12:08');
+(23, 'Delivery', NULL, '2025-12-02 08:34:58', '2025-12-02 08:35:07');
 
 -- --------------------------------------------------------
 
@@ -349,6 +416,22 @@ ALTER TABLE `approvals`
   ADD PRIMARY KEY (`id`),
   ADD KEY `order_id` (`order_id`),
   ADD KEY `spv_id` (`spv_id`);
+
+--
+-- Indexes for table `consum_cart`
+--
+ALTER TABLE `consum_cart`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `product_type_id` (`product_type_id`),
+  ADD KEY `product_item_id` (`product_item_id`);
+
+--
+-- Indexes for table `consum_order`
+--
+ALTER TABLE `consum_order`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `product_type_id` (`product_type_id`),
+  ADD KEY `product_item_id` (`product_item_id`);
 
 --
 -- Indexes for table `customers`
@@ -421,10 +504,19 @@ ALTER TABLE `products`
   ADD KEY `fk_category` (`category_id`);
 
 --
+-- Indexes for table `product_items`
+--
+ALTER TABLE `product_items`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `item_code` (`item_code`),
+  ADD KEY `product_type_id` (`product_type_id`);
+
+--
 -- Indexes for table `product_types`
 --
 ALTER TABLE `product_types`
   ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `product_code` (`product_code`),
   ADD KEY `section_id` (`section_id`);
 
 --
@@ -451,7 +543,19 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `approvals`
 --
 ALTER TABLE `approvals`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT for table `consum_cart`
+--
+ALTER TABLE `consum_cart`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `consum_order`
+--
+ALTER TABLE `consum_order`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `customers`
@@ -469,19 +573,19 @@ ALTER TABLE `departments`
 -- AUTO_INCREMENT for table `items`
 --
 ALTER TABLE `items`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `order_histories`
@@ -502,16 +606,22 @@ ALTER TABLE `products`
   MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `product_items`
+--
+ALTER TABLE `product_items`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
 -- AUTO_INCREMENT for table `product_types`
 --
 ALTER TABLE `product_types`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `sections`
 --
 ALTER TABLE `sections`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT for table `users`
@@ -529,6 +639,20 @@ ALTER TABLE `users`
 ALTER TABLE `approvals`
   ADD CONSTRAINT `approvals_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `approvals_ibfk_2` FOREIGN KEY (`spv_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `consum_cart`
+--
+ALTER TABLE `consum_cart`
+  ADD CONSTRAINT `consum_cart_ibfk_1` FOREIGN KEY (`product_type_id`) REFERENCES `product_types` (`id`),
+  ADD CONSTRAINT `consum_cart_ibfk_2` FOREIGN KEY (`product_item_id`) REFERENCES `product_items` (`id`);
+
+--
+-- Constraints for table `consum_order`
+--
+ALTER TABLE `consum_order`
+  ADD CONSTRAINT `consum_order_ibfk_1` FOREIGN KEY (`product_type_id`) REFERENCES `product_types` (`id`),
+  ADD CONSTRAINT `consum_order_ibfk_2` FOREIGN KEY (`product_item_id`) REFERENCES `product_items` (`id`);
 
 --
 -- Constraints for table `customers`
@@ -571,6 +695,12 @@ ALTER TABLE `order_histories`
 --
 ALTER TABLE `products`
   ADD CONSTRAINT `fk_category` FOREIGN KEY (`category_id`) REFERENCES `sections` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `product_items`
+--
+ALTER TABLE `product_items`
+  ADD CONSTRAINT `product_items_ibfk_1` FOREIGN KEY (`product_type_id`) REFERENCES `product_types` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `product_types`
