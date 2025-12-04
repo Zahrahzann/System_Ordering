@@ -57,8 +57,18 @@ class ProductItemModel
     // Update printilan
     public static function update($id, $data, $files): void
     {
-        $imagePath = !empty($files['image']['name']) ? self::uploadFile($files['image']) : $data['old_image'];
-        $filePath  = !empty($files['file_path']['name']) ? self::uploadFile($files['file_path']) : $data['old_file'];
+        $oldItem = self::find($id);
+        if (!$oldItem) {
+            throw new \Exception("Item not found");
+        }
+
+        $imagePath = (!empty($files['image']['name']))
+            ? self::uploadFile($files['image'])
+            : $oldItem['image_path'];
+
+        $filePath = (!empty($files['file_path']['name']))
+            ? self::uploadFile($files['file_path'])
+            : $oldItem['file_path'];
 
         $st = self::db()->prepare("
         UPDATE product_items 
@@ -66,8 +76,8 @@ class ProductItemModel
         WHERE id=?
     ");
         $st->execute([
-            $data['product_type_id'],
-            $data['item_code'],
+            $oldItem['product_type_id'],   
+            $oldItem['item_code'],         
             $data['name'],
             is_numeric($data['price']) ? $data['price'] : null,
             $data['description'],

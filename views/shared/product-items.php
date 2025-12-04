@@ -56,33 +56,35 @@ $productTypeId   = $productType['id'] ?? null;
                         <div class="product-items-container">
                             <?php foreach ($items as $item): ?>
                                 <div class="product-item-card">
-                                    <!-- Product Image with Badge -->
                                     <div class="product-item-image"
                                         style="background-image:url('<?= !empty($item['image_path']) ? $basePath . htmlspecialchars($item['image_path']) : $basePath . '/assets/img/default.jpeg' ?>');">
-                                        <span class="category-badge"></span>
+                                        <span class="category-badge">
+                                            <?= htmlspecialchars($productType['name']) ?>
+                                        </span>
                                     </div>
 
                                     <div class="product-item-content">
+                                        <!-- Nama Produk -->
                                         <h4 class="product-item-name"><?= htmlspecialchars($item['name']) ?></h4>
 
-                                        <?php if ($currentRole === 'admin'): ?>
-                                            <div class="form-group">
-                                                <label>Stok</label>
-                                                <input type="number" name="stock" id="itemStock" class="form-control" min="0">
-                                            </div>
+                                        <!-- Deskripsi Produk -->
+                                        <?php if (!empty($item['description'])): ?>
+                                            <p class="product-item-description"><?= htmlspecialchars($item['description']) ?></p>
                                         <?php endif; ?>
+
+                                        <!-- Bar Status Stok (Admin Only) -->
                                         <?php if ($currentRole === 'admin'): ?>
                                             <div class="stock-status">
                                                 <div class="stock-bar 
-            <?php
+        <?php
                                             if ($item['stock'] < 10) echo 'stock-low';
                                             elseif ($item['stock'] < 20) echo 'stock-medium';
                                             else echo 'stock-high';
-            ?>"
+        ?>"
                                                     style="width:<?= min(100, $item['stock']) ?>%">
                                                 </div>
-                                                <small>Stok: <?= $item['stock'] ?></small>
                                             </div>
+                                            <p class="stock-count">Stok: <?= $item['stock'] ?></p>
                                         <?php endif; ?>
 
                                         <!-- File Drawing -->
@@ -98,12 +100,13 @@ $productTypeId   = $productType['id'] ?? null;
                                             </span>
                                         <?php endif; ?>
 
+                                        <!-- Harga -->
                                         <p class="product-item-price">
                                             <?= $item['price'] === null ? 'TBA' : 'Rp ' . number_format($item['price'], 0, ',', '.') ?>
                                         </p>
 
+                                        <!-- Tombol Aksi -->
                                         <?php if ($currentRole === 'customer'): ?>
-                                            <!-- Quantity Control -->
                                             <div class="quantity-control">
                                                 <label>Qty:</label>
                                                 <div class="qty-wrapper">
@@ -112,15 +115,9 @@ $productTypeId   = $productType['id'] ?? null;
                                                     <button type="button" class="qty-btn qty-plus">+</button>
                                                 </div>
                                             </div>
-
-                                            <!-- Action Buttons -->
                                             <div class="product-item-actions">
-                                                <button class="btn btn-outline" onclick="addToCart(<?= $item['id'] ?>)">
-                                                    Add to Cart
-                                                </button>
-                                                <button class="btn btn-dark" onclick="buyNow(<?= $item['id'] ?>)">
-                                                    Buy Now
-                                                </button>
+                                                <button class="btn btn-outline" onclick="addToCart(<?= $item['id'] ?>)">Add to Cart</button>
+                                                <button class="btn btn-dark" onclick="buyNow(<?= $item['id'] ?>)">Buy Now</button>
                                             </div>
                                         <?php endif; ?>
 
@@ -130,7 +127,8 @@ $productTypeId   = $productType['id'] ?? null;
                                                     data-id="<?= $item['id'] ?>"
                                                     data-name="<?= htmlspecialchars($item['name']) ?>"
                                                     data-price="<?= $item['price'] ?>"
-                                                    data-description="<?= htmlspecialchars($item['description'] ?? '') ?>">
+                                                    data-description="<?= htmlspecialchars($item['description'] ?? '') ?>"
+                                                    data-stock="<?= $item['stock'] ?>">
                                                     <i class="fas fa-edit"></i> Edit
                                                 </button>
                                                 <a href="<?= $basePath ?>/admin/consumable/product-items/delete/<?= $item['id'] ?>"
