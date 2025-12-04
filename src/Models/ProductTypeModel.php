@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use ManufactureEngineering\SystemOrdering\Config\Database;
+
 use App\Helpers\CodeGenerator;
 use PDO;
 

@@ -107,7 +107,7 @@ $isEditMode = $editData !== null;
                     <?php else: ?>
                         <div class="product-types-container d-flex flex-wrap gap-3">
                             <?php foreach ($productTypes as $pt): ?>
-                                <a href="<?= $basePath ?>/customer/consumable/product-items?type=<?= $pt['id'] ?>" class="product-type-card-link">
+                                <a href="<?= $basePath ?>/shared/consumable/product-items/<?= $pt['id'] ?>" class="product-type-card-link">
                                     <div class="product-type-card">
                                         <div class="product-type-image"
                                             style="background-image:url('<?= $basePath . (!empty($pt['image_path']) ? $pt['image_path'] : '/assets/img/default.jpeg') ?>');">

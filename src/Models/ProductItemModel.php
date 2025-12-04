@@ -3,60 +3,66 @@
 namespace App\Models;
 
 use PDO;
+use ManufactureEngineering\SystemOrdering\Config\Database;
+use App\Helpers\CodeGenerator;
 
 class ProductItemModel
 {
-    private static function db()
+    private static function db(): PDO
     {
-        return $GLOBALS['db'];
+        return Database::connect();
     }
 
     // List printilan per jenis produk
-    public static function listByProductType($typeId)
+    public static function listByProductType($typeId): array
     {
         $st = self::db()->prepare("SELECT * FROM product_items WHERE product_type_id = ? ORDER BY name ASC");
         $st->execute([$typeId]);
-        return $st->fetchAll(PDO::FETCH_ASSOC);
+        return $st->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
 
     // Ambil detail printilan
-    public static function find($id)
+    public static function find($id): ?array
     {
         $st = self::db()->prepare("SELECT * FROM product_items WHERE id = ?");
         $st->execute([$id]);
-        return $st->fetch(PDO::FETCH_ASSOC);
+        return $st->fetch(PDO::FETCH_ASSOC) ?: null;
     }
 
     // Tambah printilan
-    public static function create($typeId, $data, $files)
+    public static function create($typeId, $data, $files): void
     {
+        $productType = ProductTypeModel::find($typeId);
+        $itemCode    = CodeGenerator::generateItemCode($data['name'], $productType['name']);
+
         $imagePath = self::uploadFile($files['image'] ?? null);
         $filePath  = self::uploadFile($files['file_path'] ?? null);
 
         $st = self::db()->prepare("
-        INSERT INTO product_items (product_type_id, item_code, name, price, description, image_path, file_path)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO product_items (product_type_id, item_code, name, price, description, image_path, file_path, stock)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     ");
         $st->execute([
             $typeId,
-            $data['item_code'],
+            $itemCode,
             $data['name'],
             is_numeric($data['price']) ? $data['price'] : null,
             $data['description'],
             $imagePath,
-            $filePath
+            $filePath,
+            is_numeric($data['stock']) ? $data['stock'] : 0
         ]);
     }
 
     // Update printilan
-    public static function update($id, $data, $files)
+    public static function update($id, $data, $files): void
     {
         $imagePath = !empty($files['image']['name']) ? self::uploadFile($files['image']) : $data['old_image'];
         $filePath  = !empty($files['file_path']['name']) ? self::uploadFile($files['file_path']) : $data['old_file'];
 
         $st = self::db()->prepare("
         UPDATE product_items 
-        SET product_type_id=?, item_code=?, name=?, price=?, description=?, image_path=?, file_path=? 
+        SET product_type_id=?, item_code=?, name=?, price=?, description=?, image_path=?, file_path=?, stock=? 
         WHERE id=?
     ");
         $st->execute([
@@ -67,22 +73,32 @@ class ProductItemModel
             $data['description'],
             $imagePath,
             $filePath,
+            is_numeric($data['stock']) ? $data['stock'] : 0,
             $id
         ]);
     }
 
     // Hapus printilan
-    public static function delete($id)
+    public static function delete($id): void
     {
         $st = self::db()->prepare("DELETE FROM product_items WHERE id=?");
         $st->execute([$id]);
     }
 
-    private static function uploadFile($file)
+    private static function uploadFile($file): ?string
     {
         if (!$file || $file['error'] !== UPLOAD_ERR_OK) return null;
-        $target = '/uploads/consum-product-item/' . basename($file['name']);
-        move_uploaded_file($file['tmp_name'], __DIR__ . '/../../public' . $target);
+
+        $targetDir = '/uploads/consum-katalog-item/';
+        $target    = $targetDir . basename($file['name']);
+
+
+        $destination = __DIR__ . '/../../public' . $target;
+        if (!is_dir(__DIR__ . '/../../public' . $targetDir)) {
+            mkdir(__DIR__ . '/../../public' . $targetDir, 0777, true);
+        }
+        move_uploaded_file($file['tmp_name'], $destination);
+
         return $target;
     }
 }

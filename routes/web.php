@@ -135,6 +135,10 @@ switch (true) {
     case preg_match('#^/admin/consumable/product-items/delete/(\d+)$#', $route, $matches):
         ProductItemController::delete($matches[1]);
         break;
+    case preg_match('#^/admin/consumable/product-items$#', $route) && isset($_GET['type']):
+        ProductItemController::listByProductType($_GET['type']);
+        break;
+
 
     // --- Default 404 ---
     default:

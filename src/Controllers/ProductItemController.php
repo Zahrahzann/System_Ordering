@@ -3,17 +3,20 @@
 namespace App\Controllers;
 
 use App\Models\ProductItemModel;
+use App\Models\ProductTypeModel;
 
 class ProductItemController
 {
     // List printilan per jenis produk
     public static function listByProductType($typeId)
     {
-        $items = ProductItemModel::listByProductType($typeId);
-        require_once __DIR__ . '/../../views/shared/product_items.php';
+        $items       = ProductItemModel::listByProductType($typeId);
+        $productType = ProductTypeModel::find($typeId);
+
+        require_once __DIR__ . '/../../views/shared/product-items.php';
     }
 
-    // Tambah printilan (admin only)
+    // Tambah printilan (admin only, via modal)
     public static function add($typeId)
     {
         if (session_status() === PHP_SESSION_NONE) session_start();
@@ -25,14 +28,15 @@ class ProductItemController
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ProductItemModel::create($typeId, $_POST, $_FILES);
-            header("Location: /admin/consumable/product-items?type={$typeId}");
+            header("Location: /system_ordering/public/admin/consumable/product-items?type={$typeId}");
             exit;
         } else {
-            require_once __DIR__ . '/../../views/shared/product_item_form.php';
+            echo "Form tambah printilan hanya tersedia via modal.";
+            exit;
         }
     }
 
-    // Edit printilan
+    // Edit printilan (admin only, via modal)
     public static function edit($id)
     {
         if (session_status() === PHP_SESSION_NONE) session_start();
@@ -45,18 +49,15 @@ class ProductItemController
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ProductItemModel::update($id, $_POST, $_FILES);
 
-            $item = ProductItemModel::find($id);
+            $item   = ProductItemModel::find($id);
             $typeId = $item['product_type_id'] ?? null;
 
             header("Location: /system_ordering/public/admin/consumable/product-items?type={$typeId}");
             exit;
-        } else {
-            $item = ProductItemModel::find($id);
-            require_once __DIR__ . '/../../views/shared/product_item_form.php';
         }
     }
 
-    // Hapus printilan
+    // Hapus printilan (admin only)
     public static function delete($id)
     {
         if (session_status() === PHP_SESSION_NONE) session_start();
@@ -66,14 +67,11 @@ class ProductItemController
             exit;
         }
 
-        // Ambil item dulu untuk tahu typeId
-        $item = ProductItemModel::find($id);
+        $item   = ProductItemModel::find($id);
         $typeId = $item['product_type_id'] ?? null;
 
-        // Baru hapus
         ProductItemModel::delete($id);
 
-        // Redirect balik ke halaman item milik jenis produk yang benar
         header("Location: /system_ordering/public/admin/consumable/product-items?type={$typeId}");
         exit;
     }

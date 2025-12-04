@@ -104,7 +104,7 @@ $departmentName = DepartmentModel::getNameById($userData['department_id']);
                                     <i class="fas fa-spinner"></i>
                                 </div>
                             </div>
-                        </div>
+                        </div>  
 
                         <div class="stat-card">
                             <div class="stat-header">

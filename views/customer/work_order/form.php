@@ -152,14 +152,12 @@ $old = $_SESSION['old_input'] ?? [];
                                     <?php endif; ?>
 
                                     <div class="file-input-wrapper">
-                                        <div class="file-input-display">
+                                        <label for="file_path" class="file-input-display">
                                             <i class="fas fa-cloud-upload-alt"></i>
                                             <p><strong>Klik untuk upload file</strong></p>
-                                            <p class="file-info">
-                                                <?= $isEditMode ? 'Upload file baru untuk mengganti file lama' : 'Format: PDF, JPG, PNG (Max 10MB per file)' ?>
-                                            </p>
-                                        </div>
-                                        <input type="file" class="form-control-file" id="file_path" name="file_path[]" multiple <?= $isEditMode ? '' : 'required' ?>>
+                                            <p class="file-info">Format: PDF, JPG, PNG (Max 10MB per file)</p>
+                                        </label>
+                                        <input type="file" class="form-control-file" id="file_path" name="file_path[]" multiple style="display:none;">
                                     </div>
                                     <small class="form-text">Anda bisa memilih lebih dari satu file</small>
                                 </div>
