@@ -85,9 +85,7 @@ switch ($route) {
 
 // ROUTING DINAMIS PRODUCT TYPE & ITEM
 switch (true) {
-    // =========================
-    // PRODUCT TYPE ROUTES (All Roles)
-    // =========================
+    // PRODUCT TYPE ROUTES
     case preg_match('#^/shared/consumable/product-types/(\d+)$#', $route, $matches):
         ProductTypeController::listBySection($matches[1]);
         break;
@@ -117,10 +115,7 @@ switch (true) {
         }
         break;
 
-
-    // =========================
-    // PRODUCT ITEM ROUTES (All Roles)
-    // =========================
+    // PRODUCT ITEM ROUTES
     case preg_match('#^/shared/consumable/product-items/(\d+)$#', $route, $matches):
         ProductItemController::listByProductType($matches[1]);
         break;
@@ -136,23 +131,36 @@ switch (true) {
     case preg_match('#^/admin/consumable/product-items/delete/(\d+)$#', $route, $matches):
         ProductItemController::delete($matches[1]);
         break;
-    case preg_match('#^/admin/consumable/product-items$#', $route) && isset($_GET['type']):
-        ProductItemController::listByProductType($_GET['type']);
+
+    case preg_match('#^/admin/consumable/product-items$#', $route):
+        if (isset($_GET['type'])) {
+            ProductItemController::listByProductType($_GET['type']);
+        } else {
+            echo "Error: type tidak ditemukan.";
+        }
         break;
 
-
-    // ====================================
-    // Consumable Order ROUTES (All Roles)
-    // ====================================
-    case '/customer/shared/consumable/orders':
-    case '/spv/shared/consumable/orders':
-    case '/admin/shared/consumable/orders':
+    // CONSUMABLE ORDER ROUTES
+    case ($route === '/customer/shared/consumable/orders'
+        || $route === '/spv/shared/consumable/orders'
+        || $route === '/admin/shared/consumable/orders'):
         ConsumOrderController::showOrders();
         break;
 
+    // ACTION ROUTES (Admin only)
+    case preg_match('#^/admin/consumable/orders/send/(\d+)$#', $route, $matches):
+        ConsumOrderController::sendOrder($matches[1]);
+        break;
 
+    case preg_match('#^/admin/consumable/orders/complete/(\d+)$#', $route, $matches):
+        ConsumOrderController::completeOrder($matches[1]);
+        break;
 
-    // --- Default 404 ---
+    case preg_match('#^/admin/consumable/orders/delete/(\d+)$#', $route, $matches):
+        ConsumOrderController::deleteOrder($matches[1]);
+        break;
+
+    // Default 404
     default:
         http_response_code(404);
         echo "404 Not Found :) <br>";

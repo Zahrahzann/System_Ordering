@@ -172,7 +172,34 @@
  .status-shipping {
      background: #f5eae5;
      color: #e7812e;
+     display: inline-flex;
+     align-items: center;
+     gap: 6px;
+     padding: 4px 12px;
+     border-radius: 12px;
+     font-size: 11px;
+     font-weight: 600;
+     text-transform: uppercase;
  }
+
+ .status-shipping i {
+     animation: drive 2s linear infinite;
+ }
+
+ @keyframes drive {
+     0% {
+         transform: translateX(0);
+     }
+
+     50% {
+         transform: translateX(5px);
+     }
+
+     100% {
+         transform: translateX(0);
+     }
+ }
+
 
  .status-completed {
      background: #d4fee5;

@@ -38,8 +38,8 @@ class ConsumOrderModel
                 // Simpan ke orders
                 $orderStmt = $pdo->prepare("
                     INSERT INTO consum_orders 
-                        (customer_id, product_item_id, quantity, price, status, created_at)
-                    VALUES (?, ?, ?, ?, ?, NOW())
+                        (customer_id, product_item_id, quantity, price, status, created_at, updated_at)
+                    VALUES (?, ?, ?, ?, ?, NOW(), NOW())
                 ");
                 $orderStmt->execute([
                     $customerId,
@@ -68,6 +68,7 @@ class ConsumOrderModel
             return true;
         } catch (\Exception $e) {
             $pdo->rollBack();
+            error_log("Order creation failed: " . $e->getMessage());
             return false;
         }
     }
@@ -79,25 +80,25 @@ class ConsumOrderModel
     {
         $pdo = Database::connect();
         $stmt = $pdo->prepare("
-        SELECT o.id, o.product_item_id, o.quantity, o.price, o.status, o.created_at,
-                o.order_code,
-                p.name AS product_name,
-                p.item_code AS item_code,
-                p.image_path AS product_image,
-                p.file_path AS drawing_file,
-                pt.name AS product_type,
-                s.name AS section_name,
-                c.name AS customer_name,
-                c.line,
-                d.name AS department
-        FROM consum_orders o
-        JOIN product_items p ON o.product_item_id = p.id
-        JOIN product_types pt ON p.product_type_id = pt.id
-        JOIN sections s ON p.section_id = s.id
-        JOIN customers c ON o.customer_id = c.id
-        JOIN departments d ON c.department_id = d.id
-        WHERE o.customer_id = ?
-        ORDER BY o.created_at DESC
+            SELECT o.id, o.product_item_id, o.quantity, o.price, o.status, o.created_at,
+                   o.order_code,
+                   p.name AS product_name,
+                   p.item_code AS item_code,
+                   p.image_path AS product_image,
+                   p.file_path AS drawing_file,
+                   pt.name AS product_type,
+                   s.name AS section_name,
+                   c.name AS customer_name,
+                   c.line,
+                   d.name AS department
+            FROM consum_orders o
+            JOIN product_items p ON o.product_item_id = p.id
+            JOIN product_types pt ON p.product_type_id = pt.id
+            JOIN sections s ON p.section_id = s.id
+            JOIN customers c ON o.customer_id = c.id
+            JOIN departments d ON c.department_id = d.id
+            WHERE o.customer_id = ?
+            ORDER BY o.created_at DESC
         ");
         $stmt->execute([$customerId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -110,24 +111,24 @@ class ConsumOrderModel
     {
         $pdo = Database::connect();
         $stmt = $pdo->query("
-        SELECT o.id, o.product_item_id, o.quantity, o.price, o.status, o.created_at,
-                o.order_code,
-                p.name AS product_name,
-                p.item_code AS item_code,
-                p.image_path AS product_image,
-                p.file_path AS drawing_file,
-                pt.name AS product_type,
-                s.name AS section_name,
-                c.name AS customer_name,
-                c.line,
-                d.name AS department
-        FROM consum_orders o
-        JOIN product_items p ON o.product_item_id = p.id
-        JOIN product_types pt ON p.product_type_id = pt.id
-        JOIN sections s ON p.section_id = s.id
-        JOIN customers c ON o.customer_id = c.id
-        JOIN departments d ON c.department_id = d.id
-        ORDER BY o.created_at DESC
+            SELECT o.id, o.product_item_id, o.quantity, o.price, o.status, o.created_at,
+                   o.order_code,
+                   p.name AS product_name,
+                   p.item_code AS item_code,
+                   p.image_path AS product_image,
+                   p.file_path AS drawing_file,
+                   pt.name AS product_type,
+                   s.name AS section_name,
+                   c.name AS customer_name,
+                   c.line,
+                   d.name AS department
+            FROM consum_orders o
+            JOIN product_items p ON o.product_item_id = p.id
+            JOIN product_types pt ON p.product_type_id = pt.id
+            JOIN sections s ON p.section_id = s.id
+            JOIN customers c ON o.customer_id = c.id
+            JOIN departments d ON c.department_id = d.id
+            ORDER BY o.created_at DESC
         ");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -139,25 +140,25 @@ class ConsumOrderModel
     {
         $pdo = Database::connect();
         $stmt = $pdo->prepare("
-        SELECT o.id, o.product_item_id, o.quantity, o.price, o.status, o.created_at,
-                o.order_code,
-                p.name AS product_name,
-                p.item_code AS item_code,
-                p.image_path AS product_image,
-                p.file_path AS drawing_file,
-                pt.name AS product_type,
-                s.name AS section_name,
-                c.name AS customer_name,
-                c.line,
-                d.name AS department
-        FROM consum_orders o
-        JOIN product_items p ON o.product_item_id = p.id
-        JOIN product_types pt ON p.product_type_id = pt.id
-        JOIN sections s ON p.section_id = s.id
-        JOIN customers c ON o.customer_id = c.id
-        JOIN departments d ON c.department_id = d.id
-        WHERE c.department_id = ?
-        ORDER BY o.created_at DESC
+            SELECT o.id, o.product_item_id, o.quantity, o.price, o.status, o.created_at,
+                   o.order_code,
+                   p.name AS product_name,
+                   p.item_code AS item_code,
+                   p.image_path AS product_image,
+                   p.file_path AS drawing_file,
+                   pt.name AS product_type,
+                   s.name AS section_name,
+                   c.name AS customer_name,
+                   c.line,
+                   d.name AS department
+            FROM consum_orders o
+            JOIN product_items p ON o.product_item_id = p.id
+            JOIN product_types pt ON p.product_type_id = pt.id
+            JOIN sections s ON p.section_id = s.id
+            JOIN customers c ON o.customer_id = c.id
+            JOIN departments d ON c.department_id = d.id
+            WHERE c.department_id = ?
+            ORDER BY o.created_at DESC
         ");
         $stmt->execute([$departmentId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -170,6 +171,44 @@ class ConsumOrderModel
     {
         $pdo = Database::connect();
         $stmt = $pdo->prepare("UPDATE consum_orders SET status = ?, updated_at = NOW() WHERE id = ?");
+
         return $stmt->execute([$newStatus, $orderId]);
+    }
+
+    /**
+     * Tandai order sebagai dikirim.
+     */
+    public static function markAsShipped($orderId): bool
+    {
+        return self::updateStatus($orderId, 'Dikirim');
+    }
+
+    /**
+     * Tandai order sebagai selesai.
+     */
+    public static function markAsCompleted($orderId): bool
+    {
+        return self::updateStatus($orderId, 'Selesai');
+    }
+
+    /**
+     * Hapus order.
+     */
+    public static function delete($orderId): bool
+    {
+        $pdo = Database::connect();
+        $stmt = $pdo->prepare("DELETE FROM consum_orders WHERE id = ?");
+        return $stmt->execute([$orderId]);
+    }
+
+    /**
+     * Ambil detail order by ID (opsional).
+     */
+    public static function getOrderById($orderId)
+    {
+        $pdo = Database::connect();
+        $stmt = $pdo->prepare("SELECT * FROM consum_orders WHERE id = ?");
+        $stmt->execute([$orderId]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 }

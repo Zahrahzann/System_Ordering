@@ -57,25 +57,31 @@ $currentRole = $_SESSION['user_data']['role'] ?? 'customer';
                         <!-- Orders Grid -->
                         <div class="orders-grid">
                             <?php foreach ($orders as $order): ?>
+                                <?php
+                                // tentukan status class
+                                $statusText  = $order['status'] ?? 'Pending';
+                                $statusClass = 'status-pending';
+                                if ($statusText === 'Ready') {
+                                    $statusClass = 'status-ready';
+                                } elseif ($statusText === 'Dikirim') {
+                                    $statusClass = 'status-shipping';
+                                } elseif ($statusText === 'Selesai') {
+                                    $statusClass = 'status-completed';
+                                }
+                                ?>
                                 <div class="order-card">
                                     <div class="order-header">
                                         <div>
                                             <div class="order-id">Kode Order: <?= htmlspecialchars($order['order_code'] ?? 'ORD-XXXX') ?></div>
                                             <div class="order-date"><?= htmlspecialchars($order['created_at']) ?></div>
                                         </div>
-                                        <?php
-                                        $statusClass = 'status-pending'; // default status
-                                        $statusText  = $order['status'];
 
-                                        if ($order['status'] === 'Ready') {
-                                            $statusClass = 'status-ready';
-                                        } elseif ($order['status'] === 'Dikirim') {
-                                            $statusClass = 'status-shipping';
-                                        } elseif ($order['status'] === 'Selesai') {
-                                            $statusClass = 'status-completed';
-                                        }
-                                        ?>
                                         <span class="status-badge <?= $statusClass ?>">
+                                            <?php if ($statusText === 'Dikirim'): ?>
+                                                <i class="fas fa-truck-moving"></i>
+                                            <?php elseif ($statusText === 'Selesai'): ?>
+                                                <i class="fas fa-check-circle"></i>
+                                            <?php endif; ?>
                                             <?= htmlspecialchars($statusText) ?>
                                         </span>
                                     </div>
@@ -218,18 +224,19 @@ $currentRole = $_SESSION['user_data']['role'] ?? 'customer';
             document.getElementById('detail-department').textContent = order.department || '-';
             document.getElementById('detail-line').textContent = order.line || '-';
             document.getElementById('detail-itemcode').textContent = order.item_code || '-';
-            document.getElementById('detail-product').textContent = order.product_name;
+            document.getElementById('detail-product').textContent = order.product_name || '-';
             document.getElementById('detail-type').textContent = order.product_type || '-';
             document.getElementById('detail-section').textContent = order.section_name || '-';
             document.getElementById('detail-drawing').innerHTML = order.drawing_file ?
                 `<a href="${basePath}${order.drawing_file}" target="_blank">Lihat Drawing</a>` :
                 'Tidak ada';
             document.getElementById('detail-qty').textContent = order.quantity;
-            document.getElementById('detail-price').textContent = 'Rp ' + parseInt(order.price).toLocaleString('id-ID');
-            document.getElementById('detail-total').textContent = 'Rp ' + (parseInt(order.price) * parseInt(order.quantity)).toLocaleString('id-ID');
+            document.getElementById('detail-price').textContent = 'Rp ' + Number(order.price).toLocaleString('id-ID');
+            document.getElementById('detail-total').textContent = 'Rp ' + (Number(order.price) * Number(order.quantity)).toLocaleString('id-ID');
             document.getElementById('detail-status').textContent = order.status;
 
             <?php if ($currentRole === 'admin'): ?>
+                // Pastikan order.id ada
                 document.getElementById('btn-send').href = basePath + '/admin/consumable/orders/send/' + order.id;
                 document.getElementById('btn-complete').href = basePath + '/admin/consumable/orders/complete/' + order.id;
                 document.getElementById('btn-delete').href = basePath + '/admin/consumable/orders/delete/' + order.id;

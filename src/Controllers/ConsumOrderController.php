@@ -9,7 +9,6 @@ use App\Middleware\SessionMiddleware;
 class ConsumOrderController
 {
     /** Proses checkout dari cart → buat order */
-    /** Checkout cart (hanya item yang dicentang) */
     public static function processCheckout()
     {
         SessionMiddleware::requireCustomerLogin();
@@ -20,7 +19,7 @@ class ConsumOrderController
             exit;
         }
 
-        // Konsisten: checkbox harus name="selected_items[]" dengan value=cart_id
+        // Checkbox harus name="selected_items[]" dengan value=cart_id
         $selectedItems = $_POST['selected_items'] ?? [];
 
         if (empty($selectedItems) || !is_array($selectedItems)) {
@@ -30,10 +29,6 @@ class ConsumOrderController
 
         // Sanitize ids → integer only
         $cartIds = array_map('intval', $selectedItems);
-
-        // var_dump($_POST);
-        // exit;
-
 
         // Buat order dan hapus item yang di-checkout
         $okOrder  = ConsumCartModel::checkoutSelected($customerId, $cartIds);
@@ -47,7 +42,7 @@ class ConsumOrderController
         exit;
     }
 
-    /** Tampilkan daftar order milik customer */
+    /** Tampilkan daftar order sesuai role */
     public static function showOrders()
     {
         SessionMiddleware::requireLogin();
@@ -70,26 +65,32 @@ class ConsumOrderController
         require_once __DIR__ . "/../../views/shared/consum-orders.php";
     }
 
-
     /** Admin: tandai pesanan sedang dikirim */
-    public static function markShipping($orderId)
+    public static function sendOrder($orderId)
     {
+        // var_dump("MASUK CONTROLLER", $orderId);
+        // exit;
         SessionMiddleware::requireAdminLogin();
-
         ConsumOrderModel::updateStatus($orderId, 'Dikirim');
-
-        header('Location: /system_ordering/public/shared/consumable/orders?status=shipping');
+        header('Location: /system_ordering/public/admin/shared/consumable/orders?status=shipping');
         exit;
     }
 
-    /** Admin: tandai pesanan selesai dikirim */
-    public static function markComplete($orderId)
+    /** Admin: tandai pesanan selesai */
+    public static function completeOrder($orderId)
     {
         SessionMiddleware::requireAdminLogin();
+        ConsumOrderModel::updateStatus($orderId, 'Selesai');
+        header('Location: /system_ordering/public/admin/shared/consumable/orders?status=complete');
+        exit;
+    }
 
-        ConsumOrderModel::updateStatus($orderId, 'Pesanan Selesai');
-
-        header('Location: /system_ordering/public/shared/consumable/orders?status=complete');
+    /** Admin: hapus pesanan */
+    public static function deleteOrder($orderId)
+    {
+        SessionMiddleware::requireAdminLogin();
+        ConsumOrderModel::delete($orderId);
+        header('Location: /system_ordering/public/admin/shared/consumable/orders?status=deleted');
         exit;
     }
 }
