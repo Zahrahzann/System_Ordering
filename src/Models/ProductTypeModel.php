@@ -39,9 +39,9 @@ class ProductTypeModel
             return;
         }
 
-        $productCode = \App\Helpers\CodeGenerator::generateProductCode($section['name'], $data['name']);
+        $productCode = CodeGenerator::generateProductCode($section['name'], $data['name']);
 
-        // ✅ Upload gambar dan file
+        // Upload gambar dan file
         $imagePath = !empty($files['image']['name']) ? self::uploadFile($files['image']) : null;
         $filePath  = !empty($files['file_path']['name']) ? self::uploadFile($files['file_path']) : null;
 

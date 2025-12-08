@@ -129,10 +129,6 @@ $isEditMode = $editData !== null;
                                                         onclick="return confirm('Yakin hapus jenis produk ini?');">
                                                         <i class="fas fa-trash"></i> Hapus
                                                     </a>
-                                                <?php elseif ($currentRole === 'customer'): ?>
-                                                    <a href="<?= $basePath ?>/customer/consumable/product-type?id=<?= $pt['id'] ?>" class="btn btn-sm btn-info">
-                                                        <i class="fas fa-eye"></i> Lihat Detail
-                                                    </a>
                                                     <a href="<?= $basePath ?>/customer/cart/add?type=<?= $pt['id'] ?>" class="btn btn-sm btn-success">
                                                         <i class="fas fa-shopping-cart"></i> Pesan
                                                     </a>

@@ -11,6 +11,7 @@ use App\Controllers\HistoryController;
 use App\Controllers\ConsumableController;
 use App\Controllers\ProductTypeController;
 use App\Controllers\ProductItemController;
+use App\Controllers\ConsumOrderController;
 
 $requestMethod = $_SERVER['REQUEST_METHOD'];
 
@@ -85,7 +86,7 @@ switch ($route) {
 // ROUTING DINAMIS PRODUCT TYPE & ITEM
 switch (true) {
     // =========================
-    // PRODUCT TYPE ROUTES
+    // PRODUCT TYPE ROUTES (All Roles)
     // =========================
     case preg_match('#^/shared/consumable/product-types/(\d+)$#', $route, $matches):
         ProductTypeController::listBySection($matches[1]);
@@ -118,7 +119,7 @@ switch (true) {
 
 
     // =========================
-    // PRODUCT ITEM ROUTES
+    // PRODUCT ITEM ROUTES (All Roles)
     // =========================
     case preg_match('#^/shared/consumable/product-items/(\d+)$#', $route, $matches):
         ProductItemController::listByProductType($matches[1]);
@@ -138,6 +139,17 @@ switch (true) {
     case preg_match('#^/admin/consumable/product-items$#', $route) && isset($_GET['type']):
         ProductItemController::listByProductType($_GET['type']);
         break;
+
+
+    // ====================================
+    // Consumable Order ROUTES (All Roles)
+    // ====================================
+    case '/customer/shared/consumable/orders':
+    case '/spv/shared/consumable/orders':
+    case '/admin/shared/consumable/orders':
+        ConsumOrderController::showOrders();
+        break;
+
 
 
     // --- Default 404 ---

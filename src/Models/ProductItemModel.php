@@ -13,7 +13,7 @@ class ProductItemModel
         return Database::connect();
     }
 
-    // List printilan per jenis produk
+    // List item per jenis produk
     public static function listByProductType($typeId): array
     {
         $st = self::db()->prepare("SELECT * FROM product_items WHERE product_type_id = ? ORDER BY name ASC");
@@ -21,7 +21,7 @@ class ProductItemModel
         return $st->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
 
-    // Ambil detail printilan
+    // Ambil detail item
     public static function find($id): ?array
     {
         $st = self::db()->prepare("SELECT * FROM product_items WHERE id = ?");
@@ -29,18 +29,19 @@ class ProductItemModel
         return $st->fetch(PDO::FETCH_ASSOC) ?: null;
     }
 
-    // Tambah printilan
+    // Tambah item
     public static function create($typeId, $data, $files): void
     {
         $productType = ProductTypeModel::find($typeId);
         $itemCode    = CodeGenerator::generateItemCode($data['name'], $productType['name']);
+        $sectionId   = $productType['section_id']; 
 
         $imagePath = self::uploadFile($files['image'] ?? null);
         $filePath  = self::uploadFile($files['file_path'] ?? null);
 
         $st = self::db()->prepare("
-        INSERT INTO product_items (product_type_id, item_code, name, price, description, image_path, file_path, stock)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO product_items (product_type_id, item_code, name, price, description, image_path, file_path, stock, section_id)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
         $st->execute([
             $typeId,
@@ -50,11 +51,13 @@ class ProductItemModel
             $data['description'],
             $imagePath,
             $filePath,
-            is_numeric($data['stock']) ? $data['stock'] : 0
+            is_numeric($data['stock']) ? $data['stock'] : 0,
+            $sectionId
         ]);
     }
 
-    // Update printilan
+
+    // Update item
     public static function update($id, $data, $files): void
     {
         $oldItem = self::find($id);
@@ -70,25 +73,29 @@ class ProductItemModel
             ? self::uploadFile($files['file_path'])
             : $oldItem['file_path'];
 
+        $productType = ProductTypeModel::find($oldItem['product_type_id']);
+        $sectionId   = $productType['section_id'];
+
         $st = self::db()->prepare("
         UPDATE product_items 
-        SET product_type_id=?, item_code=?, name=?, price=?, description=?, image_path=?, file_path=?, stock=? 
+        SET product_type_id=?, item_code=?, name=?, price=?, description=?, image_path=?, file_path=?, stock=?, section_id=? 
         WHERE id=?
     ");
         $st->execute([
-            $oldItem['product_type_id'],   
-            $oldItem['item_code'],         
+            $oldItem['product_type_id'],
+            $oldItem['item_code'],
             $data['name'],
             is_numeric($data['price']) ? $data['price'] : null,
             $data['description'],
             $imagePath,
             $filePath,
             is_numeric($data['stock']) ? $data['stock'] : 0,
+            $sectionId,
             $id
         ]);
     }
 
-    // Hapus printilan
+    // Hapus item
     public static function delete($id): void
     {
         $st = self::db()->prepare("DELETE FROM product_items WHERE id=?");

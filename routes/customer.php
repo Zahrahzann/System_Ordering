@@ -1,6 +1,5 @@
 <?php
 // routes/customer.php
-// Variabel $route dari index.php
 global $route;
 
 // Controller
@@ -10,9 +9,10 @@ use App\Controllers\CustomerAuthController;
 use App\Controllers\TrackingController;
 use App\Controllers\DashboardController;
 use App\Controllers\ConsumableController;
+use App\Controllers\ConsumCartController;
+use App\Controllers\ConsumOrderController;
 
-
-// ROUTING DINAMIS
+// ROUTING DINAMIS (pakai preg_match di luar switch)
 $matches = [];
 if (preg_match('#^/customer/cart/edit/(\d+)$#', $route, $matches)) {
     WorkOrderController::editItem($matches[1]);
@@ -23,10 +23,14 @@ if (preg_match('#^/customer/cart/edit/(\d+)$#', $route, $matches)) {
 } elseif (preg_match('#^/customer/cart/delete/(\d+)$#', $route, $matches)) {
     CartController::deleteItem($matches[1]);
     exit;
+} elseif (preg_match('#^/customer/order/delete/(\d+)$#', $route, $matches)) {
+    CartController::deleteRejectedOrder($matches[1]);
+    exit;
 }
 
-// ROUTING STATIS
+// ROUTING STATIS (switch-case)
 switch ($route) {
+    // --- AUTH & DASHBOARD ---
     case '/customer/login':
         require __DIR__ . '/../views/customer/login.php';
         break;
@@ -36,6 +40,8 @@ switch ($route) {
     case '/customer/dashboard':
         DashboardController::showDashboard();
         break;
+
+    // --- WORK ORDER ---
     case '/customer/work_order/form':
         WorkOrderController::showForm();
         break;
@@ -45,7 +51,7 @@ switch ($route) {
     case '/customer/work_order/process_add_to_cart':
         WorkOrderController::processWorkOrderForm();
         break;
-    case '/customer/cart':
+    case '/customer/cart': // Cart untuk work order
         CartController::showCart();
         break;
     case '/customer/checkout/confirm':
@@ -57,11 +63,26 @@ switch ($route) {
     case '/customer/checkout':
         CartController::showTrackingPage();
         break;
-    case (preg_match('#^/customer/order/delete/(\d+)$#', $route, $matches) ? true : false):
-        CartController::deleteRejectedOrder($matches[1]);
+
+    // --- CONSUMABLE CART ---
+    case '/customer/consumable/cart':
+        ConsumCartController::showCart();
+        break;
+    case '/customer/consumable/cart/add':
+        ConsumCartController::processAdd();
+        break;
+    case '/customer/consumable/cart/update':
+        ConsumCartController::processUpdate();
+        break;
+    case '/customer/consumable/cart/delete':
+        ConsumCartController::processDelete();
+        break;
+    case '/customer/consumable/cart/checkout':
+        ConsumOrderController::processCheckout();
         break;
 
 
+    // --- PESAN ERROR ---
     default:
         http_response_code(404);
         echo "404 Not Found :) <br>";

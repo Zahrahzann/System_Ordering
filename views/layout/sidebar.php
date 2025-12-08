@@ -119,9 +119,8 @@ if ($currentRole === 'customer') {
             <div id="collapseCustomerConsumable" class="collapse" data-parent="#accordionSidebar">
                 <div class="bg-white py-2 collapse-inner rounded">
                     <h6 class="collapse-header">Menu</h6>
-                    <a class="collapse-item" href="#">Cart</a>
-                    <a class="collapse-item" href="#">Checkout</a>
-                    <a class="collapse-item" href="#">Tracking Order</a>
+                    <a class="collapse-item" href="<?= $basePath ?>/customer/consumable/cart">Cart</a>
+                    <a class="collapse-item" href="<?= $basePath ?>/customer/shared/consumable/orders">Checkout</a>
                     <a class="collapse-item" href="#">Riwayat Pesanan</a>
                 </div>
             </div>
@@ -202,7 +201,7 @@ if ($currentRole === 'customer') {
                 <div class="bg-white py-2 collapse-inner rounded">
                     <h6 class="collapse-header">Menu</h6>
                     <a class="collapse-item" href="<?= $basePath ?>/admin/consumable/sections">Kelola Katalog</a>
-                    <a class="collapse-item" href="#">Tracking Pesanan</a>
+                    <a class="collapse-item" href="<?= $basePath ?>/admin/shared/consumable/orders">Pesanan Consumable</a>
                     <a class="collapse-item" href="#">History</a>
                     <a class="collapse-item" href="#">Laporan Consumable</a>
                 </div>

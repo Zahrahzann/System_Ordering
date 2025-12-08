@@ -3,12 +3,11 @@ if (!isset($cartItems)) die('Controller tidak menyediakan data keranjang.');
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Keranjang Customer</title>
+    <title>Keranjang Work Order</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="/system_ordering/public/assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
     <link href="/system_ordering/public/assets/css/sb-admin-2.min.css" rel="stylesheet">
@@ -25,7 +24,6 @@ if (!isset($cartItems)) die('Controller tidak menyediakan data keranjang.');
                     <h1 class="h3 mb-4 text-gray-800">Keranjang Work Order</h1>
 
                     <?php if (empty($cartItems)): ?>
-                        <!-- Empty State -->
                         <div class="empty-cart">
                             <i class="fas fa-shopping-cart"></i>
                             <h3>Keranjang Anda Masih Kosong</h3>
@@ -35,13 +33,11 @@ if (!isset($cartItems)) die('Controller tidak menyediakan data keranjang.');
                         <form action="/system_ordering/public/customer/checkout/confirm" method="POST">
                             <div class="row">
                                 <div class="col-lg-8">
-                                    <!-- Select All Bar -->
                                     <div class="select-all-bar">
                                         <input type="checkbox" id="select_all">
                                         <label for="select_all">Pilih Semua</label>
                                     </div>
 
-                                    <!-- Cart Items -->
                                     <?php foreach ($cartItems as $item): ?>
                                         <div class="cart-item">
                                             <div class="cart-item-content">
@@ -71,7 +67,6 @@ if (!isset($cartItems)) die('Controller tidak menyediakan data keranjang.');
                                                         </div>
                                                     </div>
 
-                                                    <!-- Files -->
                                                     <?php
                                                     $files = json_decode($item['file_path'], true);
                                                     if (is_array($files) && !empty($files)):
@@ -107,8 +102,8 @@ if (!isset($cartItems)) die('Controller tidak menyediakan data keranjang.');
                                                             <div>
                                                                 <?php
                                                                 if ($item['is_emergency']) {
-                                                                    echo $item['emergency_type'] === 'line_stop' 
-                                                                        ? '<span class="badge badge-danger">Line Stop</span>' 
+                                                                    echo $item['emergency_type'] === 'line_stop'
+                                                                        ? '<span class="badge badge-danger">Line Stop</span>'
                                                                         : '<span class="badge badge-success">Safety</span>';
                                                                 } else {
                                                                     echo '<span class="badge badge-info">Regular</span>';
@@ -133,7 +128,6 @@ if (!isset($cartItems)) die('Controller tidak menyediakan data keranjang.');
                                 </div>
 
                                 <div class="col-lg-4">
-                                    <!-- Checkout Summary -->
                                     <div class="checkout-summary">
                                         <h5 style="margin-bottom: 15px; font-weight: 600;">Ringkasan Pesanan</h5>
                                         <div class="summary-row">
@@ -154,25 +148,37 @@ if (!isset($cartItems)) die('Controller tidak menyediakan data keranjang.');
         </div>
     </div>
 
-    <script src="/system_ordering/public/assets/vendor/jquery/jquery.min.js"></script>
-    <script src="/system_ordering/public/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="/system_ordering/public/assets/js/sb-admin-2.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const selectAll = document.getElementById('select_all');
             const checkboxes = document.querySelectorAll('.item-checkbox');
             const selectedCount = document.getElementById('selected_count');
+            const subtotalEl = document.getElementById('selected_subtotal');
+            const totalEl = document.getElementById('selected_total');
             const checkoutBtn = document.getElementById('checkout-btn');
 
             function updateState() {
-                const checkedCount = document.querySelectorAll('.item-checkbox:checked').length;
-                if (selectedCount) {
-                    selectedCount.textContent = checkedCount;
-                }
-                if (checkoutBtn) {
-                    checkoutBtn.disabled = checkedCount === 0;
-                }
+                let itemCount = 0;
+                let subtotal = 0;
+
+                checkboxes.forEach(cb => {
+                    if (cb.checked) {
+                        itemCount++;
+                        const row = cb.closest('.cart-item');
+                        const qty = parseInt(row.querySelector('.qty-input')?.value || '1');
+                        const priceText = row.querySelector('.item-price')?.textContent || 'Rp 0';
+                        const price = parseInt(priceText.replace(/\D/g, '')) || 0;
+                        subtotal += price * qty;
+                    }
+                });
+
+                selectedCount.textContent = itemCount;
+                subtotalEl.textContent = 'Rp ' + subtotal.toLocaleString('id-ID');
+                totalEl.textContent = 'Rp ' + subtotal.toLocaleString('id-ID');
+                checkoutBtn.disabled = itemCount === 0;
+
                 if (selectAll) {
+                    const checkedCount = document.querySelectorAll('.item-checkbox:checked').length;
                     selectAll.checked = checkedCount > 0 && checkedCount === checkboxes.length;
                 }
             }
@@ -184,13 +190,14 @@ if (!isset($cartItems)) die('Controller tidak menyediakan data keranjang.');
                 });
             }
 
-            checkboxes.forEach(checkbox => {
-                checkbox.addEventListener('change', updateState);
-            });
-
+            checkboxes.forEach(cb => cb.addEventListener('change', updateState));
             updateState();
         });
     </script>
+
+    <script src="/system_ordering/public/assets/vendor/jquery/jquery.min.js"></script>
+    <script src="/system_ordering/public/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="/system_ordering/public/assets/js/sb-admin-2.min.js"></script>
 </body>
 
 </html>
