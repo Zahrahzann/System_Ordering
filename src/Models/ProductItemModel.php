@@ -82,7 +82,7 @@ class ProductItemModel
         WHERE id=?
     ");
         $st->execute([
-            $oldItem['product_type_id'],
+            $oldItem['product_type_id'], 
             $oldItem['item_code'],
             $data['name'],
             is_numeric($data['price']) ? $data['price'] : null,

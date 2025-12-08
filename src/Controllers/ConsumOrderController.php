@@ -69,4 +69,27 @@ class ConsumOrderController
 
         require_once __DIR__ . "/../../views/shared/consum-orders.php";
     }
+
+
+    /** Admin: tandai pesanan sedang dikirim */
+    public static function markShipping($orderId)
+    {
+        SessionMiddleware::requireAdminLogin();
+
+        ConsumOrderModel::updateStatus($orderId, 'Dikirim');
+
+        header('Location: /system_ordering/public/shared/consumable/orders?status=shipping');
+        exit;
+    }
+
+    /** Admin: tandai pesanan selesai dikirim */
+    public static function markComplete($orderId)
+    {
+        SessionMiddleware::requireAdminLogin();
+
+        ConsumOrderModel::updateStatus($orderId, 'Pesanan Selesai');
+
+        header('Location: /system_ordering/public/shared/consumable/orders?status=complete');
+        exit;
+    }
 }
