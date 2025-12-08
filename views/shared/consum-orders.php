@@ -14,7 +14,8 @@ $currentRole = $_SESSION['user_data']['role'] ?? 'customer';
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="<?= $basePath ?>/assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
     <link href="<?= $basePath ?>/assets/css/sb-admin-2.min.css" rel="stylesheet">
-    <link href="<?= $basePath ?>/assets/css/customer/consumable/consum_orders.css?v=<?= time() ?>" rel="stylesheet">
+    <link href="<?= $basePath ?>/assets/css/shared/consum_order.css" <?= time() ?> rel="stylesheet">
+
 </head>
 
 <body id="page-top">
@@ -25,9 +26,12 @@ $currentRole = $_SESSION['user_data']['role'] ?? 'customer';
                 <?php include __DIR__ . '/../../views/layout/topbar.php'; ?>
                 <div class="container-fluid">
 
-                    <!-- Header -->
+                    <!-- Page Header -->
                     <div class="page-header">
-                        <h1 class="page-title"><i class="fas fa-clipboard-list"></i> Tracking Pesanan Consumable</h1>
+                        <h1 class="page-title">
+                            <i class="fas fa-clipboard-list"></i>
+                            Tracking Pesanan Consumable
+                        </h1>
                         <p class="page-subtitle">
                             <?php if ($currentRole === 'admin'): ?>
                                 List pesanan customer
@@ -39,61 +43,65 @@ $currentRole = $_SESSION['user_data']['role'] ?? 'customer';
                         </p>
                     </div>
 
-                    <!-- Konten -->
+                    <!-- Content -->
                     <?php if (empty($orders)): ?>
+                        <!-- Empty State -->
                         <div class="empty-state">
                             <i class="fas fa-box-open fa-3x"></i>
                             <h4>Belum ada pesanan</h4>
                             <p>Silakan checkout dari keranjang untuk membuat pesanan baru.</p>
-                            <a href="<?= $basePath ?>/shared/consumable/product-items/" class="btn-primary">Lihat Katalog</a>
+                            <a href="<?= $basePath ?>/shared/consumable/product-items/" class="btn-primary">
+                                Lihat Katalog
+                            </a>
                         </div>
                     <?php else: ?>
+                        <!-- Orders Table -->
                         <div class="orders-container">
                             <table class="orders-table">
                                 <thead>
                                     <tr>
+                                        <th>ID Order</th>
                                         <th>Produk</th>
+                                        <th>Product Type</th>
+                                        <th>Section</th>
                                         <th>Qty</th>
-                                        <th>Harga</th>
+                                        <th>Harga Satuan</th>
+                                        <th>Total Harga</th>
                                         <th>Status</th>
                                         <th>Tanggal</th>
                                         <?php if ($currentRole === 'admin' || $currentRole === 'spv'): ?>
                                             <th>Customer</th>
                                         <?php endif; ?>
-                                        <?php if ($currentRole === 'spv'): ?>
-                                            <th>Departemen</th>
+                                        <th>Line</th>
+                                        <?php if ($currentRole === 'admin'): ?>
+                                            <th>Department</th>
+                                            <th>Aksi</th>
                                         <?php endif; ?>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <?php foreach ($orders as $order): ?>
                                         <tr>
-                                            <td>
-                                                <div class="order-product">
-                                                    <strong><?= htmlspecialchars($order['product_name']) ?></strong><br>
-                                                    <small>ID Produk: <?= (int)$order['product_item_id'] ?></small>
-                                                </div>
-                                            </td>
+                                            <td><?= (int)$order['id'] ?></td>
+                                            <td><?= htmlspecialchars($order['product_name']) ?></td>
+                                            <td><?= htmlspecialchars($order['product_type'] ?? '-') ?></td>
+                                            <td><?= htmlspecialchars($order['section_name'] ?? '-') ?></td>
                                             <td><?= (int)$order['quantity'] ?></td>
                                             <td>Rp <?= number_format($order['price'], 0, ',', '.') ?></td>
-                                            <td>
-                                                <?php if ($order['status'] === 'Ready'): ?>
-                                                    <span class="status-label status-ready">
-                                                        <i class="fas fa-check-circle"></i> Ready
-                                                    </span>
-                                                <?php else: ?>
-                                                    <span class="status-label status-pending">
-                                                        <i class="fas fa-clock"></i> Pending
-                                                    </span>
-                                                <?php endif; ?>
-                                            </td>
+                                            <td>Rp <?= number_format($order['price'] * $order['quantity'], 0, ',', '.') ?></td>
+                                            <td><?= htmlspecialchars($order['status']) ?></td>
                                             <td><?= htmlspecialchars($order['created_at']) ?></td>
-
                                             <?php if ($currentRole === 'admin' || $currentRole === 'spv'): ?>
                                                 <td><?= htmlspecialchars($order['customer_name'] ?? '-') ?></td>
                                             <?php endif; ?>
+                                            <td><?= htmlspecialchars($order['line'] ?? '-') ?></td>
                                             <?php if ($currentRole === 'admin'): ?>
-                                                <td><?= htmlspecialchars($order['department_id'] ?? '-') ?></td>
+                                                <td><?= htmlspecialchars($order['department']) ?></td>
+                                                <td>
+                                                    <a href="<?= $basePath ?>/admin/orders/detail/<?= (int)$order['id'] ?>" class="btn btn-sm btn-info">Detail</a>
+                                                    <a href="<?= $basePath ?>/admin/orders/update_status/<?= (int)$order['id'] ?>" class="btn btn-sm btn-warning">Update</a>
+                                                    <a href="<?= $basePath ?>/admin/orders/delete/<?= (int)$order['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Hapus pesanan ini?')">Hapus</a>
+                                                </td>
                                             <?php endif; ?>
                                         </tr>
                                     <?php endforeach; ?>
@@ -101,6 +109,7 @@ $currentRole = $_SESSION['user_data']['role'] ?? 'customer';
                             </table>
                         </div>
                     <?php endif; ?>
+
                 </div>
             </div>
         </div>
@@ -111,4 +120,5 @@ $currentRole = $_SESSION['user_data']['role'] ?? 'customer';
     <script src="<?= $basePath ?>/assets/vendor/jquery-easing/jquery.easing.min.js"></script>
     <script src="<?= $basePath ?>/assets/js/sb-admin-2.min.js"></script>
 </body>
+
 </html>
