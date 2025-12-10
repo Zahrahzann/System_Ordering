@@ -35,7 +35,7 @@ $currentRole = $_SESSION['user_data']['role'] ?? 'customer';
                             <i class="fas fa-shopping-basket fa-3x"></i>
                             <h4>Keranjang Kosong</h4>
                             <p>Belum ada produk yang ditambahkan ke keranjang.</p>
-                            <a href="<?= $basePath ?>/shared/consumable/product-items/" class="btn-primary">Lihat Katalog</a>
+                            <a href="<?= $basePath ?>/admin/consumable/sections" class="btn-primary">Lihat Katalog</a>
                         </div>
                     <?php else: ?>
                         <form method="post" action="<?= $basePath ?>/customer/consumable/cart/checkout">
@@ -94,7 +94,7 @@ $currentRole = $_SESSION['user_data']['role'] ?? 'customer';
                                                 Rp <?= number_format($item['price'], 0, ',', '.') ?>
                                             </div>
 
-                                            <!-- Qty control (DIPERBAIKI) -->
+                                            <!-- Qty control -->
                                             <div class="quantity-control">
                                                 <button type="button" class="qty-btn qty-decrease" data-cart-id="<?= $item['id'] ?>">−</button>
                                                 <input type="number" class="qty-input" value="<?= $item['quantity'] ?>" min="1" data-cart-id="<?= $item['id'] ?>">
@@ -225,11 +225,9 @@ $currentRole = $_SESSION['user_data']['role'] ?? 'customer';
 
                     if (newQty === currentQty) return;
 
-                    // Update UI langsung
                     qtyInput.value = newQty;
                     updateSummary();
 
-                    // Kirim ke server menggunakan XMLHttpRequest (PHP 7 compatible)
                     var xhr = new XMLHttpRequest();
                     xhr.open('POST', '<?= $basePath ?>/customer/consumable/cart/update', true);
                     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
@@ -237,7 +235,6 @@ $currentRole = $_SESSION['user_data']['role'] ?? 'customer';
                     xhr.onload = function() {
                         if (xhr.status !== 200) {
                             console.error('Error updating quantity');
-                            // Rollback jika error
                             location.reload();
                         }
                     };

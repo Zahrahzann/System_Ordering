@@ -68,22 +68,6 @@ switch ($route) {
         }
         break;
 
-    // case '/admin/consumable/katalog_produk':
-    //     \App\Controllers\ConsumableController::listProducts();
-    //     break;
-
-    // case '/admin/consumable/katalog_produk/add':
-    //     \App\Controllers\ConsumableController::addProduct();
-    //     break;
-
-    // case '/admin/consumable/katalog_produk/edit':
-    //     \App\Controllers\ConsumableController::editProduct($_GET['id']);
-    //     break;
-
-    // case '/admin/consumable/katalog_produk/delete':
-    //     \App\Controllers\ConsumableController::deleteProduct($_GET['id']);
-    //     break;
-
 
     // 404 NOT FOUND RESPON
     default:

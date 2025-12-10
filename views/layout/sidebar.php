@@ -121,7 +121,7 @@ if ($currentRole === 'customer') {
                     <h6 class="collapse-header">Menu</h6>
                     <a class="collapse-item" href="<?= $basePath ?>/customer/consumable/cart">Cart</a>
                     <a class="collapse-item" href="<?= $basePath ?>/customer/shared/consumable/orders">Checkout</a>
-                    <a class="collapse-item" href="#">Riwayat Pesanan</a>
+                    <a class="collapse-item" href="<?= $basePath ?>/customer/consumable/history">Riwayat Pesanan</a>
                 </div>
             </div>
         </li>
@@ -203,7 +203,7 @@ if ($currentRole === 'customer') {
                     <h6 class="collapse-header">Menu</h6>
                     <a class="collapse-item" href="<?= $basePath ?>/admin/consumable/sections">Kelola Katalog</a>
                     <a class="collapse-item" href="<?= $basePath ?>/admin/shared/consumable/orders">Pesanan Consumable</a>
-                    <a class="collapse-item" href="#">History</a>
+                    <a class="collapse-item" href="<?= $basePath ?>/admin/consumable/history">History</a>
                     <a class="collapse-item" href="#">Laporan Consumable</a>
                 </div>
             </div>

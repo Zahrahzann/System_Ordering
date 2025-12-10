@@ -58,7 +58,7 @@ $currentRole = $_SESSION['user_data']['role'] ?? 'customer';
                         <div class="orders-grid">
                             <?php foreach ($orders as $order): ?>
                                 <?php
-                                // tentukan status class
+                                // Menentukan status class
                                 $statusText  = $order['status'] ?? 'Pending';
                                 $statusClass = 'status-pending';
                                 if ($statusText === 'Ready') {
@@ -123,7 +123,6 @@ $currentRole = $_SESSION['user_data']['role'] ?? 'customer';
                             <?php endforeach; ?>
                         </div>
                     <?php endif; ?>
-
                 </div>
             </div>
         </div>
@@ -229,7 +228,7 @@ $currentRole = $_SESSION['user_data']['role'] ?? 'customer';
             document.getElementById('detail-section').textContent = order.section_name || '-';
             document.getElementById('detail-drawing').innerHTML = order.drawing_file ?
                 `<a href="${basePath}${order.drawing_file}" target="_blank">Lihat Drawing</a>` :
-                'Tidak ada';
+                'Tidak ada Drawing';
             document.getElementById('detail-qty').textContent = order.quantity;
             document.getElementById('detail-price').textContent = 'Rp ' + Number(order.price).toLocaleString('id-ID');
             document.getElementById('detail-total').textContent = 'Rp ' + (Number(order.price) * Number(order.quantity)).toLocaleString('id-ID');

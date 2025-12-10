@@ -68,7 +68,7 @@
  }
 
  .btn-primary {
-     background: #1a1a1a;
+     background: #05124d;
      border: none;
      color: #ffffff;
      padding: 12px 32px;
@@ -80,7 +80,7 @@
  }
 
  .btn-primary:hover {
-     background: #000000;
+     background: #0b2bb5;
      transform: translateY(-2px);
      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
      color: #ffffff;
@@ -103,7 +103,7 @@
  }
 
  .order-card:hover {
-     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+     box-shadow: 0 4px 12px rgb(206, 243, 255);
      transform: translateY(-2px);
  }
 
@@ -215,11 +215,8 @@
 
  .order-image {
      max-width: 180px;
-     /* batasi lebar */
      max-height: 180px;
-     /* batasi tinggi */
      object-fit: cover;
-     /* crop proporsional */
      border-radius: 8px;
      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
  }
@@ -229,7 +226,6 @@
      max-width: 150px;
      max-height: 150px;
      object-fit: contain;
-     /* biar gambar tidak terpotong */
      border-radius: 8px;
      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
  }
@@ -237,7 +233,7 @@
  /* Detail Button */
  .detail-button {
      width: 100%;
-     background: #1a1a1a;
+     background: #000c41;
      color: #ffffff;
      border: none;
      padding: 10px;
@@ -252,7 +248,7 @@
  }
 
  .detail-button:hover {
-     background: #000000;
+     background: #0c28a6;
      color: #ffffff;
      text-decoration: none;
  }

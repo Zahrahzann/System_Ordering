@@ -12,6 +12,7 @@ use App\Controllers\ConsumableController;
 use App\Controllers\ProductTypeController;
 use App\Controllers\ProductItemController;
 use App\Controllers\ConsumOrderController;
+use App\Controllers\ConsumHistoryController;
 
 $requestMethod = $_SERVER['REQUEST_METHOD'];
 
@@ -160,6 +161,12 @@ switch (true) {
         ConsumOrderController::deleteOrder($matches[1]);
         break;
 
+
+// CONSUMABLE HISTORY ROUTES
+    case '/customer/consumable/history':
+    case '/admin/consumable/history':
+        ConsumHistoryController::showHistory();
+        break;
     // Default 404
     default:
         http_response_code(404);

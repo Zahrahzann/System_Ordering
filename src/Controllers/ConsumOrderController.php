@@ -33,9 +33,10 @@ class ConsumOrderController
         // Buat order dan hapus item yang di-checkout
         $okOrder  = ConsumCartModel::checkoutSelected($customerId, $cartIds);
         $okDelete = $okOrder ? ConsumCartModel::deleteSelected($customerId, $cartIds) : false;
+        $role = $_SESSION['user_data']['role'] ?? 'customer';
 
         if ($okOrder && $okDelete) {
-            header('Location: /system_ordering/public/shared/consumable/orders?status=checkout_success');
+            header("Location: /system_ordering/public/{$role}/shared/consumable/orders?status=checkout_success");
         } else {
             header('Location: /system_ordering/public/customer/consumable/cart?status=checkout_failed');
         }
@@ -81,7 +82,9 @@ class ConsumOrderController
     {
         SessionMiddleware::requireAdminLogin();
         ConsumOrderModel::updateStatus($orderId, 'Selesai');
-        header('Location: /system_ordering/public/admin/shared/consumable/orders?status=complete');
+
+        $role = $_SESSION['user_data']['role'] ?? 'customer';
+        header("Location: /system_ordering/public/{$role}/consumable/history?status=completed");
         exit;
     }
 
