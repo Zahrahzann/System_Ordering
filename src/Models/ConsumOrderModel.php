@@ -74,12 +74,17 @@ class ConsumOrderModel
     }
 
     /**
-     * Ambil semua order milik customer.
+     * Ambil order sesuai role & status.
+     * - role = 'customer' → filter customer_id
+     * - role = 'spv'      → filter department_id
+     * - role = 'admin'    → semua order
+     * - status bisa 'Selesai' atau 'aktif' (selain Selesai)
      */
-    public static function getOrders($customerId)
+    public static function getOrdersByRole(string $role, ?int $id = null, ?string $status = null): array
     {
         $pdo = Database::connect();
-        $stmt = $pdo->prepare("
+
+        $sql = "
             SELECT o.id, o.product_item_id, o.quantity, o.price, o.status, o.created_at,
                    o.order_code,
                    p.name AS product_name,
@@ -97,118 +102,120 @@ class ConsumOrderModel
             JOIN sections s ON p.section_id = s.id
             JOIN customers c ON o.customer_id = c.id
             JOIN departments d ON c.department_id = d.id
-            WHERE o.customer_id = ?
-            ORDER BY o.created_at DESC
-        ");
-        $stmt->execute([$customerId]);
+            WHERE 1=1
+        ";
+
+        $params = [];
+
+        // filter role
+        if ($role === 'customer' && $id) {
+            $sql .= " AND o.customer_id = ?";
+            $params[] = $id;
+        } elseif ($role === 'spv' && $id) {
+            $sql .= " AND c.department_id = ?";
+            $params[] = $id;
+        }
+        // admin → tidak ada filter tambahan
+
+        // filter status
+        if ($status === 'Selesai') {
+            $sql .= " AND o.status = 'Selesai'";
+        } elseif ($status === 'aktif') {
+            $sql .= " AND o.status != 'Selesai'";
+        }
+
+        $sql .= " ORDER BY o.created_at DESC";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     /**
-     * Ambil semua order (untuk admin).
-     */
-    public static function getAllOrders()
-    {
-        $pdo = Database::connect();
-        $stmt = $pdo->query("
-            SELECT o.id, o.product_item_id, o.quantity, o.price, o.status, o.created_at,
-                   o.order_code,
-                   p.name AS product_name,
-                   p.item_code AS item_code,
-                   p.image_path AS product_image,
-                   p.file_path AS drawing_file,
-                   pt.name AS product_type,
-                   s.name AS section_name,
-                   c.name AS customer_name,
-                   c.line,
-                   d.name AS department
-            FROM consum_orders o
-            JOIN product_items p ON o.product_item_id = p.id
-            JOIN product_types pt ON p.product_type_id = pt.id
-            JOIN sections s ON p.section_id = s.id
-            JOIN customers c ON o.customer_id = c.id
-            JOIN departments d ON c.department_id = d.id
-            ORDER BY o.created_at DESC
-        ");
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    /**
-     * Ambil order berdasarkan departemen (untuk supervisor).
-     */
-    public static function getOrdersByDepartment($departmentId)
-    {
-        $pdo = Database::connect();
-        $stmt = $pdo->prepare("
-            SELECT o.id, o.product_item_id, o.quantity, o.price, o.status, o.created_at,
-                   o.order_code,
-                   p.name AS product_name,
-                   p.item_code AS item_code,
-                   p.image_path AS product_image,
-                   p.file_path AS drawing_file,
-                   pt.name AS product_type,
-                   s.name AS section_name,
-                   c.name AS customer_name,
-                   c.line,
-                   d.name AS department
-            FROM consum_orders o
-            JOIN product_items p ON o.product_item_id = p.id
-            JOIN product_types pt ON p.product_type_id = pt.id
-            JOIN sections s ON p.section_id = s.id
-            JOIN customers c ON o.customer_id = c.id
-            JOIN departments d ON c.department_id = d.id
-            WHERE c.department_id = ?
-            ORDER BY o.created_at DESC
-        ");
-        $stmt->execute([$departmentId]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    /**
-     * Update status pesanan (dipakai admin).
+     * Update status pesanan.
      */
     public static function updateStatus($orderId, string $newStatus): bool
     {
         $pdo = Database::connect();
         $stmt = $pdo->prepare("UPDATE consum_orders SET status = ?, updated_at = NOW() WHERE id = ?");
-
         return $stmt->execute([$newStatus, $orderId]);
     }
 
-    /**
-     * Tandai order sebagai dikirim.
-     */
     public static function markAsShipped($orderId): bool
     {
         return self::updateStatus($orderId, 'Dikirim');
     }
 
-    /**
-     * Tandai order sebagai selesai.
-     */
     public static function markAsCompleted($orderId): bool
     {
         return self::updateStatus($orderId, 'Selesai');
     }
 
-    /**
-     * Hapus order.
-     */
     public static function delete($orderId): bool
     {
         $pdo = Database::connect();
-        $stmt = $pdo->prepare("DELETE FROM consum_orders WHERE id = ?");
-        return $stmt->execute([$orderId]);
+
+        // Ambil detail order dulu
+        $stmt = $pdo->prepare("SELECT product_item_id, quantity, status FROM consum_orders WHERE id=?");
+        $stmt->execute([$orderId]);
+        $order = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($order) {
+            // Kalo status Ready atau Pending → balikin stok
+            if (in_array($order['status'], ['Ready', 'Pending'])) {
+                $updateStock = $pdo->prepare("UPDATE product_items SET stock = stock + ? WHERE id = ?");
+                $updateStock->execute([$order['quantity'], $order['product_item_id']]);
+            }
+
+            // Hapus order
+            $stmt = $pdo->prepare("DELETE FROM consum_orders WHERE id = ?");
+            return $stmt->execute([$orderId]);
+        }
+
+        return false;
     }
 
-    /**
-     * Ambil detail order by ID (opsional).
-     */
     public static function getOrderById($orderId)
     {
         $pdo = Database::connect();
         $stmt = $pdo->prepare("SELECT * FROM consum_orders WHERE id = ?");
         $stmt->execute([$orderId]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    // Cek dan update order pending jika stok sudah cukup
+    public static function checkAndUpdatePendingOrders($productItemId)
+    {
+        $pdo = Database::connect();
+
+        // Ambil stok terbaru
+        $stmt = $pdo->prepare("SELECT stock FROM product_items WHERE id = ?");
+        $stmt->execute([$productItemId]);
+        $stock = (int)$stmt->fetchColumn();
+
+        // Ambil semua order pending untuk produk ini
+        $stmt = $pdo->prepare("
+        SELECT id, quantity 
+        FROM consum_orders 
+        WHERE product_item_id = ? AND status = 'Pending'
+        ORDER BY created_at ASC
+    ");
+        $stmt->execute([$productItemId]);
+        $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($orders as $order) {
+            $qty = (int)$order['quantity'];
+            if ($stock >= $qty) {
+                // Update status jadi Ready
+                $update = $pdo->prepare("UPDATE consum_orders SET status='Ready', updated_at=NOW() WHERE id=?");
+                $update->execute([$order['id']]);
+
+                // Kurangi stok
+                $stock -= $qty;
+                $updateStock = $pdo->prepare("UPDATE product_items SET stock=? WHERE id=?");
+                $updateStock->execute([$stock, $productItemId]);
+            }
+        }
     }
 }

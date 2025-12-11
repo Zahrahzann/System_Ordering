@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Models\ProductItemModel;
 use App\Models\ProductTypeModel;
+use App\Models\ConsumOrderModel;
 
 class ProductItemController
 {
@@ -47,12 +48,16 @@ class ProductItemController
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // Update produk
             ProductItemModel::update($id, $_POST, $_FILES);
+
+            // Setelah stok diupdate → cek order pending
+            ConsumOrderModel::checkAndUpdatePendingOrders($id);
 
             $item   = ProductItemModel::find($id);
             $typeId = $item['product_type_id'] ?? null;
 
-            header("Location: /system_ordering/public/admin/consumable/product-items?type={$typeId}");
+            header("Location: /system_ordering/public/admin/consumable/product-items?type={$typeId}&status=stock_updated");
             exit;
         }
     }

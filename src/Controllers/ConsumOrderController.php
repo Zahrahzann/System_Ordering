@@ -5,6 +5,8 @@ namespace App\Controllers;
 use App\Models\ConsumOrderModel;
 use App\Models\ConsumCartModel;
 use App\Middleware\SessionMiddleware;
+use ManufactureEngineering\SystemOrdering\Config\Database;
+use PDO;
 
 class ConsumOrderController
 {
@@ -49,18 +51,18 @@ class ConsumOrderController
         SessionMiddleware::requireLogin();
 
         $role       = $_SESSION['user_data']['role'] ?? 'customer';
-        $customerId = $_SESSION['user_data']['id'];
+        $customerId = $_SESSION['user_data']['id'] ?? null;
 
         if ($role === 'admin') {
-            // Admin lihat semua pesanan
-            $orders = ConsumOrderModel::getAllOrders();
+            // Admin lihat semua pesanan aktif
+            $orders = ConsumOrderModel::getOrdersByRole('admin', null, 'aktif');
         } elseif ($role === 'spv') {
-            // SPV lihat pesanan departemen
+            // SPV lihat pesanan departemen aktif
             $departmentId = $_SESSION['user_data']['department_id'] ?? null;
-            $orders = ConsumOrderModel::getOrdersByDepartment($departmentId);
+            $orders = ConsumOrderModel::getOrdersByRole('spv', $departmentId, 'aktif');
         } else {
-            // Customer lihat pesanan sendiri
-            $orders = ConsumOrderModel::getOrders($customerId);
+            // Customer lihat pesanan aktif miliknya
+            $orders = ConsumOrderModel::getOrdersByRole('customer', $customerId, 'aktif');
         }
 
         require_once __DIR__ . "/../../views/shared/consum-orders.php";
@@ -94,6 +96,64 @@ class ConsumOrderController
         SessionMiddleware::requireAdminLogin();
         ConsumOrderModel::delete($orderId);
         header('Location: /system_ordering/public/admin/shared/consumable/orders?status=deleted');
+        exit;
+    }
+
+    public static function reorder()
+    {
+        SessionMiddleware::requireCustomerLogin();
+        $customerId = $_SESSION['user_data']['id'] ?? null;
+
+        $orderId  = $_POST['order_id'] ?? null;
+        $quantity = (int)($_POST['quantity'] ?? 1);
+        $orderCode = 'ORD-' . date('Ymd') . '-' . rand(1000, 9999);
+
+        if (!$orderId || !$customerId) {
+            header('Location: /system_ordering/public/customer/shared/consumable/orders?status=reorder_failed');
+            exit;
+        }
+
+        // Ambil detail order lama + join ke product_items supaya dapat stok
+        $oldOrder = ConsumOrderModel::getOrderById($orderId);
+
+        if (!$oldOrder) {
+            header('Location: /system_ordering/public/customer/shared/consumable/orders?status=reorder_failed');
+            exit;
+        }
+
+        // Ambil stok produk
+        $pdo = Database::connect();
+        $stmt = $pdo->prepare("SELECT stock FROM product_items WHERE id = ?");
+        $stmt->execute([$oldOrder['product_item_id']]);
+        $product = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        $stock  = (int)($product['stock'] ?? 0);
+        $status = ($stock >= $quantity) ? 'Ready' : 'Pending';
+
+        // Insert order baru dengan status sesuai stok
+        $stmt = $pdo->prepare("
+    INSERT INTO consum_orders 
+        (order_code, customer_id, product_item_id, product_type_id, section_id, quantity, price, status, created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+");
+        $stmt->execute([
+            $orderCode,
+            $customerId,
+            $oldOrder['product_item_id'],
+            $oldOrder['product_type_id'],
+            $oldOrder['section_id'],
+            $quantity,
+            $oldOrder['price'],
+            $status
+        ]);
+
+        // Kalau status Ready → kurangi stok
+        if ($status === 'Ready') {
+            $updateStock = $pdo->prepare("UPDATE product_items SET stock = stock - ? WHERE id = ?");
+            $updateStock->execute([$quantity, $oldOrder['product_item_id']]);
+        }
+
+        header('Location: /system_ordering/public/customer/shared/consumable/orders?status=reorder_success');
         exit;
     }
 }

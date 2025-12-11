@@ -28,10 +28,20 @@ $isEditMode = isset($_GET['edit']) && $editData !== null;
                 <?php include __DIR__ . '/../layout/topbar.php'; ?>
                 <div class="container-fluid">
 
+                    <!-- Page Header -->
                     <div class="page-header">
-                        <h1 class="page-title"><i class="fas fa-shopping-bag"></i> Katalog Consumable</h1>
-                        <p class="page-subtitle">Pilih section untuk melihat produk yang tersedia</p>
+                        <h1 class="page-title">Katalog Consumable</h1>
+                        <p class="page-subtitle">
+                            <?php if ($currentRole === 'admin'): ?>
+                                Pilih Section untuk mengelola produk consumable
+                            <?php elseif ($currentRole === 'spv'): ?>
+                                Pilih section untuk melihat produk consumable yang tersedia
+                            <?php else: ?>
+                                Pilih section untuk melihat produk consumable yang tersedia
+                            <?php endif; ?>
+                        </p>
                     </div>
+
 
                     <!-- Admin: tombol toggle form -->
                     <?php if ($currentRole === 'admin'): ?>
@@ -130,7 +140,9 @@ $isEditMode = isset($_GET['edit']) && $editData !== null;
 
     <script src="<?= $basePath ?>/assets/vendor/jquery/jquery.min.js"></script>
     <script src="<?= $basePath ?>/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="<?= $basePath ?>/assets/vendor/jquery-easing/jquery.easing.min.js"></script>
     <script src="<?= $basePath ?>/assets/js/sb-admin-2.min.js"></script>
+
     <script>
         function toggleForm() {
             const form = document.getElementById('sectionForm');

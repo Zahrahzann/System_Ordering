@@ -20,15 +20,23 @@ $currentRole = $_SESSION['user_data']['role'] ?? '';
                 <?php include __DIR__ . '/../layout/topbar.php'; ?>
                 <div class="container-fluid">
 
-                    <h1 class="h3 mb-4 text-gray-800">
-                        <?php if ($currentRole === 'admin'): ?>
+                    <!-- Page Header -->
+                    <div class="page-header">
+                        <h1 class="page-title">
+                            <i class="fas fa-history"></i>
                             Riwayat Pesanan Work Order
-                        <?php elseif ($currentRole === 'spv'): ?>
-                            Riwayat Pesanan yang telah selesai
-                        <?php else: ?>
-                            Riwayat Pesanan Saya
-                        <?php endif; ?>
-                    </h1>
+                        </h1>
+                        <p class="page-subtitle">
+                            <?php if ($currentRole === 'admin'): ?>
+                                Riwayat Pesanan Work Order seluruh customer
+                            <?php elseif ($currentRole === 'spv'): ?>
+                                Riwayat Pesanan Work Order dari departemen Anda
+                            <?php else: ?>
+                                Riwayat Pesanan Anda
+                            <?php endif; ?>
+                        </p>
+                    </div>
+
 
                     <!-- Filter Tahun & Bulan -->
                     <div class="card shadow mb-4">

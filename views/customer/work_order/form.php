@@ -32,10 +32,20 @@ $old = $_SESSION['old_input'] ?? [];
                 <?php include __DIR__ . '/../../../views/layout/topbar.php'; ?>
 
                 <div class="container-fluid">
-                    <h1 class="page-title">
-                        <i class="fas fa-<?= $isEditMode ? 'edit' : 'file-alt' ?>"></i>
-                        <?= $isEditMode ? 'Edit Item' : 'Form Pengajuan' ?> Work Order
-                    </h1>
+                    <!-- Page Header -->
+                    <div class="page-header">
+                        <h1 class="page-title">Riwayat Pesanan</h1>
+                        <p class="page-subtitle">
+                            <?php if ($currentRole === 'admin'): ?>
+                                Pantau status pesanan customer terbaru, kelola pengembalian dengan mudah, dan dapatkan insight berharga
+                            <?php elseif ($currentRole === 'spv'): ?>
+                                Pantau status pesanan departemen terbaru dan kelola pengembalian dengan mudah
+                            <?php else: ?>
+                                Pantau status pesanan terbaru Anda, kelola pengembalian dengan mudah, dan dapatkan insight berharga
+                            <?php endif; ?>
+                        </p>
+                    </div>
+
 
                     <?php
                     // Menampilkan pesan error atau sukses

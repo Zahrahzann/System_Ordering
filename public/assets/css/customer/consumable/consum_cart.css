@@ -16,27 +16,21 @@ body {
 
 /* Page Header */
 .page-header {
-    margin-bottom: 30px;
+    margin-bottom: 2rem;
+    text-align: center;
 }
 
 .page-title {
-    font-size: 28px;
-    font-weight: 600;
-    color: #1a202c;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin: 0 0 8px 0;
-}
-
-.page-title i {
-    color: #4a5568;
-    font-size: 30px;
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 0.5rem;
 }
 
 .page-subtitle {
-    font-size: 14px;
-    color: #718096;
+    font-size: 0.95rem;
+    color: #6b7280;
+    font-weight: 400;
     margin: 0;
 }
 

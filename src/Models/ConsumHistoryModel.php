@@ -24,6 +24,8 @@ class ConsumHistoryModel
                 o.quantity,
                 o.price,
                 p.name AS product_name,
+                p.image_path AS product_image,
+                p.file_path AS drawing_file,
                 p.item_code,
                 pt.name AS product_type_name,
                 s.name AS section_name,
@@ -97,7 +99,7 @@ class ConsumHistoryModel
             $params[] = (int)$filters['year'];
         }
 
-        // order by created_at (karena updated_at tidak ada)
+        // order by created_at 
         $sql .= " ORDER BY o.created_at DESC";
 
         $stmt = $pdo->prepare($sql);

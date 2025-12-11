@@ -27,17 +27,14 @@ $currentRole = $_SESSION['user_data']['role'] ?? 'customer';
 
                     <!-- Page Header -->
                     <div class="page-header">
-                        <h1 class="page-title">
-                            <i class="fas fa-clipboard-list"></i>
-                            Tracking Pesanan Consumable
-                        </h1>
+                        <h1 class="page-title">Tracking Pesanan Consumable</h1>
                         <p class="page-subtitle">
                             <?php if ($currentRole === 'admin'): ?>
-                                List pesanan customer
+                                Pantau status pesanan customer terbaru, kelola pengembalian dengan mudah, dan dapatkan insight berharga  
                             <?php elseif ($currentRole === 'spv'): ?>
-                                Informasi pesanan dari departemen Anda
+                                Pantau status pesanan consumable terbaru pada departemen Anda
                             <?php else: ?>
-                                Pesanan Anda
+                                Pantau status pesanan terbaru Anda, dan tinjau riwayat pesanan dengan mudah
                             <?php endif; ?>
                         </p>
                     </div>
@@ -94,14 +91,23 @@ $currentRole = $_SESSION['user_data']['role'] ?? 'customer';
                                             </div>
                                         <?php endif; ?>
 
-                                        <div class="order-row">
-                                            <span class="order-label">Nama Customer:</span>
-                                            <span class="order-value"><?= htmlspecialchars($order['customer_name']) ?></span>
-                                        </div>
-                                        <div class="order-row">
-                                            <span class="order-label">Line:</span>
-                                            <span class="order-value"><?= htmlspecialchars($order['line']) ?></span>
-                                        </div>
+                                        <?php if (in_array($role, ['admin', 'spv'])): ?>
+                                            <div class="order-row">
+                                                <span class="order-label">Nama Customer:</span>
+                                                <span class="order-value"><?= htmlspecialchars($order['customer_name']) ?></span>
+                                            </div>
+                                            <div class="order-row">
+                                                <span class="order-label">Line:</span>
+                                                <span class="order-value"><?= htmlspecialchars($order['line']) ?></span>
+                                            </div>
+                                        <?php endif; ?>
+
+                                        <?php if ($role === 'admin'): ?>
+                                            <div class="order-row">
+                                                <span class="order-label">Departemen:</span>
+                                                <span class="order-value"><?= htmlspecialchars($order['department']) ?></span>
+                                            </div>
+                                        <?php endif; ?>
                                         <div class="order-row">
                                             <span class="order-label">Nama Produk:</span>
                                             <span class="order-value"><?= htmlspecialchars($order['product_name']) ?></span>

@@ -29,11 +29,12 @@ $productTypeId   = $productType['id'] ?? null;
                 <?php include __DIR__ . '/../layout/topbar.php'; ?>
                 <div class="container-fluid">
 
+                    <!-- Page Header -->
                     <div class="page-header">
-                        <h1 class="page-title">
-                            <i class="fas fa-cogs"></i> Katalog Produk dari <?= $productTypeName ?>
-                        </h1>
-                        <p class="page-subtitle">Daftar produk yang termasuk dalam katalog</p>
+                        <h1 class="page-title">Katalog Produk dari <?= $productTypeName ?></h1>
+                        <p class="page-subtitle">
+                                Daftar Produk yang termasuk dalam <?= $productTypeName ?>
+                        </p>
                     </div>
 
                     <!-- Admin: tombol tambah item -->

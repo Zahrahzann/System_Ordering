@@ -29,9 +29,12 @@ $isEditMode = $editData !== null;
                 <?php include __DIR__ . '/../layout/topbar.php'; ?>
                 <div class="container-fluid">
 
+                    <!-- Page Header -->
                     <div class="page-header">
-                        <h1 class="page-title"><i class="fas fa-boxes"></i> Jenis Produk di Section <?= htmlspecialchars($section['name']) ?></h1>
-                        <p class="page-subtitle">Pilih jenis produk untuk melihat detail barang</p>
+                        <h1 class="page-title">Jenis Produk</h1>
+                        <p class="page-subtitle">
+                            Daftar Jenis Produk yang termasuk dalam Section <?= htmlspecialchars($section['name']) ?>
+                        </p>
                     </div>
 
                     <!-- Admin: tombol toggle form -->

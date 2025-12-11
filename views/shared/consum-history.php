@@ -10,11 +10,12 @@ $currentRole = $_SESSION['user_data']['role'] ?? 'customer';
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Riwayat Pesanan Consumable</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="<?= $basePath ?>/assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
     <link href="<?= $basePath ?>/assets/css/sb-admin-2.min.css" rel="stylesheet">
-    <link href="<?= $basePath ?>/assets/css/shared/consum_order.css?v=<?= time() ?>" rel="stylesheet">
+    <link href="<?= $basePath ?>/assets/css/shared/consum_history.css?v=<?= time() ?>" rel="stylesheet">
 </head>
 
 <body id="page-top">
@@ -27,112 +28,156 @@ $currentRole = $_SESSION['user_data']['role'] ?? 'customer';
 
                     <!-- Page Header -->
                     <div class="page-header">
-                        <h1 class="page-title">
-                            <i class="fas fa-history"></i>
-                            Riwayat Pesanan Consumable
-                        </h1>
+                        <h1 class="page-title">Riwayat Pesanan</h1>
                         <p class="page-subtitle">
                             <?php if ($currentRole === 'admin'): ?>
-                                Semua riwayat pesanan customer
+                                Pantau status pesanan customer terbaru, kelola pengembalian dengan mudah, dan dapatkan insight berharga
                             <?php elseif ($currentRole === 'spv'): ?>
-                                Riwayat pesanan departemen Anda
+                                Pantau status pesanan departemen terbaru dan kelola pengembalian dengan mudah
                             <?php else: ?>
-                                Riwayat pesanan Anda
+                                Pantau status pesanan terbaru Anda, kelola pengembalian dengan mudah, dan dapatkan insight berharga
                             <?php endif; ?>
                         </p>
                     </div>
 
-                    <!-- Search & Filter -->
-                    <form method="GET" class="search-filter-form">
-                        <?php if ($currentRole === 'admin'): ?>
-                            <input type="text" name="q" placeholder="Cari produk / kode item / customer"
-                                value="<?= htmlspecialchars($_GET['q'] ?? '') ?>">
-                        <?php else: ?>
-                            <input type="text" name="q" placeholder="Cari produk / kode item"
-                                value="<?= htmlspecialchars($_GET['q'] ?? '') ?>">
-                        <?php endif; ?>
+                    <!-- Filter Section -->
+                    <div class="filter-section">
+                        <form method="GET" class="search-filter-form">
+                            <?php if ($currentRole === 'admin'): ?>
+                                <input type="text" name="q" placeholder="Cari produk, kode item, atau customer..."
+                                    value="<?= htmlspecialchars($_GET['q'] ?? '') ?>">
+                            <?php else: ?>
+                                <input type="text" name="q" placeholder="Cari produk atau kode item..."
+                                    value="<?= htmlspecialchars($_GET['q'] ?? '') ?>">
+                            <?php endif; ?>
 
-                        <?php if ($currentRole === 'admin' || $currentRole === 'spv'): ?>
-                            <select name="department">
-                                <option value="">-- Pilih Departemen --</option>
-                                <?php foreach ($departments as $dept): ?>
-                                    <option value="<?= $dept['id'] ?>"
-                                        <?= ($filters['department'] == $dept['id']) ? 'selected' : '' ?>>
-                                        <?= htmlspecialchars($dept['name']) ?>
+                            <?php if ($currentRole === 'admin' || $currentRole === 'spv'): ?>
+                                <select name="department">
+                                    <option value="">Semua Departemen</option>
+                                    <?php foreach ($departments as $dept): ?>
+                                        <option value="<?= $dept['id'] ?>"
+                                            <?= ($filters['department'] == $dept['id']) ? 'selected' : '' ?>>
+                                            <?= htmlspecialchars($dept['name']) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            <?php endif; ?>
+
+                            <select name="month">
+                                <option value="">Semua Bulan</option>
+                                <?php for ($m = 1; $m <= 12; $m++): ?>
+                                    <option value="<?= $m ?>" <?= ($_GET['month'] ?? '') == $m ? 'selected' : '' ?>>
+                                        <?= date('F', mktime(0, 0, 0, $m, 1)) ?>
                                     </option>
-                                <?php endforeach; ?>
+                                <?php endfor; ?>
                             </select>
-                        <?php endif; ?>
 
-                        <select name="month">
-                            <option value="">Semua Bulan</option>
-                            <?php for ($m = 1; $m <= 12; $m++): ?>
-                                <option value="<?= $m ?>" <?= ($_GET['month'] ?? '') == $m ? 'selected' : '' ?>>
-                                    <?= date('F', mktime(0, 0, 0, $m, 1)) ?>
-                                </option>
-                            <?php endfor; ?>
-                        </select>
+                            <select name="year">
+                                <option value="">Semua Tahun</option>
+                                <?php for ($y = date('Y'); $y >= date('Y') - 5; $y--): ?>
+                                    <option value="<?= $y ?>" <?= ($_GET['year'] ?? '') == $y ? 'selected' : '' ?>>
+                                        <?= $y ?>
+                                    </option>
+                                <?php endfor; ?>
+                            </select>
 
-                        <select name="year">
-                            <option value="">Semua Tahun</option>
-                            <?php for ($y = date('Y'); $y >= date('Y') - 5; $y--): ?>
-                                <option value="<?= $y ?>" <?= ($_GET['year'] ?? '') == $y ? 'selected' : '' ?>>
-                                    <?= $y ?>
-                                </option>
-                            <?php endfor; ?>
-                        </select>
+                            <button type="submit" class="btn-filter">
+                                <i class="fas fa-search"></i>
+                                Cari
+                            </button>
+                        </form>
+                    </div>
 
-                        <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Filter</button>
-                    </form>
-
-                    <!-- Cards -->
-                    <div class="orders-grid">
+                    <!-- Orders List -->
+                    <div class="orders-list">
                         <?php if (empty($orders)): ?>
                             <div class="empty-state">
-                                <i class="fas fa-box-open fa-3x"></i>
-                                <h4>Tidak ada riwayat pesanan</h4>
+                                <i class="fas fa-box-open fa-4x"></i>
+                                <h4>Belum ada riwayat pesanan</h4>
+                                <p>Pesanan yang sudah selesai akan muncul di sini</p>
                             </div>
                         <?php else: ?>
-                            <?php foreach ($orders as $order): ?>
-                                <div class="order-card">
-                                    <div class="order-header">
-                                        <div>
-                                            <div class="order-id">Kode Order: <?= htmlspecialchars($order['order_code']) ?></div>
-                                            <div class="order-date"><?= htmlspecialchars($order['created_at']) ?></div>
-                                        </div>
-                                        <span class="status-badge status-complete">
-                                            <i class="fas fa-check-circle"></i> Selesai
-                                        </span>
-                                    </div>
+                            <?php
+                            // Group orders by order_code
+                            $groupedOrders = [];
+                            foreach ($orders as $order) {
+                                $groupedOrders[$order['order_code']][] = $order;
+                            }
+                            ?>
 
-                                    <div class="order-content">
-                                        <div class="order-row">
-                                            <span class="order-label">Nama Produk:</span>
-                                            <span class="order-value"><?= htmlspecialchars($order['product_name']) ?></span>
+                            <?php foreach ($groupedOrders as $orderCode => $orderItems): ?>
+                                <?php $firstItem = $orderItems[0]; ?>
+                                <div class="order-card">
+                                    <!-- Order Header -->
+                                    <div class="order-header">
+                                        <div class="order-meta">
+                                            <span class="order-meta-label">Kode Pesanan</span>
+                                            <span class="order-meta-value">#<?= htmlspecialchars($orderCode) ?></span>
                                         </div>
-                                        <div class="order-row">
-                                            <span class="order-label">Qty:</span>
-                                            <span class="order-value"><?= (int)$order['quantity'] ?></span>
-                                        </div>
-                                        <div class="order-row">
-                                            <span class="order-label">Total:</span>
-                                            <span class="order-value">Rp <?= number_format($order['price'] * $order['quantity'], 0, ',', '.') ?></span>
+                                        <div class="order-meta">
+                                            <span class="order-meta-label">Tanggal Pengiriman</span>
+                                            <span class="order-meta-value"><?= date('d M Y', strtotime($firstItem['created_at'])) ?></span>
                                         </div>
                                         <?php if ($currentRole !== 'customer'): ?>
-                                            <div class="order-row">
-                                                <span class="order-label">Customer:</span>
-                                                <span class="order-value"><?= htmlspecialchars($order['customer_name']) ?></span>
-                                            </div>
-                                            <div class="order-row">
-                                                <span class="order-label">Departemen:</span>
-                                                <span class="order-value"><?= htmlspecialchars($order['department']) ?></span>
+                                            <div class="order-meta">
+                                                <span class="order-meta-label">Nama Customer</span>
+                                                <span class="order-meta-value"><?= htmlspecialchars($firstItem['customer_name']) ?></span>
                                             </div>
                                         <?php endif; ?>
+                                        <!-- <div class="order-actions-header">
+                                            <button class="btn-view-invoice">Lihat Invoice</button>
+                                        </div> -->
                                     </div>
 
-                                    <button class="detail-button" onclick="showDetail(<?= htmlspecialchars(json_encode($order)) ?>)">
-                                        Lihat Rincian
-                                    </button>
+                                    <!-- Order Body -->
+                                    <div class="order-body">
+                                        <?php foreach ($orderItems as $item): ?>
+                                            <div class="order-item-row">
+                                                <div class="order-image-container">
+                                                    <?php if (!empty($item['product_image'])): ?>
+                                                        <img src="<?= $basePath . htmlspecialchars($item['product_image']) ?>"
+                                                            alt="<?= htmlspecialchars($item['product_name']) ?>">
+                                                    <?php else: ?>
+                                                        <i class="fas fa-box no-image"></i>
+                                                    <?php endif; ?>
+                                                </div>
+
+                                                <div class="order-item-info">
+                                                    <div class="product-name"><?= htmlspecialchars($item['product_name']) ?></div>
+                                                    <div class="product-subtitle"><?= htmlspecialchars($item['section_name']) ?></div>
+                                                    <div class="product-details">
+                                                        Qty: <?= (int)$item['quantity'] ?> |
+                                                        Kode Pesanan: #<?= htmlspecialchars($item['item_code']) ?>
+                                                    </div>
+                                                </div>
+
+                                                <div class="order-item-right">
+                                                    <div class="product-price">
+                                                        Rp <?= number_format($item['price'] * $item['quantity'], 0, ',', '.') ?>
+                                                    </div>
+                                                    <div class="order-item-actions">
+                                                        <button class="btn-view-product" onclick="showDetail(<?= htmlspecialchars(json_encode($item)) ?>)">
+                                                            Detail Pesanan
+                                                        </button>
+
+                                                        <?php if ($currentRole === 'customer' && $item['status'] === 'Selesai'): ?>
+                                                            <button class="btn-buy-again" onclick="openReorderModal(<?= htmlspecialchars(json_encode($item)) ?>)">
+                                                                Pesan Lagi
+                                                            </button>
+                                                        <?php endif; ?>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    </div>
+
+                                    <!-- Order Footer -->
+                                    <div class="order-footer">
+                                        <span class="status-badge status-delivered">
+                                            <i class="fas fa-check-circle"></i>
+                                            Dikirim Pada <?= date('d M Y', strtotime($firstItem['created_at'])) ?>
+                                        </span>
+                                    </div>
                                 </div>
                             <?php endforeach; ?>
                         <?php endif; ?>
@@ -141,40 +186,135 @@ $currentRole = $_SESSION['user_data']['role'] ?? 'customer';
                     <!-- Modal Detail -->
                     <div class="modal-overlay" id="detailModal">
                         <div class="modal-content">
-                            <button class="modal-close" onclick="closeDetail()">×</button>
-                            <h2 class="modal-title">Rincian Pesanan</h2>
-                            <div id="detailContent"></div>
+                            <div class="modal-header">
+                                <h2 class="modal-title">Detail Pesanan</h2>
+                                <button class="modal-close" onclick="closeDetail()">×</button>
+                            </div>
+                            <div class="modal-body" id="detailContent"></div>
                         </div>
                     </div>
 
+                    <!-- Modal Pesan Lagi -->
+                    <div class="modal-overlay" id="reorderModal">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h2 class="modal-title">Pesan Lagi</h2>
+                                <button class="modal-close" onclick="closeReorderModal()">×</button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="reorderForm" method="POST" action="<?= $basePath ?>/customer/shared/consumable/reorder">
+                                    <input type="hidden" name="order_id" id="reorder_order_id">
+
+                                    <div class="detail-row">
+                                        <strong>Produk</strong>
+                                        <span id="reorder_product"></span>
+                                    </div>
+
+                                    <div class="detail-row">
+                                        <strong>Jumlah</strong>
+                                        <input type="number" name="quantity" id="reorder_quantity" min="1">
+                                    </div>
+
+                                    <div class="detail-row">
+                                        <strong>Harga Satuan</strong>
+                                        <span id="reorder_price"></span>
+                                    </div>
+
+                                    <div class="detail-row">
+                                        <strong>Total Harga</strong>
+                                        <span id="reorder_total"></span>
+                                    </div>
+
+                                    <div class="modal-actions">
+                                        <button type="submit" class="btn-confirm">Pesan Sekarang</button>
+                                        <button type="button" onclick="closeReorderModal()">Batal</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <script src="<?= $basePath ?>/assets/vendor/jquery/jquery.min.js"></script>
+    <script src="<?= $basePath ?>/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="<?= $basePath ?>/assets/vendor/jquery-easing/jquery.easing.min.js"></script>
+    <script src="<?= $basePath ?>/assets/js/sb-admin-2.min.js"></script>
 
     <script>
         const basePath = '<?= $basePath ?>';
 
         function showDetail(order) {
             let html = `
-            <p><strong>Kode Order:</strong> ${order.order_code}</p>
-            <p><strong>Tanggal:</strong> ${order.created_at}</p>
-            <p><strong>Produk:</strong> ${order.product_name}</p>
-            <p><strong>Item Code:</strong> ${order.item_code}</p>
-            <p><strong>Section:</strong> ${order.section_name}</p>
-            <p><strong>Type:</strong> ${order.product_type_name}</p>
-            <p><strong>Qty:</strong> ${order.quantity}</p>
-            <p><strong>Total:</strong> Rp ${new Intl.NumberFormat('id-ID').format(order.price * order.quantity)}</p>
-        `;
+                <div class="detail-row">
+                    <strong>Kode Pesanan</strong>
+                    <span>${order.order_code}</span>
+                </div>
+                <div class="detail-row">
+                    <strong>Tanggal</strong>
+                    <span>${order.created_at}</span>
+                </div>
+                <div class="detail-row">
+                    <strong>Nama Produk</strong>
+                    <span>${order.product_name}</span>
+                </div>
+                <div class="detail-row">
+                    <strong>Kode Item</strong>
+                    <span>${order.item_code}</span>
+                </div>
+                <div class="detail-row">
+                    <strong>Section</strong>
+                    <span>${order.section_name}</span>
+                </div>
+                <div class="detail-row">
+                    <strong>Tipe</strong>
+                    <span>${order.product_type_name}</span>
+                </div>
+                <div class="detail-row">
+                    <strong>Quantity</strong>
+                    <span>${order.quantity} pcs</span>
+                </div>
+                <div class="detail-row">
+                    <strong>Harga Satuan</strong>
+                    <span>Rp ${new Intl.NumberFormat('id-ID').format(order.price)}</span>
+                </div>
+                <div class="detail-row">
+                    <strong>Total Harga</strong>
+                    <span style="font-weight: 700; font-size: 1.1rem;">
+                        Rp ${new Intl.NumberFormat('id-ID').format(order.price * order.quantity)}
+                    </span>
+                </div>
+            `;
+
             if (order.customer_name) {
-                html += `<p><strong>Customer:</strong> ${order.customer_name}</p>`;
+                html += `
+                    <div class="detail-row">
+                        <strong>Customer</strong>
+                        <span>${order.customer_name}</span>
+                    </div>
+                `;
             }
+
             if (order.department) {
-                html += `<p><strong>Departemen:</strong> ${order.department}</p>`;
+                html += `
+                    <div class="detail-row">
+                        <strong>Departemen</strong>
+                        <span>${order.department}</span>
+                    </div>
+                `;
             }
+
             if (order.line) {
-                html += `<p><strong>Line:</strong> ${order.line}</p>`;
+                html += `
+                    <div class="detail-row">
+                        <strong>Line</strong>
+                        <span>${order.line}</span>
+                    </div>
+                `;
             }
+
             document.getElementById('detailContent').innerHTML = html;
             document.getElementById('detailModal').classList.add('active');
         }
@@ -186,6 +326,57 @@ $currentRole = $_SESSION['user_data']['role'] ?? 'customer';
         document.getElementById('detailModal').addEventListener('click', function(e) {
             if (e.target === this) {
                 closeDetail();
+            }
+        });
+
+        // Close modal with ESC key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeDetail();
+            }
+        });
+
+        // FITUR "PESAN LAGI"
+        let reorderUnitPrice = 0;
+
+        function openReorderModal(order) {
+            document.getElementById('reorder_order_id').value = order.id;
+            document.getElementById('reorder_product').innerText = order.product_name;
+            document.getElementById('reorder_quantity').value = order.quantity;
+
+            reorderUnitPrice = order.price; // simpan harga satuan
+            document.getElementById('reorder_price').innerText = "Rp " + new Intl.NumberFormat('id-ID').format(reorderUnitPrice);
+
+            // hitung total awal
+            updateReorderTotal();
+
+            document.getElementById('reorderModal').classList.add('active');
+        }
+
+        function updateReorderTotal() {
+            const qty = parseInt(document.getElementById('reorder_quantity').value) || 0;
+            const total = reorderUnitPrice * qty;
+            document.getElementById('reorder_total').innerText = "Rp " + new Intl.NumberFormat('id-ID').format(total);
+        }
+
+        function closeReorderModal() {
+            document.getElementById('reorderModal').classList.remove('active');
+        }
+
+        // event listener: update total saat qty berubah
+        document.getElementById('reorder_quantity').addEventListener('input', updateReorderTotal);
+
+        // Tutup modal dengan klik luar
+        document.getElementById('reorderModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeReorderModal();
+            }
+        });
+
+        // Tutup modal dengan ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeReorderModal();
             }
         });
     </script>

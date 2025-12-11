@@ -25,10 +25,14 @@ $currentRole = $_SESSION['user_data']['role'] ?? 'customer';
                 <?php include __DIR__ . '/../../../views/layout/topbar.php'; ?>
                 <div class="container-fluid">
 
+                    <!-- Page Header -->
                     <div class="page-header">
-                        <h1 class="page-title"><i class="fas fa-shopping-cart"></i> Keranjang Consumable</h1>
-                        <p class="page-subtitle">Daftar produk yang Anda pilih dari katalog</p>
+                        <h1 class="page-title">Keranjang Consumable</h1>
+                        <p class="page-subtitle">
+                           Daftar produk yang Anda pilih dari katalog
+                        </p>
                     </div>
+
 
                     <?php if (empty($items)): ?>
                         <div class="empty-state">

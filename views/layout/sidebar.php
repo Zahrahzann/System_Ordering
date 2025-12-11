@@ -154,7 +154,8 @@ if ($currentRole === 'customer') {
                 <div class="bg-white py-2 collapse-inner rounded">
                     <h6 class="collapse-header">Menu</h6>
                     <a class="collapse-item" href="<?= $basePath ?>/admin/consumable/sections">Katalog Product</a>
-                    <a class="collapse-item" href="<?= $basePath ?>/admin/shared/consumable/orders">Pesanan Consumable</a>
+                    <a class="collapse-item" href="<?= $basePath ?>/spv/shared/consumable/orders">Pesanan Consumable</a>
+                    <a class="collapse-item" href="<?= $basePath ?>/spv/consumable/history">History Consumable</a>
                 </div>
             </div>
         </li>

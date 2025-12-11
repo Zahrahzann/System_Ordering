@@ -21,6 +21,8 @@ class ConsumHistoryController
             SessionMiddleware::requireCustomerLogin();
         } elseif ($role === 'admin') {
             SessionMiddleware::requireAdminLogin();
+        } elseif ($role === 'spv') {
+            SessionMiddleware::requireSpvLogin();
         } else {
             http_response_code(403);
             echo "Akses ditolak. Halaman history hanya untuk admin dan customer.";

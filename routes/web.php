@@ -147,6 +147,9 @@ switch (true) {
         || $route === '/admin/shared/consumable/orders'):
         ConsumOrderController::showOrders();
         break;
+    case ($route === '/customer/shared/consumable/reorder'):
+        ConsumOrderController::reorder();
+        break;
 
     // ACTION ROUTES (Admin only)
     case preg_match('#^/admin/consumable/orders/send/(\d+)$#', $route, $matches):
@@ -162,11 +165,13 @@ switch (true) {
         break;
 
 
-// CONSUMABLE HISTORY ROUTES
+    // CONSUMABLE HISTORY ROUTES
     case '/customer/consumable/history':
+    case '/spv/consumable/history':
     case '/admin/consumable/history':
         ConsumHistoryController::showHistory();
         break;
+        
     // Default 404
     default:
         http_response_code(404);
