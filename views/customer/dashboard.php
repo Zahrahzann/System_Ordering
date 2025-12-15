@@ -30,7 +30,6 @@ $departmentName = DepartmentModel::getNameById($userData['department_id']);
     <link href="/system_ordering/public/assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
     <link href="/system_ordering/public/assets/css/sb-admin-2.css" rel="stylesheet">
     <link href="/system_ordering/public/assets/css/customer/dashboard.css?v=<?= time() ?>" rel="stylesheet">
-    <!-- <link href="/system_ordering/public/assets/css/layout.css?v=<?= time() ?>" rel="stylesheet"> -->
 </head>
 
 <body id="page-top"> 

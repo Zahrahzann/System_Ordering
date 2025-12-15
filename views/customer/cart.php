@@ -32,7 +32,9 @@ if (!isset($cartItems)) die('Controller tidak menyediakan data keranjang.');
                     <?php else: ?>
                         <form action="/system_ordering/public/customer/checkout/confirm" method="POST">
                             <div class="row">
+                                <!-- Daftar Item -->
                                 <div class="col-lg-8">
+                                    <!-- Pilih Semua -->
                                     <div class="select-all-bar">
                                         <input type="checkbox" id="select_all">
                                         <label for="select_all">Pilih Semua</label>
@@ -41,14 +43,17 @@ if (!isset($cartItems)) die('Controller tidak menyediakan data keranjang.');
                                     <?php foreach ($cartItems as $item): ?>
                                         <div class="cart-item">
                                             <div class="cart-item-content">
+                                                <!-- Checkbox per item -->
                                                 <div class="item-checkbox-wrapper">
                                                     <input type="checkbox" class="item-checkbox" name="selected_items[]" value="<?= $item['id'] ?>">
                                                 </div>
 
+                                                <!-- Icon / gambar item -->
                                                 <div class="item-image">
                                                     <i class="fas fa-tools"></i>
                                                 </div>
 
+                                                <!-- Detail item -->
                                                 <div class="item-details">
                                                     <div class="item-name"><?= htmlspecialchars($item['item_name']) ?></div>
 
@@ -67,6 +72,7 @@ if (!isset($cartItems)) die('Controller tidak menyediakan data keranjang.');
                                                         </div>
                                                     </div>
 
+                                                    <!-- File Drawing -->
                                                     <?php
                                                     $files = json_decode($item['file_path'], true);
                                                     if (is_array($files) && !empty($files)):
@@ -90,6 +96,7 @@ if (!isset($cartItems)) die('Controller tidak menyediakan data keranjang.');
                                                         </div>
                                                     <?php endif; ?>
 
+                                                    <!-- Footer item -->
                                                     <div class="item-footer">
                                                         <div class="item-meta">
                                                             <div class="qty-info">
@@ -127,6 +134,7 @@ if (!isset($cartItems)) die('Controller tidak menyediakan data keranjang.');
                                     <?php endforeach; ?>
                                 </div>
 
+                                <!-- Ringkasan -->
                                 <div class="col-lg-4">
                                     <div class="checkout-summary">
                                         <h5 style="margin-bottom: 15px; font-weight: 600;">Ringkasan Pesanan</h5>
@@ -135,7 +143,7 @@ if (!isset($cartItems)) die('Controller tidak menyediakan data keranjang.');
                                             <span class="summary-value" id="selected_count">0</span>
                                         </div>
                                         <button type="submit" class="btn btn-primary" id="checkout-btn" disabled>
-                                            <i class="fas fa-check mr-2"></i>Checkout Sekarang
+                                            <i class="fas fa-check mr-2"></i> Checkout Sekarang
                                         </button>
                                     </div>
                                 </div>
@@ -144,7 +152,6 @@ if (!isset($cartItems)) die('Controller tidak menyediakan data keranjang.');
                     <?php endif; ?>
                 </div>
             </div>
-            <?php include __DIR__ . '/../../views/layout/footer.php'; ?>
         </div>
     </div>
 
@@ -153,30 +160,24 @@ if (!isset($cartItems)) die('Controller tidak menyediakan data keranjang.');
             const selectAll = document.getElementById('select_all');
             const checkboxes = document.querySelectorAll('.item-checkbox');
             const selectedCount = document.getElementById('selected_count');
-            const subtotalEl = document.getElementById('selected_subtotal');
-            const totalEl = document.getElementById('selected_total');
             const checkoutBtn = document.getElementById('checkout-btn');
 
             function updateState() {
                 let itemCount = 0;
-                let subtotal = 0;
 
                 checkboxes.forEach(cb => {
                     if (cb.checked) {
                         itemCount++;
-                        const row = cb.closest('.cart-item');
-                        const qty = parseInt(row.querySelector('.qty-input')?.value || '1');
-                        const priceText = row.querySelector('.item-price')?.textContent || 'Rp 0';
-                        const price = parseInt(priceText.replace(/\D/g, '')) || 0;
-                        subtotal += price * qty;
                     }
                 });
 
+                // update jumlah item terpilih
                 selectedCount.textContent = itemCount;
-                subtotalEl.textContent = 'Rp ' + subtotal.toLocaleString('id-ID');
-                totalEl.textContent = 'Rp ' + subtotal.toLocaleString('id-ID');
+
+                // aktifkan tombol checkout kalau ada item dipilih
                 checkoutBtn.disabled = itemCount === 0;
 
+                // sinkronkan "Pilih Semua"
                 if (selectAll) {
                     const checkedCount = document.querySelectorAll('.item-checkbox:checked').length;
                     selectAll.checked = checkedCount > 0 && checkedCount === checkboxes.length;

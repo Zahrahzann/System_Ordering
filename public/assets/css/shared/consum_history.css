@@ -5,20 +5,20 @@
 }
 
 body {
-    font-family: 'Poppins', sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     background-color: #fafafa;
     color: #1a1a1a;
 }
 
 #content {
-     padding-top: 64px !important;
+     padding-top: 65px !important;
  }
 
 .container-fluid {
-    padding: 40px;
-    max-width: 1400px;
-    margin: 0 auto;
-}
+     padding: 40px;
+     max-width: 1400px;
+     margin: 0 auto;
+ }
 
 /* Page Header */
 .page-header {
@@ -27,7 +27,7 @@ body {
 }
 
 .page-title {
-    font-size: 1.7rem;
+    font-size: 2rem;
     font-weight: 700;
     color: #1a1a1a;
     margin-bottom: 0.5rem;
@@ -37,22 +37,25 @@ body {
     font-size: 0.95rem;
     color: #6b7280;
     font-weight: 400;
-    margin: 0;
+    line-height: 1.6;
+    max-width: 700px;
+    margin: 0 auto;
 }
 
-/* Filter Section */
+/* ==================== Filter Section ==================== */
 .filter-section {
     background: white;
     padding: 1.5rem;
     border-radius: 12px;
     margin-bottom: 2rem;
     border: 1px solid #e5e7eb;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .search-filter-form {
     display: grid;
     grid-template-columns: 2fr repeat(auto-fit, minmax(150px, 1fr));
-    gap: 1rem;
+    gap: 0.875rem;
     align-items: center;
 }
 
@@ -65,6 +68,7 @@ body {
     transition: all 0.2s ease;
     font-family: 'Inter', sans-serif;
     background: white;
+    color: #1a1a1a;
 }
 
 .search-filter-form input[type="text"]:focus,
@@ -72,6 +76,10 @@ body {
     outline: none;
     border-color: #6366f1;
     box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+.search-filter-form input[type="text"]::placeholder {
+    color: #9ca3af;
 }
 
 .btn-filter {
@@ -93,15 +101,22 @@ body {
 
 .btn-filter:hover {
     background: #4f46e5;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
 
-/* Order Card */
+.btn-filter:active {
+    transform: translateY(0);
+}
+
+/* ==================== Orders List ==================== */
 .orders-list {
     display: flex;
     flex-direction: column;
     gap: 1rem;
 }
 
+/* ==================== Order Card ==================== */
 .order-card {
     background: white;
     border-radius: 12px;
@@ -112,16 +127,17 @@ body {
 
 .order-card:hover {
     border-color: #d1d5db;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    transform: translateY(-2px);
 }
 
-/* Order Header */
+/* ==================== Order Header ==================== */
 .order-header {
     padding: 1.25rem 1.5rem;
     background: #f9fafb;
     border-bottom: 1px solid #e5e7eb;
     display: grid;
-    grid-template-columns: repeat(3, 1fr) auto;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 1.5rem;
     align-items: center;
 }
@@ -149,18 +165,24 @@ body {
 .order-actions-header {
     display: flex;
     gap: 0.5rem;
+    justify-content: flex-end;
 }
 
-.btn-view-order {
+.btn-view-order,
+.btn-view-invoice {
     padding: 0.5rem 1rem;
-    background: white;
-    color: #374151;
-    border: 1px solid #d1d5db;
     border-radius: 6px;
     cursor: pointer;
     font-weight: 500;
     transition: all 0.2s ease;
     font-size: 0.875rem;
+    border: none;
+}
+
+.btn-view-order {
+    background: white;
+    color: #374151;
+    border: 1px solid #d1d5db;
 }
 
 .btn-view-order:hover {
@@ -169,22 +191,15 @@ body {
 }
 
 .btn-view-invoice {
-    padding: 0.5rem 1rem;
     background: #6366f1;
     color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 500;
-    transition: all 0.2s ease;
-    font-size: 0.875rem;
 }
 
 .btn-view-invoice:hover {
     background: #4f46e5;
 }
 
-/* Order Body */
+/* ==================== Order Body ==================== */
 .order-body {
     padding: 1.5rem;
 }
@@ -205,6 +220,7 @@ body {
     padding-bottom: 0;
 }
 
+/* Image Container */
 .order-image-container {
     width: 100px;
     height: 100px;
@@ -228,6 +244,7 @@ body {
     font-size: 2rem;
 }
 
+/* Item Info */
 .order-item-info {
     display: flex;
     flex-direction: column;
@@ -239,25 +256,28 @@ body {
     font-weight: 600;
     color: #1a1a1a;
     margin-bottom: 0.25rem;
+    line-height: 1.4;
 }
 
 .product-subtitle {
     font-size: 0.875rem;
-    color: #444545;
+    color: #6b7280;
     font-weight: 400;
 }
 
 .product-details {
     font-size: 0.8rem;
-    color: #444545;
+    color: #9ca3af;
     margin-top: 0.25rem;
 }
 
+/* Item Right Side */
 .order-item-right {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
     gap: 0.75rem;
+    min-width: 200px;
 }
 
 .product-price {
@@ -268,7 +288,9 @@ body {
 
 .order-item-actions {
     display: flex;
-    gap: 0.75rem;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
 }
 
 .btn-view-product,
@@ -284,13 +306,23 @@ body {
     color: #374151;
 }
 
-.btn-view-product:hover,
-.btn-buy-again:hover {
+.btn-view-product:hover {
     background: #f9fafb;
     border-color: #9ca3af;
 }
 
-/* Order Footer */
+.btn-buy-again {
+    background: #6366f1;
+    color: white;
+    border-color: #6366f1;
+}
+
+.btn-buy-again:hover {
+    background: #4f46e5;
+    border-color: #4f46e5;
+}
+
+/* ==================== Order Footer ==================== */
 .order-footer {
     padding: 1rem 1.5rem;
     background: #f9fafb;
@@ -320,12 +352,7 @@ body {
     color: #92400e;
 }
 
-.order-footer-text {
-    font-size: 0.8rem;
-    color: #6b7280;
-}
-
-/* Empty State */
+/* ==================== Empty State ==================== */
 .empty-state {
     text-align: center;
     padding: 4rem 2rem;
@@ -343,6 +370,7 @@ body {
     color: #6b7280;
     font-weight: 600;
     margin-bottom: 0.5rem;
+    font-size: 1.125rem;
 }
 
 .empty-state p {
@@ -350,7 +378,7 @@ body {
     font-size: 0.875rem;
 }
 
-/* Modal */
+/* ==================== Modal ==================== */
 .modal-overlay {
     display: none;
     position: fixed;
@@ -362,6 +390,7 @@ body {
     z-index: 9999;
     align-items: center;
     justify-content: center;
+    backdrop-filter: blur(2px);
 }
 
 .modal-overlay.active {
@@ -383,12 +412,12 @@ body {
 @keyframes modalSlideIn {
     from {
         opacity: 0;
-        transform: translateY(-20px);
+        transform: translateY(-20px) scale(0.95);
     }
 
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(0) scale(1);
     }
 }
 
@@ -398,6 +427,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    background: #f9fafb;
 }
 
 .modal-title {
@@ -420,10 +450,11 @@ body {
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
+    line-height: 1;
 }
 
 .modal-close:hover {
-    background: #f3f4f6;
+    background: #e5e7eb;
     color: #1a1a1a;
 }
 
@@ -431,12 +462,14 @@ body {
     padding: 1.5rem;
 }
 
+/* Detail Row */
 .detail-row {
     display: grid;
     grid-template-columns: 140px 1fr;
     gap: 1rem;
     padding: 0.875rem 0;
     border-bottom: 1px solid #f3f4f6;
+    align-items: center;
 }
 
 .detail-row:last-child {
@@ -455,7 +488,64 @@ body {
     font-size: 0.875rem;
 }
 
-/* Responsive */
+.detail-row input[type="number"] {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    width: 100%;
+    max-width: 150px;
+}
+
+.detail-row input[type="number"]:focus {
+    outline: none;
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+}
+
+/* Modal Actions */
+.modal-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e5e7eb;
+}
+
+.modal-actions button {
+    flex: 1;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+}
+
+.btn-confirm {
+    background: #6366f1;
+    color: white;
+}
+
+.btn-confirm:hover {
+    background: #4f46e5;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.modal-actions button[type="button"] {
+    background: white;
+    color: #374151;
+    border: 1px solid #d1d5db;
+}
+
+.modal-actions button[type="button"]:hover {
+    background: #f9fafb;
+    border-color: #9ca3af;
+}
+
+/* ==================== Responsive Design ==================== */
 @media (max-width: 992px) {
     .search-filter-form {
         grid-template-columns: 1fr;
@@ -480,6 +570,10 @@ body {
         font-size: 1.5rem;
     }
 
+    .page-subtitle {
+        font-size: 0.875rem;
+    }
+
     .order-item-row {
         grid-template-columns: 80px 1fr;
         gap: 1rem;
@@ -496,10 +590,98 @@ body {
         justify-content: space-between;
         align-items: center;
         margin-top: 0.5rem;
+        width: 100%;
+        min-width: auto;
+    }
+
+    .order-item-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .btn-view-product,
+    .btn-buy-again {
+        width: 100%;
+        justify-content: center;
     }
 
     .detail-row {
         grid-template-columns: 1fr;
         gap: 0.25rem;
     }
+
+    .detail-row input[type="number"] {
+        max-width: 100%;
+    }
+
+    .modal-actions {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    .container-fluid {
+        padding: 0.75rem;
+    }
+
+    .filter-section {
+        padding: 1rem;
+    }
+
+    .order-header {
+        padding: 1rem;
+    }
+
+    .order-body {
+        padding: 1rem;
+    }
+
+    .order-footer {
+        padding: 0.75rem 1rem;
+    }
+
+    .product-price {
+        font-size: 1.125rem;
+    }
+}
+
+/* ==================== Utility Classes ==================== */
+.text-center {
+    text-align: center;
+}
+
+.mt-1 {
+    margin-top: 0.5rem;
+}
+
+.mt-2 {
+    margin-top: 1rem;
+}
+
+.mb-1 {
+    margin-bottom: 0.5rem;
+}
+
+.mb-2 {
+    margin-bottom: 1rem;
+}
+
+/* ==================== Scrollbar Styling ==================== */
+
+.modal-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.modal-content::-webkit-scrollbar-track {
+    background: #f3f4f6;
+    border-radius: 4px;
+}
+
+.modal-content::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 4px;
+}
+
+.modal-content::-webkit-scrollbar-thumb:hover {
+    background: #9ca3af;
 }

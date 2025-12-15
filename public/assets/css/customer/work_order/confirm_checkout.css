@@ -4,9 +4,10 @@ body {
 }
 
 .container-fluid {
+    padding: 40px;
     max-width: 1400px;
     margin: 0 auto;
-}
+} 
 
 /* Page Header */
 .page-header {

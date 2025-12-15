@@ -142,7 +142,6 @@ $basePath = '/system_ordering/public';
                     </div>
                 </div>
             </div>
-            <?php include __DIR__ . '/../../../views/layout/footer.php'; ?>
         </div>
     </div>
     <script src="/system_ordering/public/assets/vendor/jquery/jquery.min.js"></script>

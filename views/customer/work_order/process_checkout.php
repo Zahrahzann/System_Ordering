@@ -185,7 +185,6 @@ if (session_status() === PHP_SESSION_NONE) {
                     </div>
                 </div>
             </div>
-            <?php include __DIR__ . '/../../../views/layout/footer.php'; ?>
         </div>
     </div>
     <!-- ... SCRIPT ... -->

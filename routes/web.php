@@ -59,15 +59,6 @@ switch ($route) {
         TrackingController::showTrackingPage();
         break;
 
-    case '/admin/tracking/update_item':
-        $itemId = $_POST['item_id'] ?? null;
-        if ($itemId) {
-            TrackingController::updateItemDetails($itemId);
-        } else {
-            echo "Error: item_id tidak ditemukan.";
-        }
-        break;
-
     case '/admin/history':
     case '/spv/history':
     case '/customer/history':

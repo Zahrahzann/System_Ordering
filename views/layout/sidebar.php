@@ -164,7 +164,7 @@ if ($currentRole === 'customer') {
     <!-- SIDEBAR UNTUK ADMIN -->
     <?php if ($currentRole === 'admin') : ?>
         <hr class="sidebar-divider">
-        <div class="sidebar-heading">User Management</div>
+        <div class="sidebar-heading">Kelola User</div>
         <li class="nav-item">
             <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUserMgmt">
                 <i class="fas fa-fw fa-users-cog"></i>
@@ -179,7 +179,7 @@ if ($currentRole === 'customer') {
         </li>
 
         <hr class="sidebar-divider">
-        <div class="sidebar-heading">Order Management</div>
+        <div class="sidebar-heading">Kelola Work Order</div>
         <li class="nav-item">
             <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseAdminWO">
                 <i class="fas fa-fw fa-wrench"></i>
@@ -194,6 +194,18 @@ if ($currentRole === 'customer') {
                 </div>
             </div>
         </li>
+
+        <hr class="sidebar-divider">
+        <div class="sidebar-heading">Kelola Material</div>
+        <li class="nav-item">
+            <a class="nav-link" href="<?= $basePath ?>/admin/materials">
+                <i class="fas fa-fw fa-box"></i>
+                <span>MATERIAL</span>
+            </a>
+        </li>
+
+        <hr class="sidebar-divider">
+        <div class="sidebar-heading">Kelola Material</div>
         <li class="nav-item">
             <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseAdminConsumable">
                 <i class="fas fa-fw fa-box-open"></i>

@@ -30,6 +30,7 @@ class ConsumHistoryModel
                 pt.name AS product_type_name,
                 s.name AS section_name,
                 c.name AS customer_name,
+                d.id   AS department_id,
                 d.name AS department,
                 c.line
             FROM consum_orders o
@@ -38,19 +39,22 @@ class ConsumHistoryModel
             JOIN sections s        ON pt.section_id = s.id
             JOIN customers c       ON o.customer_id = c.id
             LEFT JOIN departments d ON c.department_id = d.id
-            WHERE o.status = 'Selesai'
+            WHERE LOWER(o.status) = 'selesai'
         ";
 
         $params = [];
 
-        // text search
+        // 🔍 Text search (order_code / produk / kode item / customer)
         if (!empty($filters['q'])) {
-            $sql .= " AND (p.name LIKE ? OR p.item_code LIKE ?)";
-            $params[] = "%{$filters['q']}%";
-            $params[] = "%{$filters['q']}%";
+            $sql .= " AND (o.order_code LIKE ? OR p.name LIKE ? OR p.item_code LIKE ? OR c.name LIKE ?)";
+            $kw = "%{$filters['q']}%";
+            $params[] = $kw;
+            $params[] = $kw;
+            $params[] = $kw;
+            $params[] = $kw;
         }
 
-        // filter by section/type/item
+        // 🔍 Filter by section/type/item (pakai ID)
         if (!empty($filters['section'])) {
             $sql .= " AND s.id = ?";
             $params[] = (int)$filters['section'];
@@ -64,7 +68,7 @@ class ConsumHistoryModel
             $params[] = (int)$filters['item'];
         }
 
-        // role-based scope
+        // 🔍 Role-based scope
         if ($role === 'customer') {
             $sql .= " AND c.id = ?";
             $params[] = $_SESSION['user_data']['id'] ?? 0;
@@ -72,16 +76,17 @@ class ConsumHistoryModel
             $sql .= " AND c.department_id = ?";
             $params[] = $_SESSION['user_data']['department_id'] ?? 0;
         }
+        // admin bisa lihat semua
 
-        // extra filters for admin/spv
+        // 🔍 Extra filters untuk admin & spv
         if ($role !== 'customer') {
             if (!empty($filters['customer'])) {
                 $sql .= " AND c.name LIKE ?";
                 $params[] = "%{$filters['customer']}%";
             }
             if (!empty($filters['department'])) {
-                $sql .= " AND d.name LIKE ?";
-                $params[] = "%{$filters['department']}%";
+                $sql .= " AND d.id = ?";
+                $params[] = (int)$filters['department'];
             }
             if (!empty($filters['line'])) {
                 $sql .= " AND c.line LIKE ?";
@@ -89,7 +94,7 @@ class ConsumHistoryModel
             }
         }
 
-        // filter bulan/tahun
+        // 🔍 Filter bulan/tahun
         if (!empty($filters['month'])) {
             $sql .= " AND MONTH(o.created_at) = ?";
             $params[] = (int)$filters['month'];
@@ -99,7 +104,7 @@ class ConsumHistoryModel
             $params[] = (int)$filters['year'];
         }
 
-        // order by created_at 
+        // 🔍 Order by created_at
         $sql .= " ORDER BY o.created_at DESC";
 
         $stmt = $pdo->prepare($sql);
@@ -108,7 +113,7 @@ class ConsumHistoryModel
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    // dropdown helpers
+    // Dropdown helpers
     public static function getAllSections(): array
     {
         $pdo = Database::connect();
@@ -141,5 +146,29 @@ class ConsumHistoryModel
     {
         $pdo = Database::connect();
         return $pdo->query("SELECT id, name FROM departments ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public static function getMonthlyQtyBySection(int $year): array
+    {
+        $pdo = Database::connect();
+
+        $sql = "
+            SELECT 
+                MONTH(o.created_at) AS month,
+                s.name AS section_name,
+                SUM(o.quantity) AS total_qty
+            FROM consum_orders o
+            JOIN product_items p ON o.product_item_id = p.id
+            JOIN product_types pt ON p.product_type_id = pt.id
+            JOIN sections s ON pt.section_id = s.id
+            WHERE LOWER(TRIM(o.status)) = 'selesai'
+              AND YEAR(o.created_at) = ?
+            GROUP BY MONTH(o.created_at), s.name
+            ORDER BY MONTH(o.created_at), s.name
+        ";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$year]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }
