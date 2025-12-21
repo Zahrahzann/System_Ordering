@@ -87,6 +87,7 @@ if (!isset($types) || !isset($dimensions) || !isset($title)) {
                                         <tbody>
                                             <?php foreach ($dimensions as $d): ?>
                                                 <?php if ($d['material_type_id'] == $t['id']): ?>
+                                                    <!-- Baris utama dimension -->
                                                     <tr>
                                                         <td><?= htmlspecialchars($d['dimension']) ?></td>
                                                         <td><?= (int)$d['stock'] ?> Unit</td>
@@ -106,6 +107,42 @@ if (!isset($types) || !isset($dimensions) || !isset($title)) {
                                                             </td>
                                                         <?php endif; ?>
                                                     </tr>
+
+                                                    <!-- Tambahan: Riwayat stok untuk dimension ini -->
+                                                    <?php
+                                                    $logs = \App\Models\MaterialStockLogModel::getByDimension($d['id']);
+                                                    if (!empty($logs)):
+                                                    ?>
+                                                        <tr>
+                                                            <td colspan="<?= $currentRole === 'admin' ? 3 : 2 ?>">
+                                                                <h6>Riwayat Stok</h6>
+                                                                <table class="table table-bordered table-sm mt-2">
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th>Tanggal</th>
+                                                                            <th>Jenis</th>
+                                                                            <th>Jumlah</th>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        <?php foreach ($logs as $log): ?>
+                                                                            <tr>
+                                                                                <td><?= htmlspecialchars($log['created_at']) ?></td>
+                                                                                <td>
+                                                                                    <?php if ($log['change_type'] === 'IN'): ?>
+                                                                                        <span class="text-success">Masuk</span>
+                                                                                    <?php else: ?>
+                                                                                        <span class="text-danger">Keluar</span>
+                                                                                    <?php endif; ?>
+                                                                                </td>
+                                                                                <td><?= htmlspecialchars($log['quantity']) ?> Unit</td>
+                                                                            </tr>
+                                                                        <?php endforeach; ?>
+                                                                    </tbody>
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+                                                    <?php endif; ?>
                                                 <?php endif; ?>
                                             <?php endforeach; ?>
                                         </tbody>

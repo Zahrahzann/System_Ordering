@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Models\MaterialTypeModel;
 use App\Models\MaterialDimensionModel;
+use App\Models\MaterialStockLogModel;
 use App\Middleware\SessionMiddleware;
 
 class MaterialController
@@ -16,7 +17,7 @@ class MaterialController
         $title      = "Kelola Material";
         $types      = MaterialTypeModel::getAll();
         $dimensions = MaterialDimensionModel::getAllGrouped();
-        $basePath   = "/system_ordering/public";  
+        $basePath   = "/system_ordering/public";
 
         require_once __DIR__ . '/../../views/admin/work_order/materials.php';
     }
@@ -84,10 +85,27 @@ class MaterialController
     {
         SessionMiddleware::requireAdminLogin();
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $old = MaterialDimensionModel::getById((int)$id);
+            $newStock = (float)($_POST['stock'] ?? 0);
+
+            // Update stok
             MaterialDimensionModel::update((int)$id, [
                 'dimension' => $_POST['dimension'] ?? '',
-                'stock'     => $_POST['stock'] ?? 0
+                'stock'     => $newStock
             ]);
+
+            // Catat log stok
+            if ($newStock != $old['stock']) {
+                $changeType = $newStock > $old['stock'] ? 'IN' : 'OUT';
+                $quantity   = abs($newStock - $old['stock']);
+
+                MaterialStockLogModel::create([
+                    'material_dimension_id' => (int)$id,
+                    'change_type'           => $changeType,
+                    'quantity'              => $quantity
+                ]);
+            }
+
             $_SESSION['flash_notification'] = [
                 'type'    => 'success',
                 'message' => 'Dimensi material berhasil diperbarui.'

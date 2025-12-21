@@ -21,6 +21,10 @@ $basePath = '/system_ordering/public';
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="<?= $basePath ?>/assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
     <link href="<?= $basePath ?>/assets/css/sb-admin-2.min.css" rel="stylesheet">
+
+    <script src="<?= $basePath ?>/assets/vendor/chart.js/Chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@0.7.0"></script>
+
     <style>
         body {
             font-family: 'Poppins', sans-serif;
@@ -412,6 +416,7 @@ $basePath = '/system_ordering/public';
             <script src="<?= $basePath ?>/assets/vendor/jquery-easing/jquery.easing.min.js"></script>
             <script src="<?= $basePath ?>/assets/js/sb-admin-2.min.js"></script>
             <script src="<?= $basePath ?>/assets/vendor/chart.js/Chart.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@0.7.0"></script>
 
             <script>
                 console.log('=== DEBUG CHART DATA ===');
@@ -458,24 +463,36 @@ $basePath = '/system_ordering/public';
                         responsive: true,
                         maintainAspectRatio: false,
                         scales: {
-                            y: {
-                                beginAtZero: true
-                            },
-                            x: {
-                                grid: {
+                            yAxes: [{
+                                ticks: {
+                                    beginAtZero: true
+                                }
+                            }],
+                            xAxes: [{
+                                gridLines: {
                                     display: false
                                 }
-                            }
+                            }]
                         },
                         plugins: {
-                            legend: {
-                                position: 'bottom'
+                            datalabels: {
+                                anchor: 'end',
+                                align: 'top',
+                                formatter: Math.round,
+                                font: {
+                                    weight: 'bold'
+                                },
+                                color: '#000'
                             }
+                        },
+                        legend: {
+                            position: 'bottom'
                         }
-                    }
+                    },
+                    plugins: [ChartDataLabels]
                 });
 
-                /* === Consumable Chart (stacked + cumulative line) === */
+                /* === Consumable Chart (grouped bar + cumulative line) === */
                 const labelsConsum = <?= json_encode($chartMonths) ?>;
                 const sections = <?= json_encode($chartSections) ?>;
                 const datasetsPerSection = <?= json_encode($chartDatasets) ?>;
@@ -494,8 +511,8 @@ $basePath = '/system_ordering/public';
                         type: 'bar',
                         label: sec,
                         data: datasetsPerSection[sec] || [],
-                        backgroundColor: sectionColors[sec] || "rgba(100,100,100,0.7)",
-                        stack: 'stack1'
+                        backgroundColor: sectionColors[sec] || "rgba(100,100,100,0.7)"
+                        // Hapus stack supaya batang tidak ditumpuk
                     }));
 
                     const lineDataset = {
@@ -520,30 +537,42 @@ $basePath = '/system_ordering/public';
                             responsive: true,
                             maintainAspectRatio: false,
                             scales: {
-                                x: {
-                                    stacked: true
-                                },
-                                y: {
-                                    stacked: true,
-                                    beginAtZero: true
-                                }
+                                xAxes: [{
+                                    stacked: false // pastikan batang tidak ditumpuk
+                                }],
+                                yAxes: [{
+                                    stacked: false,
+                                    ticks: {
+                                        beginAtZero: true
+                                    }
+                                }]
                             },
                             plugins: {
-                                legend: {
-                                    position: 'bottom'
-                                },
-                                tooltip: {
-                                    callbacks: {
-                                        footer(items) {
-                                            const total = items
-                                                .filter(i => i.dataset.type === 'bar')
-                                                .reduce((sum, i) => sum + i.parsed.y, 0);
-                                            return 'Total bulan ini: ' + total;
-                                        }
+                                datalabels: {
+                                    anchor: 'end',
+                                    align: 'top',
+                                    formatter: Math.round,
+                                    font: {
+                                        weight: 'bold'
+                                    },
+                                    color: '#000'
+                                }
+                            },
+                            legend: {
+                                position: 'bottom'
+                            },
+                            tooltips: {
+                                callbacks: {
+                                    footer(items) {
+                                        const total = items
+                                            .filter(i => i.dataset.type === 'bar')
+                                            .reduce((sum, i) => sum + i.yLabel, 0);
+                                        return 'Total bulan ini: ' + total;
                                     }
                                 }
                             }
-                        }
+                        },
+                        plugins: [ChartDataLabels]
                     });
                 } else {
                     console.warn('Tidak ada data consumable untuk ditampilkan');
