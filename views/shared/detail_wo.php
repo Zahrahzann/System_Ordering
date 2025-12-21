@@ -96,118 +96,118 @@ if (!isset($order) || !isset($items) || !isset($approval)) {
                                     </span>
                                 </div>
                             </div>
-                    <?php if (!empty($approval['comments'])): ?>
-                        <div class="comments-box">
-                            <div class="comments-label">Catatan SPV</div>
-                            <div class="comments-text"><?= nl2br(htmlspecialchars($approval['comments'])) ?></div>
+                            <?php if (!empty($approval['comments'])): ?>
+                                <div class="comments-box">
+                                    <div class="comments-label">Catatan SPV</div>
+                                    <div class="comments-text"><?= nl2br(htmlspecialchars($approval['comments'])) ?></div>
+                                </div>
+                            <?php endif; ?>
                         </div>
-                    <?php endif; ?>
-                </div>
-            </div>
+                    </div>
 
-            <!-- Rincian Item Dipesan -->
-            <div class="card">
-                <div class="card-header">
-                    <h6><i class="fas fa-boxes"></i> Rincian Item Dipesan (<?= count($items) ?> Item)</h6>
-                </div>
-                <div class="card-body">
-                    <div class="items-container">
-                        <?php foreach ($items as $index => $item): ?>
-                            <div class="item-card">
-                                <div class="item-header">
-                                    <div>
-                                        <div style="font-size: 11px; color: #545454ff; margin-bottom: 5px;">ITEM #<?= $index + 1 ?></div>
-                                        <div class="item-name"><?= htmlspecialchars($item['item_name']) ?></div>
-                                    </div>
-                                    <div>
+                    <!-- Rincian Item Dipesan -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h6><i class="fas fa-boxes"></i> Rincian Item Dipesan (<?= count($items) ?> Item)</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="items-container">
+                                <?php foreach ($items as $index => $item): ?>
+                                    <div class="item-card">
+                                        <div class="item-header">
+                                            <div>
+                                                <div style="font-size: 11px; color: #545454ff; margin-bottom: 5px;">ITEM #<?= $index + 1 ?></div>
+                                                <div class="item-name"><?= htmlspecialchars($item['item_name']) ?></div>
+                                            </div>
+                                            <div>
+                                                <?php
+                                                if ($item['is_emergency']) {
+                                                    echo $item['emergency_type'] === 'line_stop'
+                                                        ? '<span class="badge badge-danger"><i class="fas fa-exclamation-triangle"></i> Line Stop</span>'
+                                                        : '<span class="badge badge-success"><i class="fas fa-shield-alt"></i> Safety</span>';
+                                                } else {
+                                                    echo '<span class="badge badge-info"><i class="fas fa-check"></i> Regular</span>';
+                                                }
+                                                ?>
+                                            </div>
+                                        </div>
+
+                                        <div class="item-details-grid">
+                                            <div class="detail-item">
+                                                <div class="detail-label">Kategori</div>
+                                                <div class="detail-value"><?= htmlspecialchars($item['category']) ?></div>
+                                            </div>
+                                            <div class="detail-item">
+                                                <div class="detail-label">Jenis Material</div>
+                                                <div class="detail-value"><?= htmlspecialchars($item['material_type'] ?? '-') ?></div>
+                                            </div>
+                                            <div class="detail-item">
+                                                <div class="detail-label">Dimensi Material</div>
+                                                <div class="detail-value"><?= htmlspecialchars($item['material_dimension'] ?? '-') ?></div>
+                                            </div>
+                                            <div class="detail-item">
+                                                <div class="detail-label">Quantity</div>
+                                                <div class="detail-value"><?= htmlspecialchars($item['quantity']) ?> Unit</div>
+                                            </div>
+                                            <div class="detail-item">
+                                                <div class="detail-label">Status Produksi</div>
+                                                <div class="detail-value">
+                                                    <span class="badge badge-info">
+                                                        <?= htmlspecialchars(ucwords(str_replace('_', ' ', $item['production_status']))) ?>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="detail-item">
+                                                <div class="detail-label">PIC MFG</div>
+                                                <div class="detail-value">
+                                                    <?php if (!empty($item['pic_mfg'])): ?>
+                                                        <i class="fas fa-user-tie" style="color: #667eea;"></i>
+                                                        <?= htmlspecialchars($item['pic_mfg']) ?>
+                                                    <?php else: ?>
+                                                        <span style="color: #555555;">Belum ditentukan</span>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+                                        </div>
+
                                         <?php
-                                        if ($item['is_emergency']) {
-                                            echo $item['emergency_type'] === 'line_stop'
-                                                ? '<span class="badge badge-danger"><i class="fas fa-exclamation-triangle"></i> Line Stop</span>'
-                                                : '<span class="badge badge-success"><i class="fas fa-shield-alt"></i> Safety</span>';
-                                        } else {
-                                            echo '<span class="badge badge-info"><i class="fas fa-check"></i> Regular</span>';
-                                        }
+                                        $files = json_decode($item['file_path'], true);
+                                        if (is_array($files) && !empty($files)):
                                         ?>
-                                    </div>
-                                </div>
+                                            <div class="files-section">
+                                                <div class="files-label">File Drawing</div>
+                                                <?php foreach ($files as $file):
+                                                    $extension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+                                                    $icon = 'fa-file-alt';
+                                                    if (in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
+                                                        $icon = 'fa-file-image';
+                                                    } elseif ($extension === 'pdf') {
+                                                        $icon = 'fa-file-pdf';
+                                                    }
+                                                ?>
+                                                    <a href="<?= htmlspecialchars($file) ?>" target="_blank" class="file-link">
+                                                        <i class="fas <?= $icon ?>"></i>
+                                                        <?= basename($file) ?>
+                                                    </a>
+                                                <?php endforeach; ?>
+                                            </div>
+                                        <?php endif; ?>
 
-                                <div class="item-details-grid">
-                                    <div class="detail-item">
-                                        <div class="detail-label">Kategori</div>
-                                        <div class="detail-value"><?= htmlspecialchars($item['category']) ?></div>
+                                        <?php if (!empty($item['note'])): ?>
+                                            <div class="note-section">
+                                                <div class="note-label">Catatan</div>
+                                                <div class="note-text"><?= nl2br(htmlspecialchars($item['note'])) ?></div>
+                                            </div>
+                                        <?php endif; ?>
                                     </div>
-                                    <div class="detail-item">
-                                        <div class="detail-label">Material</div>
-                                        <div class="detail-value"><?= htmlspecialchars($item['material']) ?></div>
-                                    </div>
-                                    <div class="detail-item">
-                                        <div class="detail-label">Jenis Material</div>
-                                        <div class="detail-value"><?= htmlspecialchars($item['material_type']) ?></div>
-                                    </div>
-                                    <div class="detail-item">
-                                        <div class="detail-label">Quantity</div>
-                                        <div class="detail-value"><?= htmlspecialchars($item['quantity']) ?> Unit</div>
-                                    </div>
-                                    <div class="detail-item">
-                                        <div class="detail-label">Status Produksi</div>
-                                        <div class="detail-value">
-                                            <span class="badge badge-info">
-                                                <?= htmlspecialchars(ucwords(str_replace('_', ' ', $item['production_status']))) ?>
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div class="detail-item">
-                                        <div class="detail-label">PIC MFG</div>
-                                        <div class="detail-value">
-                                            <?php if (!empty($item['pic_mfg'])): ?>
-                                                <i class="fas fa-user-tie" style="color: #667eea;"></i>
-                                                <?= htmlspecialchars($item['pic_mfg']) ?>
-                                            <?php else: ?>
-                                                <span style="color: #555555;">Belum ditentukan</span>
-                                            <?php endif; ?>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <?php
-                                $files = json_decode($item['file_path'], true);
-                                if (is_array($files) && !empty($files)):
-                                ?>
-                                    <div class="files-section">
-                                        <div class="files-label">File Drawing</div>
-                                        <?php foreach ($files as $file):
-                                            $extension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
-                                            $icon = 'fa-file-alt';
-                                            if (in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
-                                                $icon = 'fa-file-image';
-                                            } elseif ($extension === 'pdf') {
-                                                $icon = 'fa-file-pdf';
-                                            }
-                                        ?>
-                                            <a href="<?= htmlspecialchars($file) ?>" target="_blank" class="file-link">
-                                                <i class="fas <?= $icon ?>"></i>
-                                                <?= basename($file) ?>
-                                            </a>
-                                        <?php endforeach; ?>
-                                    </div>
-                                <?php endif; ?>
-
-                                <?php if (!empty($item['note'])): ?>
-                                    <div class="note-section">
-                                        <div class="note-label">Catatan</div>
-                                        <div class="note-text"><?= nl2br(htmlspecialchars($item['note'])) ?></div>
-                                    </div>
-                                <?php endif; ?>
+                                <?php endforeach; ?>
                             </div>
-                        <?php endforeach; ?>
+                        </div>
                     </div>
                 </div>
             </div>
+            <?php include __DIR__ . '/../layout/footer.php'; ?>
         </div>
-    </div>
-    <?php include __DIR__ . '/../layout/footer.php'; ?>
-    </div>
     </div>
     <script src="/system_ordering/public/assets/vendor/jquery/jquery.min.js"></script>
     <script src="/system_ordering/public/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>

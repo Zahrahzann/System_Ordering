@@ -211,11 +211,65 @@ class ConsumOrderModel
                 $update = $pdo->prepare("UPDATE consum_orders SET status='Ready', updated_at=NOW() WHERE id=?");
                 $update->execute([$order['id']]);
 
-                // Kurangi stok
+                // Kurangi stok 
                 $stock -= $qty;
                 $updateStock = $pdo->prepare("UPDATE product_items SET stock=? WHERE id=?");
                 $updateStock->execute([$stock, $productItemId]);
             }
+        }
+    }
+
+    public static function orderNow($customerId, $departmentId, $plantId, $itemId, $qty): array
+    {
+        $pdo = Database::connect();
+
+        // Ambil detail item lengkap
+        $stmt = $pdo->prepare("SELECT id, price, stock, product_type_id, section_id FROM product_items WHERE id = ?");
+        $stmt->execute([$itemId]);
+        $item = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$item) {
+            return ['success' => false, 'message' => 'Item tidak ditemukan.'];
+        }
+
+        $price     = (float)$item['price'];
+        $stock     = (int)$item['stock'];
+        $qty       = (int)$qty;
+        $status    = ($stock >= $qty) ? 'Ready' : 'Pending';
+        $orderCode = 'ORD-' . date('Ymd') . '-' . rand(1000, 9999);
+
+        try {
+            $pdo->beginTransaction();
+
+            // Insert order lengkap
+            $stmt = $pdo->prepare("
+            INSERT INTO consum_orders 
+                (order_code, customer_id, product_item_id, product_type_id, section_id, quantity, price, status, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+        ");
+            $stmt->execute([
+                $orderCode,
+                $customerId,
+                $item['id'],
+                $item['product_type_id'],
+                $item['section_id'],
+                $qty,
+                $price,
+                $status
+            ]);
+
+            // Kurangi stok jika status Ready
+            if ($status === 'Ready') {
+                $update = $pdo->prepare("UPDATE product_items SET stock = stock - ? WHERE id = ?");
+                $update->execute([$qty, $item['id']]);
+            }
+
+            $pdo->commit();
+            return ['success' => true, 'message' => 'Order berhasil ditambahkan.'];
+        } catch (\Exception $e) {
+            $pdo->rollBack();
+            error_log("OrderNow failed: " . $e->getMessage());
+            return ['success' => false, 'message' => 'Gagal memproses order.'];
         }
     }
 }

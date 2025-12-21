@@ -91,7 +91,7 @@ $basePath = '/system_ordering/public';
                                                 ?>
                                             </div>
                                         </div>
-
+                                        <!-- Detail Item -->
                                         <div class="item-details-grid">
                                             <div class="detail-item">
                                                 <div class="detail-label">Kategori</div>
@@ -102,12 +102,12 @@ $basePath = '/system_ordering/public';
                                                 <div class="detail-value"><?= htmlspecialchars($item['quantity']) ?> Unit</div>
                                             </div>
                                             <div class="detail-item">
-                                                <div class="detail-label">Material</div>
-                                                <div class="detail-value"><?= htmlspecialchars($item['material']) ?></div>
+                                                <div class="detail-label">Jenis Material</div>
+                                                <div class="detail-value"><?= htmlspecialchars($item['material_type'] ?? '-') ?></div>
                                             </div>
                                             <div class="detail-item">
-                                                <div class="detail-label">Jenis Material</div>
-                                                <div class="detail-value"><?= htmlspecialchars($item['material_type']) ?></div>
+                                                <div class="detail-label">Dimensi Material</div>
+                                                <div class="detail-value"><?= htmlspecialchars($item['material_dimension'] ?? '-') ?></div>
                                             </div>
                                             <div class="detail-item">
                                                 <div class="detail-label">Tanggal Dibutuhkan</div>

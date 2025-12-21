@@ -71,7 +71,14 @@ class ApprovalModel
     public static function findOrderItemsByOrderId($orderId)
     {
         $pdo = Database::connect();
-        $sql = "SELECT * FROM items WHERE order_id = ?";
+        $sql = "SELECT i.*, 
+                   mt.name AS material_type, 
+                   mt.material_number AS material_number,
+                   md.dimension AS material_dimension
+            FROM items i
+            LEFT JOIN material_dimensions md ON i.material_dimension_id = md.id
+            LEFT JOIN material_types mt ON md.material_type_id = mt.id
+            WHERE i.order_id = ?";
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$orderId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);

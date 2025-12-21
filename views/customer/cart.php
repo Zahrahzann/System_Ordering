@@ -42,94 +42,88 @@ if (!isset($cartItems)) die('Controller tidak menyediakan data keranjang.');
 
                                     <?php foreach ($cartItems as $item): ?>
                                         <div class="cart-item">
-                                            <div class="cart-item-content">
-                                                <!-- Checkbox per item -->
-                                                <div class="item-checkbox-wrapper">
+                                            <div class="cart-item-header">
+                                                <!-- Checkbox dan Info Utama -->
+                                                <div class="item-main">
                                                     <input type="checkbox" class="item-checkbox" name="selected_items[]" value="<?= $item['id'] ?>">
-                                                </div>
 
-                                                <!-- Icon / gambar item -->
-                                                <div class="item-image">
-                                                    <i class="fas fa-tools"></i>
-                                                </div>
-
-                                                <!-- Detail item -->
-                                                <div class="item-details">
-                                                    <div class="item-name"><?= htmlspecialchars($item['item_name']) ?></div>
-
-                                                    <div class="item-specs">
-                                                        <div class="spec-item">
-                                                            <span class="spec-label">Kategori:</span>
-                                                            <span class="spec-value"><?= htmlspecialchars($item['category']) ?></span>
-                                                        </div>
-                                                        <div class="spec-item">
-                                                            <span class="spec-label">Material:</span>
-                                                            <span class="spec-value"><?= htmlspecialchars($item['material']) ?></span>
-                                                        </div>
-                                                        <div class="spec-item">
-                                                            <span class="spec-label">Jenis Material:</span>
-                                                            <span class="spec-value"><?= htmlspecialchars($item['material_type']) ?></span>
-                                                        </div>
+                                                    <div class="item-image">
+                                                        <i class="fas fa-tools"></i>
                                                     </div>
 
-                                                    <!-- File Drawing -->
-                                                    <?php
-                                                    $files = json_decode($item['file_path'], true);
-                                                    if (is_array($files) && !empty($files)):
-                                                    ?>
-                                                        <div class="item-files">
-                                                            <div class="files-label">File Drawing:</div>
-                                                            <?php foreach ($files as $file):
-                                                                $extension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
-                                                                $icon = 'fa-file-alt';
-                                                                if (in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
-                                                                    $icon = 'fa-file-image';
-                                                                } elseif ($extension === 'pdf') {
-                                                                    $icon = 'fa-file-pdf';
-                                                                }
+                                                    <div class="item-info">
+                                                        <div class="item-name"><?= htmlspecialchars($item['item_name']) ?></div>
+                                                        <div class="item-badges">
+                                                            <?php
+                                                            if ($item['is_emergency']) {
+                                                                echo $item['emergency_type'] === 'line_stop'
+                                                                    ? '<span class="badge badge-danger">Line Stop</span>'
+                                                                    : '<span class="badge badge-success">Safety</span>';
+                                                            } else {
+                                                                echo '<span class="badge badge-info">Regular</span>';
+                                                            }
                                                             ?>
-                                                                <a href="<?= htmlspecialchars($file) ?>" target="_blank" class="file-link">
-                                                                    <i class="fas <?= $icon ?>"></i>
-                                                                    <?= basename($file) ?>
-                                                                </a>
-                                                            <?php endforeach; ?>
-                                                        </div>
-                                                    <?php endif; ?>
-
-                                                    <!-- Footer item -->
-                                                    <div class="item-footer">
-                                                        <div class="item-meta">
-                                                            <div class="qty-info">
-                                                                Qty: <strong><?= htmlspecialchars($item['quantity']) ?></strong>
-                                                            </div>
-                                                            <div class="date-info">
+                                                            <span class="item-qty">Qty: <strong><?= htmlspecialchars($item['quantity']) ?></strong></span>
+                                                            <span class="item-date">
                                                                 <i class="far fa-calendar"></i>
                                                                 <?= date('d M Y', strtotime($item['needed_date'])) ?>
-                                                            </div>
-                                                            <div>
-                                                                <?php
-                                                                if ($item['is_emergency']) {
-                                                                    echo $item['emergency_type'] === 'line_stop'
-                                                                        ? '<span class="badge badge-danger">Line Stop</span>'
-                                                                        : '<span class="badge badge-success">Safety</span>';
-                                                                } else {
-                                                                    echo '<span class="badge badge-info">Regular</span>';
-                                                                }
-                                                                ?>
-                                                            </div>
-                                                        </div>
-
-                                                        <div class="item-actions">
-                                                            <a href="<?= $basePath ?>/customer/cart/edit/<?= $item['id'] ?>" class="btn btn-warning btn-sm" title="Edit">
-                                                                <i class="fas fa-edit"></i> Edit
-                                                            </a>
-                                                            <a href="<?= $basePath ?>/customer/cart/delete/<?= $item['id'] ?>" class="btn btn-danger btn-sm" title="Hapus" onclick="return confirm('Apakah Anda yakin ingin menghapus item ini?')">
-                                                                <i class="fas fa-trash"></i> Hapus
-                                                            </a>
+                                                            </span>
                                                         </div>
                                                     </div>
                                                 </div>
+
+                                                <!-- Actions -->
+                                                <div class="item-actions">
+                                                    <a href="<?= $basePath ?>/customer/cart/edit/<?= $item['id'] ?>" class="btn btn-warning btn-sm" title="Edit">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <a href="<?= $basePath ?>/customer/cart/delete/<?= $item['id'] ?>" class="btn btn-danger btn-sm" title="Hapus" onclick="return confirm('Apakah Anda yakin ingin menghapus item ini?')">
+                                                        <i class="fas fa-trash"></i>
+                                                    </a>
+                                                </div>
                                             </div>
+
+                                            <!-- Specifications -->
+                                            <div class="item-specs">
+                                                <div class="spec-item">
+                                                    <span class="spec-label">Kategori:</span>
+                                                    <span class="spec-value"><?= htmlspecialchars($item['category']) ?></span>
+                                                </div>
+                                                <div class="spec-item">
+                                                    <span class="spec-label">Jenis Material:</span>
+                                                    <span class="spec-value"><?= htmlspecialchars($item['material_type'] ?? '-') ?></span>
+                                                </div>
+                                                <div class="spec-item">
+                                                    <span class="spec-label">Dimensi Material:</span>
+                                                    <span class="spec-value"><?= htmlspecialchars($item['material_dimension'] ?? '-') ?></span>
+                                                </div>
+                                            </div>
+
+                                            <!-- File Drawing -->
+                                            <?php
+                                            $files = json_decode($item['file_path'], true);
+                                            if (is_array($files) && !empty($files)):
+                                            ?>
+                                                <div class="item-files">
+                                                    <div class="files-label"><i class="fas fa-paperclip"></i> File Drawing:</div>
+                                                    <div class="files-list">
+                                                        <?php foreach ($files as $file):
+                                                            $extension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+                                                            $icon = 'fa-file-alt';
+                                                            if (in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
+                                                                $icon = 'fa-file-image';
+                                                            } elseif ($extension === 'pdf') {
+                                                                $icon = 'fa-file-pdf';
+                                                            }
+                                                        ?>
+                                                            <a href="<?= htmlspecialchars($file) ?>" target="_blank" class="file-link">
+                                                                <i class="fas <?= $icon ?>"></i>
+                                                                <span><?= basename($file) ?></span>
+                                                            </a>
+                                                        <?php endforeach; ?>
+                                                    </div>
+                                                </div>
+                                            <?php endif; ?>
                                         </div>
                                     <?php endforeach; ?>
                                 </div>
@@ -137,14 +131,17 @@ if (!isset($cartItems)) die('Controller tidak menyediakan data keranjang.');
                                 <!-- Ringkasan -->
                                 <div class="col-lg-4">
                                     <div class="checkout-summary">
-                                        <h5 style="margin-bottom: 15px; font-weight: 600;">Ringkasan Pesanan</h5>
-                                        <div class="summary-row">
-                                            <span class="summary-label">Item yang dipilih:</span>
-                                            <span class="summary-value" id="selected_count">0</span>
+                                        <h5>Ringkasan Pesanan</h5>
+                                        <div class="summary-content">
+                                            <div class="summary-row">
+                                                <span class="summary-label">Item yang dipilih:</span>
+                                                <span class="summary-value" id="selected_count">0</span>
+                                            </div>
+                                            <button type="submit" class="btn btn-primary btn-checkout" id="checkout-btn" disabled>
+                                                <i class="fas fa-check"></i>
+                                                <span>Checkout Sekarang</span>
+                                            </button>
                                         </div>
-                                        <button type="submit" class="btn btn-primary" id="checkout-btn" disabled>
-                                            <i class="fas fa-check mr-2"></i> Checkout Sekarang
-                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -171,13 +168,9 @@ if (!isset($cartItems)) die('Controller tidak menyediakan data keranjang.');
                     }
                 });
 
-                // update jumlah item terpilih
                 selectedCount.textContent = itemCount;
-
-                // aktifkan tombol checkout kalau ada item dipilih
                 checkoutBtn.disabled = itemCount === 0;
 
-                // sinkronkan "Pilih Semua"
                 if (selectAll) {
                     const checkedCount = document.querySelectorAll('.item-checkbox:checked').length;
                     selectAll.checked = checkedCount > 0 && checkedCount === checkboxes.length;

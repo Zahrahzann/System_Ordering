@@ -7,6 +7,7 @@ global $route;
 use App\Controllers\AuthController;
 use App\Controllers\ApprovalController;
 use App\Controllers\TrackingController;
+use App\Controllers\MaterialController;
 
 // ROUTING DINAMIS
 $matches = [];
@@ -27,7 +28,7 @@ switch ($route) {
         AuthController::registerUser('spv');
         break;
     case '/spv/login':
-        require __DIR__ . '/../views/spv/login_spv.php'; 
+        require __DIR__ . '/../views/spv/login_spv.php';
         break;
     case '/spv/process_login':
         AuthController::loginUser('spv');
@@ -38,7 +39,12 @@ switch ($route) {
     case '/spv/work_order/approval':
         ApprovalController::showApprovalListPage();
         break;
-        
+
+    // --- MATERIALS (read-only untuk SPV) ---
+    case '/spv/materials':
+        MaterialController::index();
+        break;
+
     default:
         http_response_code(404);
         echo "404 Not Found :) <br>";

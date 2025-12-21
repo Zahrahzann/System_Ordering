@@ -17,7 +17,6 @@ if ($currentRole === 'customer') {
 
 <head>
     <style>
-        /* Hanya sembunyikan scroll horizontal agar content tidak hilang */
         body {
             overflow-x: hidden;
         }
@@ -33,7 +32,6 @@ if ($currentRole === 'customer') {
         }
 
         #content-wrapper {
-            /* gunakan padding-left mengikuti default sb-admin layout */
             padding-left: 224px;
             height: 100vh;
             display: flex;
@@ -104,6 +102,15 @@ if ($currentRole === 'customer') {
         </li>
 
         <hr class="sidebar-divider">
+        <div class="sidebar-heading">Materials ME</div>
+        <li class="nav-item">
+            <a class="nav-link" href="<?= $basePath ?>/customer/materials">
+                <i class="fas fa-fw fa-box"></i>
+                <span>MATERIALS</span>
+            </a>
+        </li>
+
+        <hr class="sidebar-divider">
         <div class="sidebar-heading">Consumable</div>
         <li class="nav-item">
             <a class="nav-link" href="<?= $basePath ?>/admin/consumable/sections">
@@ -145,6 +152,16 @@ if ($currentRole === 'customer') {
                 </div>
             </div>
         </li>
+
+        <hr class="sidebar-divider">
+        <div class="sidebar-heading">Materials ME</div>
+        <li class="nav-item">
+            <a class="nav-link" href="<?= $basePath ?>/spv/materials">
+                <i class="fas fa-fw fa-box"></i>
+                <span>MATERIALS</span>
+            </a>
+        </li>
+
         <li class="nav-item">
             <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseSpvConsumable">
                 <i class="fas fa-fw fa-box-open"></i>
@@ -168,7 +185,7 @@ if ($currentRole === 'customer') {
         <li class="nav-item">
             <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseUserMgmt">
                 <i class="fas fa-fw fa-users-cog"></i>
-                <span>Manage Users</span>
+                <span>MANAGEMENT USER</span>
             </a>
             <div id="collapseUserMgmt" class="collapse" data-parent="#accordionSidebar">
                 <div class="bg-white py-2 collapse-inner rounded">
@@ -200,12 +217,12 @@ if ($currentRole === 'customer') {
         <li class="nav-item">
             <a class="nav-link" href="<?= $basePath ?>/admin/materials">
                 <i class="fas fa-fw fa-box"></i>
-                <span>MATERIAL</span>
+                <span>MATERIALS</span>
             </a>
         </li>
 
         <hr class="sidebar-divider">
-        <div class="sidebar-heading">Kelola Material</div>
+        <div class="sidebar-heading">Kelola Consumable</div>
         <li class="nav-item">
             <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseAdminConsumable">
                 <i class="fas fa-fw fa-box-open"></i>

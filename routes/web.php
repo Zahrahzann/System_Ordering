@@ -1,6 +1,5 @@
 <?php
 // routes/web.php
-// Variabel $route dari index.php
 global $route;
 
 // CONTROLLER
@@ -13,6 +12,7 @@ use App\Controllers\ProductTypeController;
 use App\Controllers\ProductItemController;
 use App\Controllers\ConsumOrderController;
 use App\Controllers\ConsumHistoryController;
+use App\Controllers\MaterialController;
 
 $requestMethod = $_SERVER['REQUEST_METHOD'];
 
@@ -33,6 +33,10 @@ if (preg_match('#^/customer/history/reorder/(\d+)$#', $route, $matches)) {
     exit;
 }
 
+if (preg_match('#^/system_ordering/public/customer/workorder/reorder/(\d+)$#', $route, $matches)) {
+    HistoryController::reorderItem($matches[1]);
+    exit;
+}
 
 // =====================
 // WORK ORDER ROUTES  
@@ -52,7 +56,6 @@ switch ($route) {
         }
         break;
 
-    // Rute tracking statis
     case '/customer/tracking':
     case '/spv/tracking':
     case '/admin/tracking':
@@ -65,9 +68,6 @@ switch ($route) {
         HistoryController::showHistoryPage();
         break;
 
-    // ==================================
-    // CONSUMABLE ROUTES (SECTION LIST) 
-    // ==================================
     case '/customer/consumable/sections':
     case '/spv/consumable/sections':
     case '/admin/consumable/sections':
@@ -75,7 +75,32 @@ switch ($route) {
         break;
 }
 
+// Customer Material Route (AJAX untuk dropdown)
+switch (true) {
+    // Ambil semua jenis material
+    case ($route === '/materials/types'):
+        MaterialController::getTypes();
+        break;
+
+    // Ambil semua dimensi berdasarkan type_id
+    case ($route === '/materials/dimensions' && isset($_GET['type_id'])):
+        MaterialController::getDimensionsByType($_GET['type_id']);
+        break;
+
+    // Ambil detail dimension (stock)
+    case preg_match('#^/materials/dimension/(\d+)$#', $route, $matches):
+        MaterialController::showDimension($matches[1]);
+        break;
+
+    default:
+        http_response_code(404);
+        echo "Route tidak ditemukan";
+        break;
+}
+
+// =====================
 // ROUTING DINAMIS PRODUCT TYPE & ITEM
+// =====================
 switch (true) {
     // PRODUCT TYPE ROUTES
     case preg_match('#^/shared/consumable/product-types/(\d+)$#', $route, $matches):
@@ -138,6 +163,7 @@ switch (true) {
         || $route === '/admin/shared/consumable/orders'):
         ConsumOrderController::showOrders();
         break;
+
     case ($route === '/customer/shared/consumable/reorder'):
         ConsumOrderController::reorder();
         break;
@@ -155,14 +181,13 @@ switch (true) {
         ConsumOrderController::deleteOrder($matches[1]);
         break;
 
-
     // CONSUMABLE HISTORY ROUTES
     case '/customer/consumable/history':
     case '/spv/consumable/history':
     case '/admin/consumable/history':
         ConsumHistoryController::showHistory();
         break;
-        
+
     // Default 404
     default:
         http_response_code(404);

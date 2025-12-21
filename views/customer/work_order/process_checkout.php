@@ -126,12 +126,12 @@ if (session_status() === PHP_SESSION_NONE) {
                                                         <span class="spec-value"><?= htmlspecialchars($item['category']) ?></span>
                                                     </div>
                                                     <div class="spec-item">
-                                                        <span class="spec-label">Material:</span>
-                                                        <span class="spec-value"><?= htmlspecialchars($item['material']) ?></span>
+                                                        <span class="spec-label">Jenis Material:</span>
+                                                        <span class="spec-value"><?= htmlspecialchars($item['material_type'] ?? '-') ?></span>
                                                     </div>
                                                     <div class="spec-item">
-                                                        <span class="spec-label">Jenis Material:</span>
-                                                        <span class="spec-value"><?= htmlspecialchars($item['material_type']) ?></span>
+                                                        <span class="spec-label">Dimensi Material:</span>
+                                                        <span class="spec-value"><?= htmlspecialchars($item['material_dimension'] ?? '-') ?></span>
                                                     </div>
                                                 </div>
                                             </div>

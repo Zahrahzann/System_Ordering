@@ -45,21 +45,29 @@ class OrderModel
     {
         $db = Database::connect();
         $sql = "SELECT 
-                    o.id AS order_id, 
-                    i.production_status AS order_status, 
-                    o.created_at AS order_date,
-                    a.approval_status as approval_status, 
-                    u.name as spv_name,
-                    i.item_name, 
-                    i.* FROM items i
-                JOIN orders o ON i.order_id = o.id
-                JOIN approvals a ON o.id = a.order_id
-                LEFT JOIN users u ON a.spv_id = u.id
-                WHERE 
-                    o.customer_id = :customer_id 
-                    AND (a.approval_status = 'waiting' OR a.approval_status = 'reject') 
-                ORDER BY 
-                    o.created_at DESC, i.item_name ASC";
+                o.id AS order_id, 
+                i.production_status AS order_status, 
+                o.created_at AS order_date,
+                a.approval_status as approval_status, 
+                u.name as spv_name,
+                i.item_name,
+                i.quantity,
+                i.is_emergency,
+                i.emergency_type,
+                mt.name AS material_type,
+                mt.material_number AS material_number,
+                md.dimension AS material_dimension
+            FROM items i
+            JOIN orders o ON i.order_id = o.id
+            JOIN approvals a ON o.id = a.order_id
+            LEFT JOIN users u ON a.spv_id = u.id
+            LEFT JOIN material_dimensions md ON i.material_dimension_id = md.id
+            LEFT JOIN material_types mt ON md.material_type_id = mt.id
+            WHERE 
+                o.customer_id = :customer_id 
+                AND (a.approval_status = 'waiting' OR a.approval_status = 'reject') 
+            ORDER BY 
+                o.created_at DESC, i.item_name ASC";
 
         $stmt = $db->prepare($sql);
         $stmt->execute([':customer_id' => $customerId]);
@@ -188,7 +196,14 @@ class OrderModel
     public static function findOrderItemsByOrderId($orderId)
     {
         $pdo = Database::connect();
-        $sql = "SELECT * FROM items WHERE order_id = ?";
+        $sql = "SELECT i.*, 
+                   mt.name AS material_type, 
+                   mt.material_number AS material_number,
+                   md.dimension AS material_dimension
+            FROM items i
+            LEFT JOIN material_dimensions md ON i.material_dimension_id = md.id
+            LEFT JOIN material_types mt ON md.material_type_id = mt.id
+            WHERE i.order_id = ?";
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$orderId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);

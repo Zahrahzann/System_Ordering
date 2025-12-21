@@ -14,24 +14,62 @@ class CartModel
     {
         $pdo = Database::connect();
         $stmt = $pdo->prepare(
-            "SELECT * FROM items WHERE customer_id = ? AND order_id IS NULL ORDER BY created_at DESC"
+            "SELECT i.*, 
+                    mt.name AS material_type, 
+                    mt.material_number AS material_number,
+                    md.dimension AS material_dimension
+             FROM items i
+             LEFT JOIN material_dimensions md ON i.material_dimension_id = md.id
+             LEFT JOIN material_types mt ON md.material_type_id = mt.id
+             WHERE i.customer_id = ? AND i.order_id IS NULL
+             ORDER BY i.created_at DESC"
         );
         $stmt->execute([$customerId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    /**
-     * Mengambil satu item berdasarkan ID dan ID customer (untuk keamanan).
-     */
     public static function getItemById($itemId, $customerId)
     {
         $pdo = Database::connect();
-        $stmt = $pdo->prepare(
-            "SELECT * FROM items WHERE id = ? AND customer_id = ? AND order_id IS NULL"
-        );
+        $sql = "SELECT i.*, 
+                   mt.name AS material_type, 
+                   mt.material_number AS material_number,
+                   md.dimension AS material_dimension
+            FROM items i
+            LEFT JOIN material_dimensions md ON i.material_dimension_id = md.id
+            LEFT JOIN material_types mt ON md.material_type_id = mt.id
+            WHERE i.id = ? AND i.customer_id = ? AND i.order_id IS NULL
+            LIMIT 1";
+        $stmt = $pdo->prepare($sql);
         $stmt->execute([$itemId, $customerId]);
         $item = $stmt->fetch(PDO::FETCH_ASSOC);
-        return $item ?: false; // Kembalikan false jika tidak ditemukan
+        return $item ?: false;
+    }
+
+    /**
+     * Mengambil item berdasarkan array ID (untuk checkout/konfirmasi).
+     */
+    public static function getItemsByIds($customerId, array $itemIds)
+    {
+        if (empty($itemIds)) {
+            return [];
+        }
+        $pdo = Database::connect();
+        $placeholders = implode(',', array_fill(0, count($itemIds), '?'));
+        $sql = "SELECT i.*, 
+                       mt.name AS material_type, 
+                       mt.material_number AS material_number,
+                       md.dimension AS material_dimension
+                FROM items i
+                LEFT JOIN material_dimensions md ON i.material_dimension_id = md.id
+                LEFT JOIN material_types mt ON md.material_type_id = mt.id
+                WHERE i.customer_id = ? 
+                  AND i.id IN ($placeholders) 
+                  AND i.order_id IS NULL";
+        $stmt = $pdo->prepare($sql);
+        $params = array_merge([$customerId], $itemIds);
+        $stmt->execute($params);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     /**
@@ -41,10 +79,17 @@ class CartModel
     {
         $pdo = Database::connect();
         $sql = "UPDATE items SET
-                        item_name = :item_name, category = :category, quantity = :quantity,
-                        material = :material, material_type = :material_type, file_path = :file_path, needed_date = :needed_date,
-                        note = :note, is_emergency = :is_emergency, emergency_type = :emergency_type
-                    WHERE id = :item_id AND customer_id = :customer_id";
+                    item_name = :item_name, 
+                    category = :category, 
+                    quantity = :quantity,
+                    material_status = :material_status, 
+                    material_dimension_id = :material_dimension_id,
+                    file_path = :file_path, 
+                    needed_date = :needed_date,
+                    note = :note, 
+                    is_emergency = :is_emergency, 
+                    emergency_type = :emergency_type
+                WHERE id = :item_id AND customer_id = :customer_id";
 
         $stmt = $pdo->prepare($sql);
         $dataToBind = $data;
@@ -63,23 +108,6 @@ class CartModel
             "DELETE FROM items WHERE id = ? AND customer_id = ? AND order_id IS NULL"
         );
         return $stmt->execute([$itemId, $customerId]);
-    }
-
-    /**
-     * Mengambil item berdasarkan array ID.
-     */
-    public static function getItemsByIds($customerId, array $itemIds)
-    {
-        if (empty($itemIds)) {
-            return [];
-        }
-        $pdo = Database::connect();
-        $placeholders = implode(',', array_fill(0, count($itemIds), '?'));
-        $sql = "SELECT * FROM items WHERE customer_id = ? AND id IN ($placeholders) AND order_id IS NULL";
-        $stmt = $pdo->prepare($sql);
-        $params = array_merge([$customerId], $itemIds);
-        $stmt->execute($params);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     /**
@@ -106,7 +134,7 @@ class CartModel
             }
             $spvId = $spv['id'];
 
-            // 2. Buat record di tabel 'orders' (tanpa production_status, karena itu per-item di tabel items)
+            // 2. Buat record di tabel 'orders'
             $stmtOrder = $pdo->prepare(
                 "INSERT INTO orders (customer_id, plant_id) VALUES (?, ?)"
             );
@@ -115,9 +143,13 @@ class CartModel
 
             $stmtApproval = $pdo->prepare("INSERT INTO approvals (order_id, spv_id, approval_status) VALUES (?, ?, 'waiting')");
             $stmtApproval->execute([$orderId, $spvId]);
-            // ==========================================================
+
+            // 3. Update items → assign ke order
             $placeholders = implode(',', array_fill(0, count($itemIds), '?'));
-            $sqlItems = "UPDATE items SET order_id = ? WHERE customer_id = ? AND id IN ($placeholders) AND order_id IS NULL";
+            $sqlItems = "UPDATE items SET order_id = ? 
+                         WHERE customer_id = ? 
+                           AND id IN ($placeholders) 
+                           AND order_id IS NULL";
             $stmtItems = $pdo->prepare($sqlItems);
             $params = array_merge([$orderId, $customerId], $itemIds);
             $stmtItems->execute($params);
@@ -131,38 +163,40 @@ class CartModel
             return ['success' => true, 'message' => 'Checkout berhasil! Order Anda sedang menunggu approval SPV.'];
         } catch (\Exception $e) {
             $pdo->rollBack();
-            // Debug: log error ke file untuk visibility
             error_log('Checkout Error: ' . $e->getMessage() . ' | Line: ' . $e->getLine());
             return ['success' => false, 'message' => 'Error: ' . $e->getMessage()];
         }
     }
 
+    /**
+     * Menambahkan item baru ke keranjang.
+     */
     public static function addItemToCart($customerId, array $item)
     {
         $pdo = Database::connect();
 
         $sql = "INSERT INTO items (
-                customer_id, item_name, quantity, category, material, material_type,
-                file_path, needed_date, note, is_emergency, emergency_type, item_type, created_at 
-            ) VALUES (
-                :customer_id, :item_name, :quantity, :category, :material, :material_type,
-                :file_path, :needed_date, :note, :is_emergency, :emergency_type, :item_type, NOW()
-            )";
+                    customer_id, item_name, quantity, category, material_status, material_dimension_id,
+                    file_path, needed_date, note, is_emergency, emergency_type, item_type, created_at 
+                ) VALUES (
+                    :customer_id, :item_name, :quantity, :category, :material_status, :material_dimension_id,
+                    :file_path, :needed_date, :note, :is_emergency, :emergency_type, :item_type, NOW()
+                )";
 
         $stmt = $pdo->prepare($sql);
         return $stmt->execute([
-            'customer_id'     => $customerId,
-            'item_name'       => $item['item_name'],
-            'quantity'        => $item['quantity'],
-            'category'        => $item['category'],
-            'material'        => $item['material'] ?? null,
-            'material_type'   => $item['material_type'] ?? null,
-            'file_path'       => $item['file_path'] ?? null,
-            'needed_date'     => date('Y-m-d'), 
-            'note'            => $item['note'] ?? null,
-            'is_emergency'    => $item['is_emergency'] ?? 0,
-            'emergency_type'  => $item['emergency_type'] ?? null,
-            'item_type'       => $item['item_type'] ?? 'work_order'
+            'customer_id'          => $customerId,
+            'item_name'            => $item['item_name'],
+            'quantity'             => $item['quantity'],
+            'category'             => $item['category'],
+            'material_status'      => $item['material_status'] ?? null,
+            'material_dimension_id' => $item['material_dimension_id'] ?? null,
+            'file_path'            => $item['file_path'] ?? null,
+            'needed_date'          => date('Y-m-d'),
+            'note'                 => $item['note'] ?? null,
+            'is_emergency'         => $item['is_emergency'] ?? 0,
+            'emergency_type'       => $item['emergency_type'] ?? null,
+            'item_type'            => $item['item_type'] ?? 'work_order'
         ]);
     }
- }
+}

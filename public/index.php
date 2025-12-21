@@ -23,7 +23,8 @@ if (
     strpos($route, '/tracking') !== false ||
     strpos($route, '/history') !== false ||
     strpos($route, '/shared') !== false ||
-    strpos($route, '/admin/consumable') !== false
+    strpos($route, '/admin/consumable') !== false ||
+    strpos($route, '/materials') === 0
 ) {
     require __DIR__ . '/../routes/web.php';
 
@@ -39,5 +40,5 @@ if (
 } else {
     http_response_code(404);
     echo "404 Not Found :) <br>";
-    echo "Route tidak ditemukan di pemandu arah utama: " . htmlspecialchars($route);
+    echo "Route tidak ditemukan di arah utama: " . htmlspecialchars($route);
 }

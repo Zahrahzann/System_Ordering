@@ -58,8 +58,8 @@ $basePath = '/system_ordering/public';
                                         <div>
                                             <?php
                                             if ($item['is_emergency']) {
-                                                echo $item['emergency_type'] === 'line_stop' 
-                                                    ? '<span class="badge badge-danger"><i class="fas fa-exclamation-triangle"></i> Line Stop</span>' 
+                                                echo $item['emergency_type'] === 'line_stop'
+                                                    ? '<span class="badge badge-danger"><i class="fas fa-exclamation-triangle"></i> Line Stop</span>'
                                                     : '<span class="badge badge-success"><i class="fas fa-shield-alt"></i> Safety</span>';
                                             } else {
                                                 echo '<span class="badge badge-info"><i class="fas fa-check"></i> Regular</span>';
@@ -74,12 +74,12 @@ $basePath = '/system_ordering/public';
                                             <div class="detail-value"><?= htmlspecialchars($item['category']) ?></div>
                                         </div>
                                         <div class="detail-item">
-                                            <div class="detail-label">Material</div>
-                                            <div class="detail-value"><?= htmlspecialchars($item['material']) ?></div>
+                                            <div class="detail-label">Jenis Material</div>
+                                            <div class="detail-value"><?= htmlspecialchars($item['material_type'] ?? '-') ?></div>
                                         </div>
                                         <div class="detail-item">
-                                            <div class="detail-label">Jenis Material</div>
-                                            <div class="detail-value"><?= htmlspecialchars($item['material_type']) ?></div>
+                                            <div class="detail-label">Dimensi Material</div>
+                                            <div class="detail-value"><?= htmlspecialchars($item['material_dimension'] ?? '-') ?></div>
                                         </div>
                                         <div class="detail-item">
                                             <div class="detail-label">Quantity</div>

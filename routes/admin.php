@@ -1,6 +1,5 @@
 <?php
 // routes/admin.php
-// Variabel $route dari index.php
 global $route;
 
 // CONTROLLER
@@ -9,6 +8,7 @@ use App\Controllers\TrackingController;
 use App\Controllers\AdminController;
 use App\Controllers\UserManagementController;
 use App\Controllers\ConsumableController;
+use App\Controllers\MaterialController;
 
 // ROUTING DINAMIS
 $matches = [];
@@ -24,15 +24,19 @@ switch ($route) {
     case '/admin/register':
         AuthController::showRegisterPage('admin');
         break;
+
     case '/admin/process_register':
         AuthController::registerUser('admin');
         break;
+
     case '/admin/login':
         AdminController::showLoginPage();
         break;
+
     case '/admin/process_login':
         AuthController::loginUser('admin');
         break;
+
     case '/admin/dashboard':
         AdminController::showDashboard();
         break;
@@ -41,6 +45,7 @@ switch ($route) {
     case '/admin/manage/spv':
         UserManagementController::listSpv();
         break;
+
     case '/admin/manage/customer':
         UserManagementController::listCustomers();
         break;
@@ -68,11 +73,50 @@ switch ($route) {
         }
         break;
 
-
-    // 404 NOT FOUND RESPON
+    // 404 NOT FOUND RESPON (untuk route statis)
     default:
-        http_response_code(404);
-        echo "404 Not Found :) <br>";
-        echo "Route Admin yang dicari: " . htmlspecialchars($route);
+        // jangan langsung exit, biarkan switch (true) di bawah bisa jalan
         break;
+}
+
+// =====================
+// MANAGEMENT MATERIAL (admin only)
+// =====================
+switch (true) {
+    // Index
+    case ($route === '/admin/materials'):
+        MaterialController::index();
+        break;
+
+    // ===== TYPE =====
+    case ($route === '/admin/materials/type/store' && $_SERVER['REQUEST_METHOD'] === 'POST'):
+        MaterialController::storeType();
+        break;
+
+    case preg_match('#^/admin/materials/type/update/(\d+)$#', $route, $matches) && $_SERVER['REQUEST_METHOD'] === 'POST':
+        MaterialController::updateType($matches[1]);
+        break;
+
+    case preg_match('#^/admin/materials/type/delete/(\d+)$#', $route, $matches):
+        MaterialController::destroyType($matches[1]);
+        break;
+
+    // ===== DIMENSION =====
+    case ($route === '/admin/materials/dimension/store' && $_SERVER['REQUEST_METHOD'] === 'POST'):
+        MaterialController::storeDimension();
+        break;
+
+    case preg_match('#^/admin/materials/dimension/update/(\d+)$#', $route, $matches) && $_SERVER['REQUEST_METHOD'] === 'POST':
+        MaterialController::updateDimension($matches[1]);
+        break;
+
+    case preg_match('#^/admin/materials/dimension/delete/(\d+)$#', $route, $matches):
+        MaterialController::destroyDimension($matches[1]);
+        break;
+
+    // default:
+    //     http_response_code(404);
+    //     echo "404 Not Found :) <br>";
+    //     echo "Route Admin yang dicari: " . htmlspecialchars($route);
+    //     break;
 }

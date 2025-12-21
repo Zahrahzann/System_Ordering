@@ -32,15 +32,27 @@ class CartController
     public static function showConfirmPage()
     {
         SessionMiddleware::requireCustomerLogin();
+
+        // Ambil selected_items dari POST, kalau kosong fallback ke semua item di cart
         $selectedIds = $_POST['selected_items'] ?? [];
+
+        if (empty($selectedIds)) {
+            $allItems = CartModel::getItems($_SESSION['user_data']['id']);
+            $selectedIds = array_column($allItems, 'id');
+        }
+
+        // Kalau tetap kosong, redirect ke cart
         if (empty($selectedIds)) {
             header('Location: /system_ordering/public/customer/cart');
             exit;
         }
+
         $cartItems = CartModel::getItemsByIds($_SESSION['user_data']['id'], $selectedIds);
         $_SESSION['checkout_items'] = $selectedIds;
+
         require_once __DIR__ . '/../../views/customer/work_order/checkout_confirm.php';
     }
+
 
     /** Memproses checkout setelah dikonfirmasi */
     public static function processCheckout()

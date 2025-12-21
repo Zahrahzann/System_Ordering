@@ -11,6 +11,7 @@ use App\Controllers\DashboardController;
 use App\Controllers\ConsumableController;
 use App\Controllers\ConsumCartController;
 use App\Controllers\ConsumOrderController;
+use App\Controllers\MaterialController;
 
 // ROUTING DINAMIS (pakai preg_match di luar switch)
 $matches = [];
@@ -48,9 +49,10 @@ switch ($route) {
     case '/customer/work_order/edit':
         WorkOrderController::editItem([]);
         break;
-    case '/customer/work_order/process_add_to_cart':
+    case '/customer/work_order/process':
         WorkOrderController::processWorkOrderForm();
         break;
+
     case '/customer/cart': // Cart untuk work order
         CartController::showCart();
         break;
@@ -81,6 +83,15 @@ switch ($route) {
         ConsumOrderController::processCheckout();
         break;
 
+    // --- CONSUMABLE ORDER NOW --- 
+    case '/customer/consumable/order/now':
+        ConsumOrderController::orderNow();
+        break;
+
+    // --- MATERIALS (read-only untuk customer) ---
+    case '/customer/materials':
+        MaterialController::index();
+        break;
 
     // --- PESAN ERROR ---
     default:

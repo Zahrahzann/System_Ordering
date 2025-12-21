@@ -57,15 +57,19 @@ class HistoryController
         $customerId = $_SESSION['user_data']['id'];
 
         $item = HistoryModel::findItemById($itemId);
-        if (!$item || $item['customer_id'] != $customerId) {
-            die('Item tidak valid atau bukan milik Anda.');
+
+        if (!$item || $item['customer_id'] != $customerId || $item['item_type'] !== 'work_order') {
+            die('Item tidak valid atau bukan Work Order milik Anda.');
         }
 
-        // Simpan data ke session untuk prefill form
         $_SESSION['reorder_item'] = $item;
 
-        // Redirect ke form WO
         header('Location: /system_ordering/public/customer/work_order/form?reorder=1');
         exit;
+        // echo "<pre>";
+        // print_r($_SESSION['user_data']);
+        // print_r($itemId);
+        // echo "</pre>";
+        // exit;
     }
 }

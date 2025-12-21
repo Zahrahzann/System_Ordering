@@ -33,7 +33,7 @@ $productTypeId   = $productType['id'] ?? null;
                     <div class="page-header">
                         <h1 class="page-title">Katalog Produk dari <?= $productTypeName ?></h1>
                         <p class="page-subtitle">
-                                Daftar Produk yang termasuk dalam <?= $productTypeName ?>
+                            Daftar Produk yang termasuk dalam <?= $productTypeName ?>
                         </p>
                     </div>
 
@@ -304,6 +304,17 @@ $productTypeId   = $productType['id'] ?? null;
                     });
                 });
 
+                document.querySelectorAll('form[action$="/order/now"]').forEach(form => {
+                    form.addEventListener('submit', function() {
+                        const itemId = this.querySelector('[name="item"]').value;
+                        const visibleQty = document.querySelector(`.qty-input[data-item-id="${itemId}"]`);
+                        const hiddenQty = this.querySelector('[name="qty"]');
+                        if (visibleQty && hiddenQty) {
+                            hiddenQty.value = visibleQty.value;
+                        }
+                    });
+                });
+
                 // Add to cart function
                 function addToCart(itemId) {
                     const qtyInput = document.querySelector(`input[data-item-id="${itemId}"]`);
@@ -315,7 +326,7 @@ $productTypeId   = $productType['id'] ?? null;
                 function buyNow(itemId) {
                     const qtyInput = document.querySelector(`input[data-item-id="${itemId}"]`);
                     const quantity = qtyInput ? qtyInput.value : 1;
-                    window.location.href = `<?= $basePath ?>/customer/order/now?item=${itemId}&qty=${quantity}`;
+                    window.location.href = `<?= $basePath ?>/customer/consumable/order/now?item=${itemId}&qty=${quantity}`;
                 }
 
                 // Modal: Isi form otomatis saat klik Edit

@@ -153,19 +153,19 @@ class ConsumHistoryModel
         $pdo = Database::connect();
 
         $sql = "
-            SELECT 
-                MONTH(o.created_at) AS month,
-                s.name AS section_name,
-                SUM(o.quantity) AS total_qty
-            FROM consum_orders o
-            JOIN product_items p ON o.product_item_id = p.id
-            JOIN product_types pt ON p.product_type_id = pt.id
-            JOIN sections s ON pt.section_id = s.id
-            WHERE LOWER(TRIM(o.status)) = 'selesai'
-              AND YEAR(o.created_at) = ?
-            GROUP BY MONTH(o.created_at), s.name
-            ORDER BY MONTH(o.created_at), s.name
-        ";
+        SELECT 
+            MONTH(o.created_at) AS month,
+            s.name AS section_name,
+            SUM(o.quantity) AS total_qty
+        FROM consum_orders o
+        JOIN product_items p ON o.product_item_id = p.id
+        JOIN product_types pt ON p.product_type_id = pt.id
+        JOIN sections s ON pt.section_id = s.id
+        WHERE LOWER(TRIM(o.status)) = 'selesai'
+          AND YEAR(o.created_at) = ?
+        GROUP BY MONTH(o.created_at), s.name
+        ORDER BY MONTH(o.created_at), s.name
+    ";
 
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$year]);

@@ -36,9 +36,9 @@ class WorkOrderController
 
         $pdo = Database::connect();
         $sql = "INSERT INTO items (
-    customer_id, order_id, item_type, item_name, category, quantity, material, material_type, file_path, needed_date, note, is_emergency, emergency_type
+    customer_id, order_id, item_type, item_name, category, quantity, material_status, material_dimension_id, file_path, needed_date, note, is_emergency, emergency_type
 ) VALUES (
-    :customer_id, NULL, 'work_order', :item_name, :category, :quantity, :material, :material_type, :file_path, :needed_date, :note, :is_emergency, :emergency_type
+    :customer_id, NULL, 'work_order', :item_name, :category, :quantity, :material_status, :material_dimension_id, :file_path, :needed_date, :note, :is_emergency, :emergency_type
 )";
         $stmt = $pdo->prepare($sql);
 
@@ -46,17 +46,17 @@ class WorkOrderController
         $emergencyType = $isEmergency ? ($_POST['emergency_type'] ?? null) : null;
 
         $stmt->execute([
-            ':customer_id'   => $_SESSION['user_data']['id'],
-            ':item_name'     => $_POST['item_name'],
-            ':category'      => $_POST['category'],
-            ':quantity'      => (int)$_POST['quantity'],
-            ':material'      => $_POST['material'],
-            ':material_type' => $_POST['material_type'],
-            ':file_path'     => $filePathsJson,
-            ':needed_date'   => date('Y-m-d H:i:s', strtotime($_POST['needed_date'])),
-            ':note'          => $_POST['note'],
-            ':is_emergency'  => $isEmergency,
-            ':emergency_type' => $emergencyType
+            ':customer_id'          => $_SESSION['user_data']['id'],
+            ':item_name'            => $_POST['item_name'],
+            ':category'             => $_POST['category'],
+            ':quantity'             => (int)$_POST['quantity'],
+            ':material_status'      => $_POST['material_status'],
+            ':material_dimension_id' => (int)$_POST['material_dimension_id'],
+            ':file_path'            => $filePathsJson,
+            ':needed_date'          => date('Y-m-d H:i:s', strtotime($_POST['needed_date'])),
+            ':note'                 => $_POST['note'],
+            ':is_emergency'         => $isEmergency,
+            ':emergency_type'       => $emergencyType
         ]);
 
         // NOTIFIKASI
@@ -67,22 +67,23 @@ class WorkOrderController
             "Item '$itemName' berhasil ditambahkan ke Work Order",
             'fas fa-clipboard-list',
             'success',
-            'work_order' 
+            'work_order'
         );
 
         // NOTIFIKASI
         $action = $_POST['action_type'] ?? 'cart';
+
         if ($action === 'cart') {
             $_SESSION['success'] = 'Item berhasil ditambahkan ke keranjang!';
             header('Location: /system_ordering/public/customer/cart');
             exit;
-        } elseif ($action === 'order') {
-            $_SESSION['success'] = 'Item berhasil diorder!';
-            header('Location: /system_ordering/public/customer/cart');
+        } elseif ($action === 'checkout') {
+            $_SESSION['success'] = 'Item berhasil diorder, lanjut ke checkout!';
+            header('Location: /system_ordering/public/customer/checkout/confirm');
             exit;
         }
     }
-
+    
     /**
      * Menampilkan form untuk meng-edit item yang ada
      */
@@ -134,16 +135,16 @@ class WorkOrderController
         $emergencyType = $isEmergency ? ($_POST['emergency_type'] ?? null) : null;
 
         $data = [
-            'item_name'      => $_POST['item_name'],
-            'category'       => $_POST['category'],
-            'quantity'       => (int)$_POST['quantity'],
-            'material'       => $_POST['material'],
-            'material_type'  => $_POST['material_type'],
-            'file_path'      => $filePathsJson,
-            'needed_date'    => date('Y-m-d H:i:s', strtotime($_POST['needed_date'])),
-            'note'           => $_POST['note'],
-            'is_emergency'   => $isEmergency,
-            'emergency_type' => $emergencyType
+            'item_name'             => $_POST['item_name'],
+            'category'              => $_POST['category'],
+            'quantity'              => (int)$_POST['quantity'],
+            'material_status'       => $_POST['material_status'],
+            'material_dimension_id' => (int)$_POST['material_dimension_id'],
+            'file_path'             => $filePathsJson,
+            'needed_date'           => date('Y-m-d H:i:s', strtotime($_POST['needed_date'])),
+            'note'                  => $_POST['note'],
+            'is_emergency'          => $isEmergency,
+            'emergency_type'        => $emergencyType
         ];
 
         CartModel::updateItem($itemId, $data, $customerId);
@@ -158,8 +159,8 @@ class WorkOrderController
         $errors = [];
         if (!v::stringType()->length(3, 255)->validate($post['item_name'] ?? '')) $errors[] = "Nama Part harus diisi (min 3 karakter).";
         if (empty($post['category'])) $errors[] = "Kategori wajib dipilih.";
-        if (empty($post['material'])) $errors[] = "Material wajib dipilih.";
-        if (empty($post['material_type'])) $errors[] = "Jenis Material wajib diisi.";
+        if (empty($post['material_status'])) $errors[] = "Status Material wajib dipilih.";
+        if (empty($post['material_dimension_id'])) $errors[] = "Dimensi Material wajib dipilih.";
         if (!v::intVal()->positive()->validate($post['quantity'] ?? '')) $errors[] = "Quantity harus berupa angka.";
         if (empty($post['needed_date'])) $errors[] = "Tanggal dibutuhkan wajib diisi.";
         if (isset($post['is_emergency']) && empty($post['emergency_type'])) $errors[] = "Jika Emergency dicentang, Jenis Emergency wajib dipilih.";
@@ -177,8 +178,8 @@ class WorkOrderController
         $errors = [];
         if (!v::stringType()->length(3, 255)->validate($post['item_name'] ?? '')) $errors[] = "Nama Part harus diisi (min 3 karakter).";
         if (empty($post['category'])) $errors[] = "Kategori wajib dipilih.";
-        if (empty($post['material'])) $errors[] = "Material wajib dipilih.";
-        if (empty($post['material_type'])) $errors[] = "Material wajib diisi.";
+        if (empty($post['material_status'])) $errors[] = "Status Material wajib dipilih.";
+        if (empty($post['material_dimension_id'])) $errors[] = "Dimensi Material wajib dipilih.";
         if (!v::intVal()->positive()->validate($post['quantity'] ?? '')) $errors[] = "Quantity harus berupa angka.";
         if (empty($post['needed_date'])) $errors[] = "Tanggal dibutuhkan wajib diisi.";
         if (isset($post['is_emergency']) && empty($post['emergency_type'])) $errors[] = "Jika Emergency dicentang, Jenis Emergency wajib dipilih.";

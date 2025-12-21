@@ -306,16 +306,6 @@ $basePath = '/system_ordering/public';
                             </div>
                         </div>
 
-                        <div class="stat-card blue">
-                            <div class="stat-card-content">
-                                <div class="stat-icon"><i class="fas fa-calendar-check"></i></div>
-                                <div class="stat-details">
-                                    <div class="stat-label">WO Completed</div>
-                                    <div class="stat-value"><?= number_format($totalWOCompleted) ?></div>
-                                </div>
-                            </div>
-                        </div>
-
                         <div class="stat-card gray">
                             <div class="stat-card-content">
                                 <div class="stat-icon"><i class="fas fa-clock"></i></div>
@@ -342,6 +332,16 @@ $basePath = '/system_ordering/public';
                                 <div class="stat-details">
                                     <div class="stat-label">WO Finish</div>
                                     <div class="stat-value"><?= number_format($totalWOFinish) ?></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stat-card blue">
+                            <div class="stat-card-content">
+                                <div class="stat-icon"><i class="fas fa-calendar-check"></i></div>
+                                <div class="stat-details">
+                                    <div class="stat-label">WO Completed</div>
+                                    <div class="stat-value"><?= number_format($totalWOCompleted) ?></div>
                                 </div>
                             </div>
                         </div>
@@ -375,7 +375,6 @@ $basePath = '/system_ordering/public';
                                 <select name="year" id="year" onchange="this.form.submit()">
                                     <?php
                                     $currentYear = date('Y');
-                                    // tampilkan dari tahun sekarang mundur 5 tahun
                                     for ($y = $currentYear; $y >= $currentYear - 5; $y--) {
                                         $selected = ($year == $y) ? 'selected' : '';
                                         echo "<option value=\"$y\" $selected>$y</option>";
@@ -482,7 +481,6 @@ $basePath = '/system_ordering/public';
                 const datasetsPerSection = <?= json_encode($chartDatasets) ?>;
                 const cumulativeTotals = <?= json_encode($cumulative) ?>;
 
-                // Hanya render chart jika ada data
                 if (sections.length > 0) {
                     const sectionColors = {
                         "Presub": "rgba(255, 193, 7, 0.7)",
