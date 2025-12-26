@@ -5,7 +5,15 @@ $basePath = '/system_ordering/public';
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-?>
+
+// Ambil flash notification
+$notif = null;
+if (isset($_SESSION['flash_notification'])) {
+    $notif = $_SESSION['flash_notification'];
+    unset($_SESSION['flash_notification']);
+} ?>
+
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -17,7 +25,6 @@ if (session_status() === PHP_SESSION_NONE) {
     <link href="<?= $basePath ?>/assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
     <link href="<?= $basePath ?>/assets/css/sb-admin-2.min.css" rel="stylesheet">
     <link href="<?= $basePath ?>/assets/css/customer/work_order/checkout.css?v=<?= time() ?>" rel="stylesheet">
-
 </head>
 
 <body id="page-top">
@@ -27,36 +34,13 @@ if (session_status() === PHP_SESSION_NONE) {
             <div id="content">
                 <?php include __DIR__ . '/../../../views/layout/topbar.php'; ?>
                 <div class="container-fluid">
+                    <!-- Page Header -->
                     <div class="page-header">
-                        <h1 class="page-title">
-                            <i class="fas fa-clipboard-check"></i>
-                            Status Approval Pesanan
-                        </h1>
+                        <h1 class="page-title">Approval Work Order</h1>
+                        <p class="page-subtitle">
+                            Pantau status approval pesanan work order Anda dari SPV Department anda
+                        </p>
                     </div>
-
-                    <!-- Notifikasi sukses (saat baru checkout) -->
-                    <?php if (isset($_SESSION['flash_message'])): ?>
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            <i class="fas fa-check-circle mr-2"></i>
-                            <?= htmlspecialchars($_SESSION['flash_message']) ?>
-                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <?php unset($_SESSION['flash_message']); ?>
-                    <?php endif; ?>
-
-                    <!-- KOREKSI: Notifikasi (jika ada) dari aksi delete -->
-                    <?php if (isset($_SESSION['flash_notification'])): ?>
-                        <div class="alert alert-<?= $_SESSION['flash_notification']['type'] == 'success' ? 'success' : 'danger' ?> alert-dismissible fade show" role="alert">
-                            <i class="fas fa-<?= $_SESSION['flash_notification']['type'] == 'success' ? 'check-circle' : 'exclamation-circle' ?> mr-2"></i>
-                            <?= htmlspecialchars($_SESSION['flash_notification']['message']) ?>
-                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
-                        <?php unset($_SESSION['flash_notification']); ?>
-                    <?php endif; ?>
 
                     <?php if (empty($allPendingOrders)): ?>
                         <div class="empty-state">
@@ -176,22 +160,30 @@ if (session_status() === PHP_SESSION_NONE) {
                             </div>
                         <?php endforeach; ?>
                     <?php endif; ?>
-
-                    <div class="back-button-wrapper">
-                        <a href="<?= $basePath ?>/customer/dashboard" class="btn btn-primary">
-                            <i class="fas fa-arrow-left"></i>
-                            Kembali ke Dashboard
-                        </a>
-                    </div>
                 </div>
             </div>
         </div>
     </div>
-    <!-- ... SCRIPT ... -->
+
+    <!-- Vendor JS -->
     <script src="<?= $basePath ?>/assets/vendor/jquery/jquery.min.js"></script>
     <script src="<?= $basePath ?>/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="<?= $basePath ?>/assets/vendor/jquery-easing/jquery.easing.min.js"></script>
     <script src="<?= $basePath ?>/assets/js/sb-admin-2.min.js"></script>
+
+    <!-- SweetAlert Pop-up -->
+    <?php if ($notif): ?> <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                Swal.fire({
+                    icon: '<?= $notif['type'] ?>',
+                    title: '<?= $notif['title'] ?>',
+                    text: '<?= $notif['message'] ?>',
+                    showConfirmButton: <?= $notif['type'] === 'success' ? 'false' : 'true' ?>,
+                    timer: <?= $notif['type'] === 'success' ? '3000' : 'null' ?>
+                });
+            });
+        </script> <?php endif; ?>
 </body>
 
 </html>

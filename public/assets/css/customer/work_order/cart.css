@@ -9,11 +9,26 @@ body {
     padding: 20px;
 }
 
-/* Header */
-h1 {
-    font-weight: 600;
-    color: #2c3e50;
-    margin-bottom: 24px;
+/* Page Header */
+.page-header {
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.page-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 0.5rem;
+}
+
+.page-subtitle {
+    font-size: 0.95rem;
+    color: #6b7280;
+    font-weight: 400;
+    line-height: 1.6;
+    max-width: 700px;
+    margin: 0 auto;
 }
 
 /* Select All Bar */

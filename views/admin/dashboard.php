@@ -10,6 +10,14 @@ if (!isset($cumulative)) $cumulative = array_fill(0, 12, 0);
 if (!isset($year)) $year = date('Y');
 
 $basePath = '/system_ordering/public';
+
+if (session_status() === PHP_SESSION_NONE) session_start();
+$notif = null;
+if (isset($_SESSION['flash_notification'])) {
+    $notif = $_SESSION['flash_notification'];
+    unset($_SESSION['flash_notification']);
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -21,257 +29,10 @@ $basePath = '/system_ordering/public';
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="<?= $basePath ?>/assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
     <link href="<?= $basePath ?>/assets/css/sb-admin-2.min.css" rel="stylesheet">
-
+    <link href="<?= $basePath ?>/assets/css/admin/dashboard_admin.css?v=<?= time() ?>" rel="stylesheet">
     <script src="<?= $basePath ?>/assets/vendor/chart.js/Chart.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@0.7.0"></script>
 
-    <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: #f5f5f5;
-        }
-
-        /* Welcome Section */
-        .welcome-section {
-            background: white;
-            border-radius: 12px;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-            border-left: 4px solid #667eea;
-        }
-
-        .welcome-section h1 {
-            font-size: 28px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 8px;
-        }
-
-        .welcome-section p {
-            font-size: 16px;
-            color: #4a4a4aff;
-            margin: 0;
-        }
-
-        .welcome-section strong {
-            color: #667eea;
-            font-weight: 600;
-        }
-
-        /* Stats Cards */
-        .stats-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: white;
-            border-radius: 10px;
-            padding: 25px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-            transition: all 0.3s ease;
-            border-left: 4px solid transparent;
-        }
-
-        .stat-card:hover {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            transform: translateY(-2px);
-        }
-
-        .stat-card.dark {
-            border-left-color: #241a84ff;
-        }
-
-        .stat-card.blue {
-            border-left-color: #62a0fdff;
-        }
-
-        .stat-card.gray {
-            border-left-color: #3d3d3dff;
-        }
-
-        .stat-card.orange {
-            border-left-color: #ff9f40;
-        }
-
-        .stat-card.green {
-            border-left-color: #44c836ff;
-        }
-
-        .stat-card-content {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .stat-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            flex-shrink: 0;
-        }
-
-        .stat-card.dark .stat-icon {
-            background: rgba(54, 162, 235, 0.1);
-            color: #241a84ff;
-        }
-
-        .stat-card.blue .stat-icon {
-            background: rgba(75, 192, 192, 0.1);
-            color: #62a0fdff;
-        }
-
-        .stat-card.gray .stat-icon {
-            background: rgba(128, 128, 128, 0.1);
-            color: #3d3d3dff;
-        }
-
-        .stat-card.orange .stat-icon {
-            background: rgba(255, 159, 64, 0.1);
-            color: #ff9f40;
-        }
-
-        .stat-card.green .stat-icon {
-            background: rgba(89, 180, 89, 0.1);
-            color: #44c836ff;
-        }
-
-        .stat-details {
-            flex: 1;
-        }
-
-        .stat-label {
-            font-size: 13px;
-            color: #333333ff;
-            font-weight: 500;
-            text-transform: uppercase;
-            margin-bottom: 5px;
-        }
-
-        .stat-value {
-            font-size: 28px;
-            font-weight: 700;
-            color: #333;
-            line-height: 1;
-        }
-
-        /* Chart Card */
-        .chart-card {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-            overflow: hidden;
-            margin-bottom: 30px;
-        }
-
-        .chart-card-header {
-            padding: 25px 30px;
-            border-bottom: 1px solid #f0f0f0;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .chart-card-header h2 {
-            font-size: 20px;
-            font-weight: 600;
-            color: #333;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .chart-card-header i {
-            color: #667eea;
-            font-size: 20px;
-        }
-
-        .chart-card-body {
-            padding: 30px;
-        }
-
-        .chart-container {
-            position: relative;
-            height: 350px;
-            margin-bottom: 20px;
-        }
-
-        .chart-footer {
-            padding: 20px 30px;
-            background: #f8f9fa;
-            border-top: 1px solid #f0f0f0;
-        }
-
-        .chart-footer small {
-            font-size: 13px;
-            color: #666;
-            display: block;
-            line-height: 1.6;
-        }
-
-        .chart-footer code {
-            background: #e9ecef;
-            padding: 2px 6px;
-            border-radius: 4px;
-            color: #667eea;
-            font-size: 12px;
-        }
-
-        .no-data-message {
-            text-align: center;
-            padding: 60px 20px;
-            color: #999;
-        }
-
-        .no-data-message i {
-            font-size: 48px;
-            margin-bottom: 15px;
-            opacity: 0.3;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .container-fluid {
-                padding: 20px 15px;
-            }
-
-            .welcome-section {
-                padding: 20px;
-            }
-
-            .welcome-section h1 {
-                font-size: 22px;
-            }
-
-            .stats-row {
-                grid-template-columns: 1fr;
-            }
-
-            .stat-card {
-                padding: 20px;
-            }
-
-            .stat-value {
-                font-size: 24px;
-            }
-
-            .chart-card-body {
-                padding: 20px 15px;
-            }
-
-            .chart-container {
-                height: 280px;
-            }
-        }
-    </style>
 </head>
 
 <body id="page-top">
@@ -285,10 +46,29 @@ $basePath = '/system_ordering/public';
                 <?php include __DIR__ . '/../layout/topbar.php'; ?>
 
                 <div class="container-fluid">
-                    <!-- Welcome Section -->
-                    <div class="welcome-section">
-                        <h1><i class="fas fa-home"></i> Dashboard Admin</h1>
-                        <p>Selamat datang, <strong><?= htmlspecialchars($userData['name'] ?? 'Admin') ?></strong></p>
+                    <!-- Welcome Card -->
+                    <div class="welcome-card">
+                        <div class="welcome-content">
+                            <div class="welcome-left">
+                                <h1 class="welcome-title">
+                                    <i class="fas fa-tachometer-alt"></i>
+                                    Selamat datang, <?= htmlspecialchars($userData['name'] ?? 'Admin') ?>!
+                                </h1>
+                                <p class="welcome-subtitle">Kelola sistem ordering dan monitoring work order dengan mudah</p>
+                            </div>
+                            <div class="welcome-right">
+                                <div class="profile-avatar">
+                                    <?php if (!empty($userData['photo'])): ?>
+                                        <img src="<?= htmlspecialchars($userData['photo']) ?>" alt="Profile Photo">
+                                    <?php else: ?>
+                                        <i class="fas fa-user-shield"></i>
+                                    <?php endif; ?>
+                                </div>
+                                <div class="role-badge">
+                                    <i class="fas fa-crown mr-1"></i> Administrator
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Stats Cards -->
@@ -371,11 +151,11 @@ $basePath = '/system_ordering/public';
 
                     <!-- Chart Card Consumable -->
                     <div class="chart-card">
-                        <div class="chart-card-header d-flex justify-content-between align-items-center">
+                        <div class="chart-card-header">
                             <h2><i class="fas fa-box"></i> ME - Consumable Part <?= htmlspecialchars($year) ?></h2>
                             <!-- Dropdown Tahun -->
                             <form method="get" class="year-dropdown-form">
-                                <label for="year" class="me-2">Tahun:</label>
+                                <label for="year">Tahun:</label>
                                 <select name="year" id="year" onchange="this.form.submit()">
                                     <?php
                                     $currentYear = date('Y');
@@ -512,7 +292,6 @@ $basePath = '/system_ordering/public';
                         label: sec,
                         data: datasetsPerSection[sec] || [],
                         backgroundColor: sectionColors[sec] || "rgba(100,100,100,0.7)"
-                        // Hapus stack supaya batang tidak ditumpuk
                     }));
 
                     const lineDataset = {
@@ -538,7 +317,7 @@ $basePath = '/system_ordering/public';
                             maintainAspectRatio: false,
                             scales: {
                                 xAxes: [{
-                                    stacked: false // pastikan batang tidak ditumpuk
+                                    stacked: false
                                 }],
                                 yAxes: [{
                                     stacked: false,
@@ -578,6 +357,24 @@ $basePath = '/system_ordering/public';
                     console.warn('Tidak ada data consumable untuk ditampilkan');
                 }
             </script>
+
+            <!-- SweetAlert Pop-up -->
+            <?php if ($notif): ?>
+                <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+                <script>
+                    document.addEventListener('DOMContentLoaded', () => {
+                        Swal.fire({
+                            icon: '<?= $notif['type'] ?>',
+                            title: '<?= $notif['title'] ?>',
+                            text: '<?= $notif['message'] ?>',
+                            showConfirmButton: true,
+                            timer: <?= $notif['type'] === 'success' ? '3000' : 'null' ?>,
+                            confirmButtonColor: '#667eea'
+                        });
+                    });
+                </script>
+            <?php endif; ?>
+
         </div>
     </div>
 </body>

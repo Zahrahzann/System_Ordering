@@ -5,7 +5,8 @@ body {
 }
 
 #content {
-    padding-top: 64px !important;
+    padding-top: 40px !important;
+    padding-bottom: 40px !important;
 }
 
 .container-fluid {
@@ -16,6 +17,7 @@ body {
 .page-header {
     margin-bottom: 2rem;
     text-align: center;
+    padding-top: 10px !important;
 }
 
 .page-title {

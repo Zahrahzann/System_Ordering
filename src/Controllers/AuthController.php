@@ -117,6 +117,13 @@ class AuthController
                 'plant'         => $user['plant_name']
             ];
 
+            // Tambahkan notifikasi sukses
+            $_SESSION['flash_notification'] = [
+                'type' => 'success',
+                'title' => 'Login Berhasil',
+                'message' => 'Selamat datang, ' . $user['name'] . '!'
+            ];
+
             if ($role === 'spv') {
                 header("Location: /system_ordering/public/spv/dashboard");
             } else {
@@ -124,7 +131,9 @@ class AuthController
             }
             exit;
         } else {
-            self::handleErrors(['Email atau Password salah.'], "/system_ordering/public/{$role}/login");
+            // Notifikasi Login Gagal
+            $_SESSION['login_error'] = 'Email atau Password salah!';
+            header("Location: /system_ordering/public/{$role}/login");
             exit;
         }
     }

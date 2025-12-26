@@ -20,6 +20,14 @@ function getStatusBadge($status)
             return 'badge-light text-dark';
     }
 }
+
+$notif = null;
+if (isset($_SESSION['flash_notification'])) {
+    $notif = $_SESSION['flash_notification'];
+    unset($_SESSION['flash_notification']);
+}
+$role = $_SESSION['user_data']['role'] ?? 'guest';
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -41,11 +49,19 @@ function getStatusBadge($status)
             <div id="content">
                 <?php include __DIR__ . '/../../views/layout/topbar.php'; ?>
                 <div class="container-fluid">
+
+                    <!-- Page Header -->
                     <div class="page-header">
-                        <h1 class="page-title">
-                            <i class="fas fa-tasks"></i>
-                            Tracking Work Order
-                        </h1>
+                        <h1 class="page-title">Tracking Work Order</h1>
+                        <p class="page-subtitle">
+                            <?php if ($currentRole === 'admin'): ?>
+                                Kelola pesanan customer terbaru, pantau status produksi, dan atur PIC MFG dengan mudah
+                            <?php elseif ($currentRole === 'spv'): ?>
+                                Pantau pesanan departemen terbaru dengan status produksi terkini
+                            <?php else: ?>
+                                Pantau pesanan terbaru Anda, lihat status produksi, dan detail work order lengkap
+                            <?php endif; ?>
+                        </p>
                     </div>
 
                     <?php if (empty($items)): ?>
@@ -190,6 +206,42 @@ function getStatusBadge($status)
     <script src="<?= $basePath ?>/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="<?= $basePath ?>/assets/vendor/jquery-easing/jquery.easing.min.js"></script>
     <script src="<?= $basePath ?>/assets/js/sb-admin-2.min.js"></script>
+
+    <?php if ($notif): ?>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                let icon = '<?= $notif['type'] ?>';
+                let title = '<?= $notif['title'] ?>';
+                let text = '<?= $notif['message'] ?>';
+
+                // Sesuaikan pesan berdasarkan role
+                <?php if ($role === 'customer'): ?>
+                    // Customer: pop‑up status approve/reject
+                    Swal.fire({
+                        icon,
+                        title,
+                        text
+                    });
+                <?php elseif ($role === 'spv'): ?>
+                    // SPV: pop‑up hasil approve/reject
+                    Swal.fire({
+                        icon,
+                        title,
+                        text
+                    });
+                <?php elseif ($role === 'admin'): ?>
+                    // Admin: pop‑up order baru masuk
+                    Swal.fire({
+                        icon,
+                        title,
+                        text
+                    });
+                <?php endif; ?>
+            });
+        </script>
+    <?php endif; ?>
+
 </body>
 
 </html>

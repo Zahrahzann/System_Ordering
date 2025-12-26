@@ -34,7 +34,7 @@ $currentRole = $_SESSION['user_data']['role'] ?? '';
                 <div class="container-fluid">
 
                     <!-- Page Header -->
-                    <div class="page-header mb-4">
+                    <div class="page-header">
                         <h1 class="page-title">Riwayat Pesanan Work Order</h1>
                         <p class="page-subtitle">
                             <?php if ($currentRole === 'admin'): ?>

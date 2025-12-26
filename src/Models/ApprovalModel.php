@@ -8,38 +8,55 @@ use PDO;
 class ApprovalModel
 {
     /**
-     * Ambil semua order untuk SPV (waiting + reject).
+     * Ambil semua order untuk SPV berdasarkan departemen (waiting + reject).
      */
     public static function getOrdersForSpv($spvId)
     {
         $pdo = Database::connect();
+
+        // Ambil departemen SPV
+        $sqlDept = "SELECT department_id FROM users WHERE id = ?";
+        $stmtDept = $pdo->prepare($sqlDept);
+        $stmtDept->execute([$spvId]);
+        $departmentId = $stmtDept->fetchColumn();
+
         $sql = "SELECT 
                     o.id as order_id, 
                     o.created_at, 
                     c.name as customer_name, 
+                    c.line as line,
                     d.name as department_name, 
-                    a.approval_status
-                FROM approvals a
-                JOIN orders o ON a.order_id = o.id
+                    o.approval_status
+                FROM orders o
                 JOIN customers c ON o.customer_id = c.id
                 JOIN departments d ON c.department_id = d.id
-                WHERE a.spv_id = ?
-                  AND a.approval_status IN ('waiting','reject')
+                WHERE d.id = ?
+                  AND o.approval_status IN ('waiting','reject')
                 ORDER BY o.created_at ASC";
         $stmt = $pdo->prepare($sql);
-        $stmt->execute([$spvId]);
+        $stmt->execute([$departmentId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     /**
-     * Hitung jumlah order berdasarkan status untuk SPV.
+     * Hitung jumlah order berdasarkan status untuk SPV (berdasarkan departemen).
      */
     public static function countByStatusForSpv($spvId, $status)
     {
         $pdo = Database::connect();
-        $sql = "SELECT COUNT(*) FROM approvals WHERE spv_id = ? AND approval_status = ?";
+
+        // Ambil departemen SPV
+        $sqlDept = "SELECT department_id FROM users WHERE id = ?";
+        $stmtDept = $pdo->prepare($sqlDept);
+        $stmtDept->execute([$spvId]);
+        $departmentId = $stmtDept->fetchColumn();
+
+        $sql = "SELECT COUNT(*) 
+                  FROM orders o
+                  JOIN customers c ON o.customer_id = c.id
+                 WHERE c.department_id = ? AND o.approval_status = ?";
         $stmt = $pdo->prepare($sql);
-        $stmt->execute([$spvId, $status]);
+        $stmt->execute([$departmentId, $status]);
         return (int) $stmt->fetchColumn();
     }
 
@@ -72,13 +89,13 @@ class ApprovalModel
     {
         $pdo = Database::connect();
         $sql = "SELECT i.*, 
-                   mt.name AS material_type, 
-                   mt.material_number AS material_number,
-                   md.dimension AS material_dimension
-            FROM items i
-            LEFT JOIN material_dimensions md ON i.material_dimension_id = md.id
-            LEFT JOIN material_types mt ON md.material_type_id = mt.id
-            WHERE i.order_id = ?";
+                       mt.name AS material_type, 
+                       mt.material_number AS material_number,
+                       md.dimension AS material_dimension
+                  FROM items i
+             LEFT JOIN material_dimensions md ON i.material_dimension_id = md.id
+             LEFT JOIN material_types mt ON md.material_type_id = mt.id
+                 WHERE i.order_id = ?";
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$orderId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -125,10 +142,35 @@ class ApprovalModel
                     a.updated_at,
                     u.name as spv_name
                 FROM approvals a
-                LEFT JOIN users u ON a.spv_id = u.id
-                WHERE a.order_id = ?";
+           LEFT JOIN users u ON a.spv_id = u.id
+               WHERE a.order_id = ?";
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$orderId]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public static function createApprovalEntry($orderId, $spvId)
+    {
+        $pdo = Database::connect();
+
+        // Cek apakah approval sudah ada
+        $checkSql = "SELECT COUNT(*) FROM approvals WHERE order_id = :order_id AND spv_id = :spv_id";
+        $stmtCheck = $pdo->prepare($checkSql);
+        $stmtCheck->execute([
+            ':order_id' => $orderId,
+            ':spv_id'   => $spvId
+        ]);
+        $exists = $stmtCheck->fetchColumn();
+
+        if ($exists == 0) {
+            $sql = "INSERT INTO approvals (order_id, spv_id, approval_status, created_at)
+                VALUES (:order_id, :spv_id, 'waiting', NOW())";
+            $stmt = $pdo->prepare($sql);
+            return $stmt->execute([
+                ':order_id' => $orderId,
+                ':spv_id'   => $spvId
+            ]);
+        }
+        return true;
     }
 }

@@ -66,31 +66,37 @@ class TrackingModel
     {
         $pdo = Database::connect();
         $sql = "SELECT 
-                    i.id as item_id, 
-                    i.item_name, 
-                    i.quantity, 
-                    i.category, 
-                    i.pic_mfg,
-                    i.production_status,
-                    i.is_emergency,
-                    i.emergency_type,
-                    o.id as order_id, 
-                    c.name as customer_name, 
-                    c.line,
-                    d.name as department_name,
-                    a.approval_status as approval_status, 
-                    u.name as spv_name
-                FROM items i
-                JOIN orders o ON i.order_id = o.id
-                JOIN customers c ON o.customer_id = c.id
-                JOIN departments d ON c.department_id = d.id
-                INNER JOIN approvals a ON o.id = a.order_id
-                LEFT JOIN users u ON a.spv_id = u.id
-                WHERE o.customer_id = ?
-                AND i.item_type = 'work_order'
-                AND a.approval_status = 'approve'
-                AND i.production_status != 'completed'
-                ORDER BY o.created_at DESC, i.id ASC";
+                i.id as item_id, 
+                i.item_name, 
+                i.quantity, 
+                i.category, 
+                i.pic_mfg,
+                i.production_status,
+                i.is_emergency,
+                i.emergency_type,
+                o.id as order_id, 
+                c.name as customer_name, 
+                c.line,
+                d.name as department_name,
+                COALESCE(a.approval_status, o.approval_status) as approval_status, 
+                u.name as spv_name
+            FROM items i
+            JOIN orders o ON i.order_id = o.id
+            JOIN customers c ON o.customer_id = c.id
+            JOIN departments d ON c.department_id = d.id
+            LEFT JOIN approvals a 
+                   ON o.id = a.order_id
+                  AND a.updated_at = (
+                      SELECT MAX(updated_at) 
+                      FROM approvals 
+                      WHERE order_id = o.id
+                  )
+            LEFT JOIN users u ON a.spv_id = u.id
+            WHERE o.customer_id = ?
+              AND i.item_type = 'work_order'
+              AND (o.approval_status = 'approve' OR a.approval_status = 'approve')
+              AND i.production_status != 'completed'
+            ORDER BY o.created_at DESC, i.id ASC";
 
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$customerId]);
@@ -98,14 +104,14 @@ class TrackingModel
     }
 
     /**
-     * UNTUK ADMIN: Update PIC dan Status Produksi PER ITEM
-     * KOREKSI: Mengupdate tabel 'items' BUKAN 'orders'
+     * Update PIC dan Status Produksi PER ITEM
+     * KOREKSI: Mengupdate tabel 'items' BUKAN 'orders' 
      */
     public static function updateItemDetails($itemId, $newStatus, $picMfg)
     {
         $pdo = Database::connect();
 
-        // KOREKSI PENTING: Perbarui status produksi di tabel 'items'
+        // Perbarui status produksi di tabel 'items'
         $sql = "UPDATE items 
                 SET 
                     pic_mfg = ?, 

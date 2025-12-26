@@ -24,11 +24,12 @@ $basePath = '/system_ordering/public';
             <div id="content">
                 <?php include __DIR__ . '/../../../views/layout/topbar.php'; ?>
                 <div class="container-fluid">
+                    <!-- Page Header -->
                     <div class="page-header">
-                        <h1 class="page-title">
-                            <i class="fas fa-clipboard-check"></i>
-                            Konfirmasi Pesanan Anda
-                        </h1>
+                        <h1 class="page-title">Konfirmasi Work Order</h1>
+                        <p class="page-subtitle">
+                            Konfirmasi checkout semua item sebelum mengirim pesanan untuk approval SPV
+                        </p>
                     </div>
 
                     <!-- Info Alert -->

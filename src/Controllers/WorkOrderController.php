@@ -7,6 +7,7 @@ use Respect\Validation\Validator as v;
 use App\Models\CartModel;
 use App\Middleware\SessionMiddleware;
 use App\Models\NotificationModel;
+use PDO;
 
 class WorkOrderController
 {
@@ -15,7 +16,10 @@ class WorkOrderController
      */
     public static function processWorkOrderForm()
     {
-        if (session_status() === PHP_SESSION_NONE) session_start();
+
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
 
         $errors = self::validateWorkOrderData($_POST, $_FILES);
         if (!empty($errors)) {
@@ -23,11 +27,14 @@ class WorkOrderController
             return;
         }
 
+        // Handle file upload
         $filePathsJson = "[]";
         if (!empty($_FILES['file_path']['name'][0])) {
             $filePathsJson = self::handleMultipleFileUploads($_FILES['file_path']);
             if ($filePathsJson === false) {
-                self::handleErrors(['Gagal mengupload file. Pastikan formatnya benar (JPG, PNG, PDF) dan ukuran tidak lebih dari 5MB.']);
+                self::handleErrors([
+                    'Gagal mengupload file. Pastikan formatnya benar (JPG, PNG, PDF) dan ukuran tidak lebih dari 5MB.'
+                ]);
                 return;
             }
         } elseif (!empty($_SESSION['reorder_item']['file_path'])) {
@@ -35,55 +42,124 @@ class WorkOrderController
         }
 
         $pdo = Database::connect();
-        $sql = "INSERT INTO items (
-    customer_id, order_id, item_type, item_name, category, quantity, material_status, material_dimension_id, file_path, needed_date, note, is_emergency, emergency_type
-) VALUES (
-    :customer_id, NULL, 'work_order', :item_name, :category, :quantity, :material_status, :material_dimension_id, :file_path, :needed_date, :note, :is_emergency, :emergency_type
-)";
-        $stmt = $pdo->prepare($sql);
 
-        $isEmergency = isset($_POST['is_emergency']) ? 1 : 0;
+        $isEmergency   = isset($_POST['is_emergency']) ? 1 : 0;
         $emergencyType = $isEmergency ? ($_POST['emergency_type'] ?? null) : null;
+        // Perbaiki format datetime-local (YYYY-MM-DDTHH:MM)
+        $neededDate = str_replace('T', ' ', $_POST['needed_date']) . ':00';
 
-        $stmt->execute([
-            ':customer_id'          => $_SESSION['user_data']['id'],
-            ':item_name'            => $_POST['item_name'],
-            ':category'             => $_POST['category'],
-            ':quantity'             => (int)$_POST['quantity'],
-            ':material_status'      => $_POST['material_status'],
-            ':material_dimension_id' => (int)$_POST['material_dimension_id'],
-            ':file_path'            => $filePathsJson,
-            ':needed_date'          => date('Y-m-d H:i:s', strtotime($_POST['needed_date'])),
-            ':note'                 => $_POST['note'],
-            ':is_emergency'         => $isEmergency,
-            ':emergency_type'       => $emergencyType
-        ]);
-
-        // NOTIFIKASI
-        $customerId = $_SESSION['user_data']['id'];
-        $itemName   = $_POST['item_name'];
-        NotificationModel::create(
-            $customerId,
-            "Item '$itemName' berhasil ditambahkan ke Work Order",
-            'fas fa-clipboard-list',
-            'success',
-            'work_order'
-        );
-
-        // NOTIFIKASI
         $action = $_POST['action_type'] ?? 'cart';
 
         if ($action === 'cart') {
-            $_SESSION['success'] = 'Item berhasil ditambahkan ke keranjang!';
+            // Masuk keranjang: simpan item dengan order_id = NULL
+            $sqlItem = "INSERT INTO items (
+            customer_id, order_id, item_type, item_name, category, quantity, material_status,
+            material_dimension_id, file_path, needed_date, note, is_emergency, emergency_type
+        ) VALUES (
+            :customer_id, NULL, 'work_order', :item_name, :category, :quantity, :material_status,
+            :material_dimension_id, :file_path, :needed_date, :note, :is_emergency, :emergency_type
+        )";
+            $stmtItem = $pdo->prepare($sqlItem);
+            $stmtItem->execute([
+                'customer_id'           => $_SESSION['user_data']['id'],
+                'item_name'             => $_POST['item_name'],
+                'category'              => $_POST['category'],
+                'quantity'              => (int)$_POST['quantity'],
+                'material_status'       => $_POST['material_status'],
+                'material_dimension_id' => (int)$_POST['material_dimension_id'],
+                'file_path'             => $filePathsJson,
+                'needed_date'           => $neededDate,
+                'note'                  => $_POST['note'],
+                'is_emergency'          => $isEmergency,
+                'emergency_type'        => $emergencyType
+            ]);
+
+            $_SESSION['flash_notification'] = [
+                'type'    => 'success',
+                'title'   => 'Berhasil!',
+                'message' => 'Item berhasil ditambahkan ke keranjang!'
+            ];
             header('Location: /system_ordering/public/customer/cart');
             exit;
         } elseif ($action === 'checkout') {
-            $_SESSION['success'] = 'Item berhasil diorder, lanjut ke checkout!';
-            header('Location: /system_ordering/public/customer/checkout/confirm');
+            // Order langsung: bikin order baru
+            $sqlOrder = "INSERT INTO orders (customer_id, department, plant_id, approval_status, created_at)
+                     VALUES (:customer_id, :department, :plant_id, 'waiting', NOW())";
+            $stmtOrder = $pdo->prepare($sqlOrder);
+            $stmtOrder->execute([
+                'customer_id' => $_SESSION['user_data']['id'],
+                'department'  => $_SESSION['user_data']['department_id'],
+                'plant_id'    => $_SESSION['user_data']['plant_id']
+            ]);
+            $orderId = $pdo->lastInsertId();
+
+            // Insert item langsung ke order baru (bukan keranjang)
+            $sqlItem = "INSERT INTO items (
+            customer_id, order_id, item_type, item_name, category, quantity, material_status,
+            material_dimension_id, file_path, needed_date, note, is_emergency, emergency_type
+        ) VALUES (
+            :customer_id, :order_id, 'work_order', :item_name, :category, :quantity, :material_status,
+            :material_dimension_id, :file_path, :needed_date, :note, :is_emergency, :emergency_type
+        )";
+            $stmtItem = $pdo->prepare($sqlItem);
+            $stmtItem->execute([
+                'customer_id'           => $_SESSION['user_data']['id'],
+                'order_id'              => $orderId,
+                'item_name'             => $_POST['item_name'],
+                'category'              => $_POST['category'],
+                'quantity'              => (int)$_POST['quantity'],
+                'material_status'       => $_POST['material_status'],
+                'material_dimension_id' => (int)$_POST['material_dimension_id'],
+                'file_path'             => $filePathsJson,
+                'needed_date'           => $neededDate,
+                'note'                  => $_POST['note'],
+                'is_emergency'          => $isEmergency,
+                'emergency_type'        => $emergencyType
+            ]);
+
+            // Buat approval untuk semua SPV departemen
+            $deptId = $_SESSION['user_data']['department_id'] ?? null;
+            if ($deptId) {
+                $sqlSpv = "SELECT id FROM users WHERE role = 'spv' AND department_id = :dept";
+                $stmtSpv = $pdo->prepare($sqlSpv);
+                $stmtSpv->execute(['dept' => $deptId]);
+                $spvs = $stmtSpv->fetchAll(\PDO::FETCH_ASSOC);
+                foreach ($spvs as $spv) {
+                    \App\Models\ApprovalModel::createApprovalEntry($orderId, $spv['id']);
+                }
+            }
+
+            $deptId = $_SESSION['user_data']['department_id'];
+
+            $sqlDept = "SELECT name FROM departments WHERE id = :id";
+            $stmtDept = $pdo->prepare($sqlDept);
+            $stmtDept->execute(['id' => $deptId]);
+            $deptName = $stmtDept->fetchColumn(); 
+
+            $customerName = $_SESSION['user_data']['name'];
+            $line         = $_SESSION['user_data']['line'] ?? '-';
+
+            $message = "Pengajuan WO ($customerName), dari ($line) butuh approval dari SPV departemen $deptName";
+
+            NotificationModel::create(
+                $deptId,
+                $message,
+                'fas fa-exclamation-triangle',
+                'warning',
+                'work_order',
+                'spv'
+            );
+
+            $_SESSION['flash_notification'] = [
+                'type' => 'success',
+                'title' => 'Berhasil!',
+                'message' => 'Pengajuan WO telah tersimpan, Mohon tunggu proses approval dari Supervisor departement anda!.'
+            ];
+            header('Location: /system_ordering/public/customer/checkout');
             exit;
         }
     }
-    
+
     /**
      * Menampilkan form untuk meng-edit item yang ada
      */
@@ -108,7 +184,7 @@ class WorkOrderController
     public static function updateItem($itemId)
     {
         SessionMiddleware::requireCustomerLogin();
-        $itemId = (int) $itemId;
+        $itemId     = (int) $itemId;
         $customerId = $_SESSION['user_data']['id'];
 
         $errors = self::validateWorkOrderDataForUpdate($_POST);
@@ -123,6 +199,7 @@ class WorkOrderController
             exit;
         }
 
+        // File upload
         $filePathsJson = $oldItem['file_path'];
         if (!empty($_FILES['file_path']['name'][0])) {
             $newFilePathsJson = self::handleMultipleFileUploads($_FILES['file_path']);
@@ -131,10 +208,13 @@ class WorkOrderController
             }
         }
 
-        $isEmergency = isset($_POST['is_emergency']) ? 1 : 0;
+        $isEmergency   = isset($_POST['is_emergency']) ? 1 : 0;
         $emergencyType = $isEmergency ? ($_POST['emergency_type'] ?? null) : null;
 
+        $orderId = $oldItem['order_id'];
+
         $data = [
+            'order_id'              => $orderId, // tetap NULL kalau item masih di keranjang
             'item_name'             => $_POST['item_name'],
             'category'              => $_POST['category'],
             'quantity'              => (int)$_POST['quantity'],

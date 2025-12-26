@@ -6,26 +6,30 @@ body.tracking-page {
 body.tracking-page .container-fluid {
     max-width: 1600px;
     margin: 0 auto;
-    padding-bottom: 80px !important;
+    padding-bottom: 40px !important;
 }
 
 /* Page Header */
 body.tracking-page .page-header {
-    margin-bottom: 30px !important;
+    margin-bottom: 2rem;
+    text-align: center;
+    padding-top: 40px !important;
 }
 
 body.tracking-page .page-title {
-    font-size: 24px;
-    font-weight: 600;
-    color: #333 !important;
-    display: flex;
-    align-items: center;
-    gap: 12px;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 0.5rem;
 }
 
-body.tracking-page .page-title i {
-    color: #667eea !important;
-    font-size: 28px;
+body.tracking-page .page-subtitle {
+    font-size: 0.95rem;
+    color: #6b7280;
+    font-weight: 400;
+    line-height: 1.6;
+    max-width: 700px;
+    margin: 0 auto;
 }
 
 /* Order Card */

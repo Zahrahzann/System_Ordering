@@ -1,7 +1,33 @@
 <?php
-if (session_status() == PHP_SESSION_NONE) session_start();
+if (session_status() === PHP_SESSION_NONE) session_start();
 
 $basePath = '/system_ordering/public';
+
+// Ambil notifikasi dari session
+$notification = null;
+if (isset($_SESSION['flash_notification'])) {
+    $notification = $_SESSION['flash_notification'];
+    unset($_SESSION['flash_notification']);
+} elseif (isset($_SESSION['errors'])) {
+    $notification = [
+        'type'    => 'error',
+        'title'   => 'Login Gagal',
+        'message' => implode("\n", $_SESSION['errors'])
+    ];
+    unset($_SESSION['errors']);
+} elseif (isset($_SESSION['login_error'])) {
+    $notification = [
+        'type'    => 'error',
+        'title'   => 'Login Gagal',
+        'message' => $_SESSION['login_error']
+    ];
+    unset($_SESSION['login_error']);
+}
+
+// Hapus input lama jika masih ada
+if (isset($_SESSION['old_input'])) {
+    unset($_SESSION['old_input']);
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -202,97 +228,49 @@ $basePath = '/system_ordering/public';
                 <h1>Admin Login</h1>
                 <p>Silakan Login jika sudah mendaftar akun</p>
             </div>
-
             <div class="login-body">
                 <form method="POST" action="<?= $basePath ?>/admin/process_login" class="user">
                     <div class="form-group">
                         <label for="email">Email Address</label>
                         <div class="input-wrapper">
                             <i class="fas fa-envelope"></i>
-                            <input
-                                type="email"
-                                class="form-control"
-                                id="email"
-                                name="email"
-                                placeholder="Enter your email"
-                                required
-                                value="<?= htmlspecialchars($_SESSION['old_input']['email'] ?? '') ?>">
+                            <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email" required value="<?= htmlspecialchars($_SESSION['old_input']['email'] ?? '') ?>">
                         </div>
                     </div>
-
                     <div class="form-group">
                         <label for="password">Password</label>
                         <div class="input-wrapper">
                             <i class="fas fa-lock"></i>
-                            <input
-                                type="password"
-                                class="form-control"
-                                id="password"
-                                name="password"
-                                placeholder="Enter your password"
-                                required>
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
                         </div>
                     </div>
-
                     <button type="submit" class="btn-login">
-                        <i class="fas fa-sign-in-alt"></i>
-                        Login
+                        <i class="fas fa-sign-in-alt"></i> Login
                     </button>
                 </form>
-
-                <div class="divider">
-                    <span>or</span>
-                </div>
-
+                <div class="divider"><span>or</span></div>
                 <div class="register-link">
                     <a href="<?= $basePath ?>/admin/register">
-                        <i class="fas fa-user-plus"></i>
-                        Buat Akun Admin Baru!
+                        <i class="fas fa-user-plus"></i> Buat Akun Admin Baru!
                     </a>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Scripts -->
-    <script src="<?= $basePath ?>/assets/vendor/jquery/jquery.min.js"></script>
-    <script src="<?= $basePath ?>/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="<?= $basePath ?>/assets/vendor/jquery-easing/jquery.easing.min.js"></script>
-    <script src="<?= $basePath ?>/assets/js/sb-admin-2.min.js"></script>
-
     <!-- SweetAlert Notification Script -->
-    <?php
-    $notification = null;
-    if (isset($_SESSION['flash_notification'])) { // Notifikasi dari Customer Login
-        $notification = $_SESSION['flash_notification'];
-        unset($_SESSION['flash_notification']);
-    } elseif (isset($_SESSION['errors'])) { // Notifikasi dari handleErrors (Admin/SPV)
-        $notification = [
-            'type'    => 'error',
-            'title'   => 'Login Gagal',
-            'message' => implode('<br>', $_SESSION['errors'])
-        ];
-        unset($_SESSION['errors']);
-    }
-
-    if ($notification):
-        echo "<script>
+    <?php if ($notification): ?>
+        <script>
             document.addEventListener('DOMContentLoaded', function() {
                 Swal.fire({
-                    icon: '" . htmlspecialchars($notification['type']) . "',
-                    title: '" . htmlspecialchars($notification['title']) . "',
-                    html: '" . addslashes($notification['message']) . "',
+                    icon: '<?= htmlspecialchars($notification['type']) ?>',
+                    title: '<?= htmlspecialchars($notification['title']) ?>',
+                    text: '<?= htmlspecialchars($notification['message']) ?>',
                     confirmButtonColor: '#667eea'
                 });
             });
-        </script>";
-    endif;
-
-    // Hapus input lama jika masih ada
-    if (isset($_SESSION['old_input'])) {
-        unset($_SESSION['old_input']);
-    }
-    ?>
+        </script>
+    <?php endif; ?>
 </body>
 
 </html>

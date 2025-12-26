@@ -162,6 +162,8 @@ if ($currentRole === 'customer') {
             </a>
         </li>
 
+        <hr class="sidebar-divider">
+        <div class="sidebar-heading">Consumable Management</div>
         <li class="nav-item">
             <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseSpvConsumable">
                 <i class="fas fa-fw fa-box-open"></i>

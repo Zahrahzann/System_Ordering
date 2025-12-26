@@ -13,12 +13,18 @@ if (session_status() == PHP_SESSION_NONE) {
 
 SessionMiddleware::requireCustomerLogin();
 
-$userData = $_SESSION['user_data'];
-$plantName = PlantModel::getNameById($userData['plant_id']);
+$userData       = $_SESSION['user_data'];
+$plantName      = PlantModel::getNameById($userData['plant_id']);
 $departmentName = DepartmentModel::getNameById($userData['department_id']);
 
-?>
+// Ambil flash notification kalau ada
+$notif = null;
+if (isset($_SESSION['flash_notification'])) {
+    $notif = $_SESSION['flash_notification'];
+    unset($_SESSION['flash_notification']); 
+}
 
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -32,7 +38,7 @@ $departmentName = DepartmentModel::getNameById($userData['department_id']);
     <link href="/system_ordering/public/assets/css/customer/dashboard.css?v=<?= time() ?>" rel="stylesheet">
 </head>
 
-<body id="page-top"> 
+<body id="page-top">
     <div id="wrapper">
         <?php include __DIR__ . '/../../views/layout/sidebar.php'; ?>
 
@@ -57,7 +63,7 @@ $departmentName = DepartmentModel::getNameById($userData['department_id']);
                                     </div>
                                     <div class="info-item">
                                         <i class="fas fa-layer-group"></i>
-                                        <span> <?= htmlspecialchars($userData['line']) ?></span>
+                                        <span><?= htmlspecialchars($userData['line']) ?></span>
                                     </div>
                                 </div>
                             </div>
@@ -103,7 +109,7 @@ $departmentName = DepartmentModel::getNameById($userData['department_id']);
                                     <i class="fas fa-spinner"></i>
                                 </div>
                             </div>
-                        </div>  
+                        </div>
 
                         <div class="stat-card">
                             <div class="stat-header">
@@ -165,6 +171,21 @@ $departmentName = DepartmentModel::getNameById($userData['department_id']);
     <script src="/system_ordering/public/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="/system_ordering/public/assets/vendor/jquery-easing/jquery.easing.min.js"></script>
     <script src="/system_ordering/public/assets/js/sb-admin-2.min.js"></script>
+
+    <?php if ($notif): ?>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                Swal.fire({
+                    icon: '<?= $notif['type'] ?>',
+                    title: '<?= $notif['title'] ?>',
+                    text: '<?= $notif['message'] ?>',
+                    showConfirmButton: <?= $notif['type'] === 'success' ? 'false' : 'true' ?>,
+                    timer: <?= $notif['type'] === 'success' ? '2000' : 'null' ?>
+                });
+            });
+        </script>
+    <?php endif; ?>
 </body>
 
 </html>

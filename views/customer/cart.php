@@ -21,7 +21,13 @@ if (!isset($cartItems)) die('Controller tidak menyediakan data keranjang.');
             <div id="content">
                 <?php include __DIR__ . '/../../views/layout/topbar.php'; ?>
                 <div class="container-fluid">
-                    <h1 class="h3 mb-4 text-gray-800">Keranjang Work Order</h1>
+                    <!-- Page Header -->
+                    <div class="page-header">
+                        <h1 class="page-title">Keranjang Work Order</h1>
+                        <p class="page-subtitle">
+                            Lihat dan kelola item work order yang telah Anda tambahkan ke keranjang
+                        </p>
+                    </div>
 
                     <?php if (empty($cartItems)): ?>
                         <div class="empty-cart">

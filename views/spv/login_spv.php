@@ -1,6 +1,23 @@
 <?php
 $basePath = '/system_ordering/public';
 if (session_status() === PHP_SESSION_NONE) session_start();
+
+// Ambil notifikasi dari session / query string
+$notification = null;
+if (isset($_SESSION['login_error'])) {
+    $notification = [
+        'type' => 'error',
+        'title' => 'Login Gagal',
+        'message' => $_SESSION['login_error']
+    ];
+    unset($_SESSION['login_error']);
+} elseif (isset($_GET['status']) && $_GET['status'] === 'reg_success') {
+    $notification = [
+        'type' => 'success',
+        'title' => 'Registrasi Berhasil',
+        'message' => 'Silakan login dengan akun baru Anda.'
+    ];
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -11,6 +28,7 @@ if (session_status() === PHP_SESSION_NONE) session_start();
     <title>Login - SPV</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <link href="<?= $basePath ?>/assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         * {
             margin: 0;
@@ -219,69 +237,49 @@ if (session_status() === PHP_SESSION_NONE) session_start();
                 <h1>SPV Login</h1>
                 <p>Silakan Login jika sudah mendaftar akun</p>
             </div>
-
             <div class="login-body">
-                <?php if (isset($_SESSION['login_error'])): ?>
-                    <div class="alert alert-danger">
-                        <?= htmlspecialchars($_SESSION['login_error']); ?>
-                        <?php unset($_SESSION['login_error']); ?>
-                    </div>
-                <?php endif; ?>
-
-                <?php if (isset($_GET['status']) && $_GET['status'] === 'reg_success'): ?>
-                    <div class="alert alert-success">
-                        Registrasi berhasil! Silakan login.
-                    </div>
-                <?php endif; ?>
-
                 <form class="user" action="<?= $basePath ?>/spv/process_login" method="POST">
                     <div class="form-group">
                         <label for="email">Email Address</label>
                         <div class="input-wrapper">
                             <i class="fas fa-envelope"></i>
-                            <input
-                                type="email"
-                                class="form-control"
-                                id="email"
-                                name="email"
-                                placeholder="Enter your email"
-                                required>
+                            <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email" required>
                         </div>
                     </div>
-
                     <div class="form-group">
                         <label for="password">Password</label>
                         <div class="input-wrapper">
                             <i class="fas fa-lock"></i>
-                            <input
-                                type="password"
-                                class="form-control"
-                                id="password"
-                                name="password"
-                                placeholder="Enter your password"
-                                required>
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
                         </div>
                     </div>
-
                     <button type="submit" class="btn-login">
-                        <i class="fas fa-sign-in-alt"></i>
-                        Login
+                        <i class="fas fa-sign-in-alt"></i> Login
                     </button>
                 </form>
-
-                <div class="divider">
-                    <span>or</span>
-                </div>
-
+                <div class="divider"><span>or</span></div>
                 <div class="register-link">
                     <a href="<?= $basePath ?>/spv/register">
-                        <i class="fas fa-user-plus"></i>
-                        Create a SPV Account!
+                        <i class="fas fa-user-plus"></i> Create a SPV Account!
                     </a>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- SweetAlert Notification Script -->
+    <?php if ($notification): ?>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: '<?= htmlspecialchars($notification['type']) ?>',
+                    title: '<?= htmlspecialchars($notification['title']) ?>',
+                    text: '<?= htmlspecialchars($notification['message']) ?>',
+                    confirmButtonColor: '#667eea'
+                });
+            });
+        </script>
+    <?php endif; ?>
 </body>
 
 </html>

@@ -11,8 +11,8 @@ $basePath = '/system_ordering/public';
     <title><?= htmlspecialchars($title) ?></title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="<?= $basePath ?>/assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
-    <link href="<?= $basePath ?>/assets/css/admin/manage/customer.css" rel="stylesheet">
-    <link href="<?= $basePath ?>/assets/css/sb-admin-2.min.css?v=<?= time() ?>" rel="stylesheet">
+    <link href="<?= $basePath ?>/assets/css/admin/manage/customer.css?v=<?= time() ?>" rel="stylesheet">
+    <link href="<?= $basePath ?>/assets/css/sb-admin-2.min.css?v" rel="stylesheet">
 </head>
 
 <body id="page-top">
@@ -22,11 +22,13 @@ $basePath = '/system_ordering/public';
             <div id="content">
                 <?php include __DIR__ . '/../../../views/layout/topbar.php'; ?>
                 <div class="container-fluid">
+
+                    <!-- Page Header -->
                     <div class="page-header">
-                        <h1 class="page-title">
-                            <i class="fas fa-users"></i>
-                            <?= htmlspecialchars($title) ?>
-                        </h1>
+                        <h1 class="page-title">Kelola Customer</h1>
+                        <p class="page-subtitle">
+                            Kelola Customer yang Terdaftar dalam Sistem dengan Mudah
+                        </p>
                     </div>
 
                     <!-- Filter Card -->
@@ -152,7 +154,6 @@ $basePath = '/system_ordering/public';
                     </div>
                 </div>
             </div>
-            <?php include __DIR__ . '/../../../views/layout/footer.php'; ?>
         </div>
     </div>
     <script src="<?= $basePath ?>/assets/vendor/jquery/jquery.min.js"></script>

@@ -31,6 +31,15 @@ class ApprovalController
         $approvedCount = ApprovalModel::countByStatusForSpv($spvId, 'approve');
         $rejectedCount = ApprovalModel::countByStatusForSpv($spvId, 'reject');
 
+        // ✅ Tambahkan notifikasi info kalau ada pesanan baru
+        if ($pendingCount > 0) {
+            $_SESSION['flash_notification'] = [
+                'type'    => 'info',
+                'title'   => 'Pesanan Baru',
+                'message' => "Ada {$pendingCount} pesanan baru menunggu approval."
+            ];
+        }
+
         // Ambil data user untuk bagian welcome
         $user = [
             'name'       => $_SESSION['user_data']['name'] ?? 'Supervisor',
@@ -41,7 +50,7 @@ class ApprovalController
         require_once __DIR__ . '/../../views/spv/dashboard.php';
     }
 
-    public static function showDetailPage($orderId) 
+    public static function showDetailPage($orderId)
     {
         SessionMiddleware::requireSpvLogin();
 
@@ -64,27 +73,52 @@ class ApprovalController
 
         if ($action === 'approve') {
             $ok = ApprovalModel::updateApprovalStatus($orderId, $spvId, 'approve', $notes);
-            if (!$ok) {
-                if (session_status() === PHP_SESSION_NONE) session_start();
-                $_SESSION['flash_error'] = 'Gagal menyetujui order. Silakan hubungi admin.';
+            if ($ok) {
+                $_SESSION['flash_notification'] = [
+                    'type'    => 'success',
+                    'title'   => 'Berhasil!',
+                    'message' => 'Pesanan berhasil disetujui oleh Supervisor.'
+                ];
+            } else {
+                $_SESSION['flash_notification'] = [
+                    'type'    => 'error',
+                    'title'   => 'Gagal!',
+                    'message' => 'Pesanan gagal disetujui. Silakan hubungi admin.'
+                ];
             }
-            header('Location: /system_ordering/public/admin/tracking');
+            // balik ke halaman approval SPV
+            header('Location: /system_ordering/public/spv/work_order/approval');
             exit;
         } elseif ($action === 'reject') {
             $ok = ApprovalModel::updateApprovalStatus($orderId, $spvId, 'reject', $notes);
-            if (!$ok) {
-                if (session_status() === PHP_SESSION_NONE) session_start();
-                $_SESSION['flash_error'] = 'Gagal menolak order. Silakan hubungi admin.';
+            if ($ok) {
+                $_SESSION['flash_notification'] = [
+                    'type'    => 'error',
+                    'title'   => 'Ditolak!',
+                    'message' => 'Pesanan ditolak oleh Supervisor.'
+                ];
+            } else {
+                $_SESSION['flash_notification'] = [
+                    'type'    => 'error',
+                    'title'   => 'Gagal!',
+                    'message' => 'Pesanan gagal ditolak. Silakan hubungi admin.'
+                ];
             }
-            // ✅ Balik ke halaman approval SPV
+            // balik ke halaman approval SPV
             header('Location: /system_ordering/public/spv/work_order/approval');
             exit;
         }
 
         // fallback kalau action tidak valid
+        $_SESSION['flash_notification'] = [
+            'type'    => 'error',
+            'title'   => 'Invalid',
+            'message' => 'Aksi tidak dikenali.'
+        ];
         header('Location: /system_ordering/public/spv/work_order/approval');
         exit;
     }
+
 
     public static function getOrderDetailJson($orderId)
     {

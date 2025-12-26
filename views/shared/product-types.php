@@ -66,11 +66,6 @@ $isEditMode = $editData !== null;
                                             value="<?= $isEditMode ? htmlspecialchars($editData['name']) : '' ?>">
                                     </div>
                                     <div class="form-group">
-                                        <label>Harga</label>
-                                        <input type="number" name="price" class="form-control"
-                                            value="<?= $isEditMode ? htmlspecialchars($editData['price']) : '' ?>">
-                                    </div>
-                                    <div class="form-group">
                                         <label>Deskripsi</label>
                                         <textarea name="description" class="form-control"><?= $isEditMode ? htmlspecialchars($editData['description']) : '' ?></textarea>
                                     </div>
@@ -118,9 +113,6 @@ $isEditMode = $editData !== null;
                                         <div class="product-type-content">
                                             <h4 class="product-type-name"><?= htmlspecialchars($pt['name']) ?></h4>
                                             <p class="product-type-code">Kode: <?= htmlspecialchars($pt['product_code']) ?></p>
-                                            <p class="product-type-price">
-                                                <?= $pt['price'] === null ? 'Harga belum ditentukan' : 'Rp ' . number_format($pt['price'], 0, ',', '.') ?>
-                                            </p>
                                             <small class="product-type-section">Section: <?= htmlspecialchars($section['name']) ?></small>
 
                                             <div class="product-type-actions mt-2">
@@ -131,14 +123,7 @@ $isEditMode = $editData !== null;
                                                     <a href="<?= $basePath ?>/admin/consumable/product-types/delete/<?= $pt['id'] ?>" class="btn btn-sm btn-danger"
                                                         onclick="return confirm('Yakin hapus jenis produk ini?');">
                                                         <i class="fas fa-trash"></i> Hapus
-                                                    </a>
-                                                    <a href="<?= $basePath ?>/customer/cart/add?type=<?= $pt['id'] ?>" class="btn btn-sm btn-success">
-                                                        <i class="fas fa-shopping-cart"></i> Pesan
-                                                    </a>
-                                                <?php elseif ($currentRole === 'spv'): ?>
-                                                    <a href="<?= $basePath ?>/spv/consumable/product-type?id=<?= $pt['id'] ?>" class="btn btn-sm btn-info">
-                                                        <i class="fas fa-eye"></i> Lihat Detail
-                                                    </a>
+                                                </a>
                                                 <?php endif; ?>
                                             </div>
                                         </div>

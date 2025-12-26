@@ -8,7 +8,17 @@ if (!is_array($orders)) {
     die('Controller tidak menyediakan data.');
 }
 
+// Ambil flash notification dari session
+$notif = null;
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+if (isset($_SESSION['flash_notification'])) {
+    $notif = $_SESSION['flash_notification'];
+    unset($_SESSION['flash_notification']);
+}
 ?>
+
 <!DOCTYPE html>
 <html lang="id">
 
@@ -29,11 +39,12 @@ if (!is_array($orders)) {
             <div id="content">
                 <?php include __DIR__ . '/../../../views/layout/topbar.php'; ?>
                 <div class="container-fluid">
+                    <!-- Page Header -->
                     <div class="page-header">
-                        <h1 class="page-title">
-                            <i class="fas fa-clipboard-list"></i>
-                            Daftar Work Order Menunggu Approval
-                        </h1>
+                        <h1 class="page-title">Approval Work Order</h1>
+                        <p class="page-subtitle">
+                            Pantau dan kelola Pengajuan Approval work order yang masuk dari customer
+                        </p>
                     </div>
 
                     <!-- Stats Bar -->
@@ -104,6 +115,13 @@ if (!is_array($orders)) {
                                         </div>
                                     </div>
                                     <div class="detail-item">
+                                        <div class="detail-label">Line</div>
+                                        <div class="detail-value">
+                                            <i class="fas fa-layer-group"></i>
+                                            <?= htmlspecialchars($order['line']) ?>
+                                        </div>
+                                    </div>
+                                    <div class="detail-item">
                                         <div class="detail-label">Tanggal Order</div>
                                         <div class="detail-value">
                                             <i class="fas fa-calendar"></i>
@@ -123,7 +141,6 @@ if (!is_array($orders)) {
                     <?php endif; ?>
                 </div>
             </div>
-            <?php include __DIR__ . '/../../../views/layout/footer.php'; ?>
         </div>
     </div>
 
@@ -131,6 +148,21 @@ if (!is_array($orders)) {
     <script src="<?= $basePath ?>/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="<?= $basePath ?>/assets/vendor/jquery-easing/jquery.easing.min.js"></script>
     <script src="<?= $basePath ?>/assets/js/sb-admin-2.min.js"></script>
+
+    <!-- SweetAlert Pop Up -->
+    <?php if (isset($_SESSION['flash_notification'])): ?>
+        <?php $notif = $_SESSION['flash_notification'];
+        unset($_SESSION['flash_notification']); ?>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+            Swal.fire({
+                icon: '<?= $notif['type'] ?>',
+                title: '<?= $notif['title'] ?>',
+                text: '<?= $notif['message'] ?>'
+            });
+        </script>
+    <?php endif; ?>
+
 </body>
 
 </html>

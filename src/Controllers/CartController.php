@@ -65,25 +65,30 @@ class CartController
             exit;
         }
 
-        $result = CartModel::checkout($_SESSION['user_data']['id'], $_SESSION['user_data']['department_id'], $_SESSION['user_data']['plant_id'], $selectedIds);
+        $result = CartModel::checkout(
+            $_SESSION['user_data']['id'],
+            $_SESSION['user_data']['department_id'],
+            $_SESSION['user_data']['plant_id'],
+            $selectedIds
+        );
 
         unset($_SESSION['checkout_items']);
-        $_SESSION['flash_message'] = $result['message'];
+        $_SESSION['flash_notification'] = [
+            'type'    => 'success',
+            'title'   => 'Berhasil!',
+            'message' => 'Pengajuan WO kamu telah tersimpan. Mohon tunggu Supervisor department memberikan approval!'
+        ];
 
         header('Location: /system_ordering/public/customer/checkout');
         exit;
     }
 
-    /** Menampilkan halaman TRACKING approval */
+    /** Menampilkan halaman  approval */
     public static function showTrackingPage()
     {
         SessionMiddleware::requireCustomerLogin();
         $latestOrderItems = OrderModel::getAllItemsForCustomer($_SESSION['user_data']['id']);
         require_once __DIR__ . '/../../views/customer/work_order/process_checkout.php';
-        var_dump(OrderModel::class);
-        var_dump(get_class_methods(OrderModel::class));
-        var_dump($_SESSION['user_data']);
-        exit;
     }
 
     public static function deleteRejectedOrder($params)

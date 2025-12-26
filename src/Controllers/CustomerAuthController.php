@@ -13,6 +13,7 @@ class CustomerAuthController
     public static function loginCustomer(): void
     {
         if (session_status() === PHP_SESSION_NONE) session_start();
+
         $input = [
             'name'          => trim($_POST['name'] ?? ''),
             'npk'           => trim($_POST['npk'] ?? ''),
@@ -22,13 +23,14 @@ class CustomerAuthController
             'line'          => trim($_POST['line'] ?? '')
         ];
 
+        // Validasi input
         $errors = self::validateCustomerData($input);
         if (!empty($errors)) {
-            // KOREKSI 1: Redirect error harus ke PUBLIC
             self::handleErrors($errors, '/system_ordering/public/customer/login');
             return;
         }
 
+        // Cek apakah NPK sudah terdaftar
         $existingCustomer = CustomerModel::findByNpk($input['npk']);
 
         if ($existingCustomer) {
@@ -41,7 +43,6 @@ class CustomerAuthController
                     'message' => "NPK '" . htmlspecialchars($input['npk']) . "' sudah terdaftar atas nama pengguna lain."
                 ];
                 $_SESSION['form_input'] = $input;
-                // KOREKSI 2: Redirect error NPK bentrok harus ke PUBLIC
                 header("Location: /system_ordering/public/customer/login");
                 exit;
             }
@@ -50,12 +51,10 @@ class CustomerAuthController
                 $id = CustomerModel::create($input);
                 $customer = CustomerModel::findById($id);
                 if (!$customer) {
-                    // KOREKSI 3: Redirect error gagal ambil data harus ke PUBLIC
                     self::handleErrors(["Gagal membuat atau mengambil data customer baru."], '/system_ordering/public/customer/login');
                     return;
                 }
             } catch (\PDOException $e) {
-                // KOREKSI 4: Redirect error PDO harus ke PUBLIC
                 self::handleErrors(["Terjadi kesalahan saat registrasi: " . $e->getMessage()], '/system_ordering/public/customer/login');
                 return;
             }
@@ -63,17 +62,24 @@ class CustomerAuthController
 
         // --- Bagian Sukses (Login atau Register) ---
         $_SESSION['user_data'] = [
-            'id' => $customer['id'],
-            'name' => $customer['name'],
-            'npk' => $customer['npk'],
-            'phone' => $customer['phone'],
-            'plant_id' => $customer['plant_id'],
+            'id'            => $customer['id'],
+            'name'          => $customer['name'],
+            'npk'           => $customer['npk'],
+            'phone'         => $customer['phone'],
+            'plant_id'      => $customer['plant_id'],
             'department_id' => $customer['department_id'],
-            'line' => $customer['line'],
-            'role' => 'customer'
+            'line'          => $customer['line'],
+            'role'          => 'customer'
         ];
         unset($_SESSION['form_input']);
-        // KOREKSI 5: Redirect sukses harus ke PUBLIC
+
+        // Flash notification sukses
+        $_SESSION['flash_notification'] = [
+            'type'    => 'success',
+            'title'   => 'Login Berhasil',
+            'message' => "Selamat datang, {$customer['name']}!"
+        ];
+
         header("Location: /system_ordering/public/customer/dashboard");
         exit;
     }
@@ -86,11 +92,22 @@ class CustomerAuthController
         if (session_status() === PHP_SESSION_NONE) session_start();
         session_unset();
         session_destroy();
-        // KOREKSI 6: Redirect logout harus ke PUBLIC
+
+        // Flash notification logout
+        session_start();
+        $_SESSION['flash_notification'] = [
+            'type'    => 'success',
+            'title'   => 'Logout Berhasil',
+            'message' => 'Anda telah keluar dari sistem.'
+        ];
+
         header("Location: /system_ordering/public/customer/login");
         exit;
     }
 
+    // ==========================================================
+    // VALIDASI DATA CUSTOMER
+    // ==========================================================
     private static function validateCustomerData(array $data): array
     {
         $errors = [];
@@ -103,15 +120,22 @@ class CustomerAuthController
     }
 
     // ==========================================================
-    // FUNGSI ERROR HANDLER
+    // ERROR HANDLER
     // ==========================================================
     private static function handleErrors(array $errors, ?string $redirectPath = null): void
     {
         if (session_status() === PHP_SESSION_NONE) session_start();
         $_SESSION['errors'] = $errors;
-        // Simpan ke KEDUA session agar kompatibel dengan semua form
         $_SESSION['old_input'] = $_POST;
         $_SESSION['form_input'] = $_POST;
+
+        // Flash notification error
+        $_SESSION['flash_notification'] = [
+            'type'    => 'error',
+            'title'   => 'Login Gagal',
+            'message' => implode(" ", $errors)
+        ];
+
         header("Location: " . $redirectPath);
         exit;
     }

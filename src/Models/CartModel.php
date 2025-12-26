@@ -79,22 +79,36 @@ class CartModel
     {
         $pdo = Database::connect();
         $sql = "UPDATE items SET
-                    item_name = :item_name, 
-                    category = :category, 
-                    quantity = :quantity,
-                    material_status = :material_status, 
-                    material_dimension_id = :material_dimension_id,
-                    file_path = :file_path, 
-                    needed_date = :needed_date,
-                    note = :note, 
-                    is_emergency = :is_emergency, 
-                    emergency_type = :emergency_type
-                WHERE id = :item_id AND customer_id = :customer_id";
+                item_name = :item_name, 
+                category = :category, 
+                quantity = :quantity,
+                material_status = :material_status, 
+                material_dimension_id = :material_dimension_id,
+                file_path = :file_path, 
+                needed_date = :needed_date,
+                note = :note, 
+                is_emergency = :is_emergency, 
+                emergency_type = :emergency_type
+            WHERE id = :item_id AND customer_id = :customer_id";
 
         $stmt = $pdo->prepare($sql);
-        $dataToBind = $data;
-        $dataToBind['item_id'] = $itemId;
-        $dataToBind['customer_id'] = $customerId;
+
+        // Pastikan semua key ada, walau nilainya null
+        $dataToBind = [
+            'item_name'             => $data['item_name'] ?? null,
+            'category'              => $data['category'] ?? null,
+            'quantity'              => $data['quantity'] ?? null,
+            'material_status'       => $data['material_status'] ?? null,
+            'material_dimension_id' => $data['material_dimension_id'] ?? null,
+            'file_path'             => $data['file_path'] ?? null,
+            'needed_date'           => $data['needed_date'] ?? null,
+            'note'                  => $data['note'] ?? null,
+            'is_emergency'          => $data['is_emergency'] ?? null,
+            'emergency_type'        => $data['emergency_type'] ?? null,
+            'item_id'               => $itemId,
+            'customer_id'           => $customerId,
+        ];
+
         return $stmt->execute($dataToBind);
     }
 
@@ -136,9 +150,10 @@ class CartModel
 
             // 2. Buat record di tabel 'orders'
             $stmtOrder = $pdo->prepare(
-                "INSERT INTO orders (customer_id, plant_id) VALUES (?, ?)"
+                "INSERT INTO orders (customer_id, department, plant_id, approval_status, created_at)
+     VALUES (?, ?, ?, 'waiting', NOW())"
             );
-            $stmtOrder->execute([$customerId, $customerPlantId]);
+            $stmtOrder->execute([$customerId, $customerDeptId, $customerPlantId]);
             $orderId = $pdo->lastInsertId();
 
             $stmtApproval = $pdo->prepare("INSERT INTO approvals (order_id, spv_id, approval_status) VALUES (?, ?, 'waiting')");

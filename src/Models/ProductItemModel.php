@@ -29,12 +29,20 @@ class ProductItemModel
         return $st->fetch(PDO::FETCH_ASSOC) ?: null;
     }
 
+    // Ambil semua item dengan stok rendah
+    public static function getLowStockItems($threshold = 10): array
+    {
+        $st = self::db()->prepare("SELECT id, name, stock FROM product_items WHERE stock <= ?");
+        $st->execute([$threshold]);
+        return $st->fetchAll(PDO::FETCH_ASSOC) ?: [];
+    }
+
     // Tambah item
     public static function create($typeId, $data, $files): void
     {
         $productType = ProductTypeModel::find($typeId);
         $itemCode    = CodeGenerator::generateItemCode($data['name'], $productType['name']);
-        $sectionId   = $productType['section_id']; 
+        $sectionId   = $productType['section_id'];
 
         $imagePath = self::uploadFile($files['image'] ?? null);
         $filePath  = self::uploadFile($files['file_path'] ?? null);
@@ -82,7 +90,7 @@ class ProductItemModel
         WHERE id=?
     ");
         $st->execute([
-            $oldItem['product_type_id'], 
+            $oldItem['product_type_id'],
             $oldItem['item_code'],
             $data['name'],
             is_numeric($data['price']) ? $data['price'] : null,

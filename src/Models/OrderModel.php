@@ -21,11 +21,10 @@ class OrderModel
         return (int) $stmt->fetchColumn();
     }
 
-
     public static function getRecentOrders($limit = 5)
     {
         $pdo = Database::connect();
-        $limit = (int) $limit; // pastikan integer
+        $limit = (int) $limit; 
         $sql = "SELECT o.order_code, o.created_at AS date, a.approval_status AS status, u.name AS requested_by
             FROM orders o
             JOIN approvals a ON o.id = a.order_id
@@ -41,57 +40,46 @@ class OrderModel
     /**
      * Mengambil semua pesanan berdasarkan 'approvals.approval_status'
      */
-    public static function getAllPendingItemsForCustomer($customerId)
+    public static function getAllPendingOrdersForCustomer($customerId)
     {
         $db = Database::connect();
-        $sql = "SELECT 
-                o.id AS order_id, 
-                i.production_status AS order_status, 
-                o.created_at AS order_date,
-                a.approval_status as approval_status, 
-                u.name as spv_name,
-                i.item_name,
-                i.quantity,
-                i.is_emergency,
-                i.emergency_type,
-                mt.name AS material_type,
-                mt.material_number AS material_number,
-                md.dimension AS material_dimension
-            FROM items i
-            JOIN orders o ON i.order_id = o.id
-            JOIN approvals a ON o.id = a.order_id
-            LEFT JOIN users u ON a.spv_id = u.id
-            LEFT JOIN material_dimensions md ON i.material_dimension_id = md.id
-            LEFT JOIN material_types mt ON md.material_type_id = mt.id
-            WHERE 
-                o.customer_id = :customer_id 
-                AND (a.approval_status = 'waiting' OR a.approval_status = 'reject') 
-            ORDER BY 
-                o.created_at DESC, i.item_name ASC";
 
-        $stmt = $db->prepare($sql);
-        $stmt->execute([':customer_id' => $customerId]);
-        $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        // Ambil distinct orders
+        $sqlOrders = "SELECT DISTINCT o.id AS order_id,
+                         o.created_at AS order_date,
+                         a.approval_status,
+                         u.name AS spv_name
+                  FROM orders o
+                  JOIN approvals a ON o.id = a.order_id
+                  LEFT JOIN users u ON a.spv_id = u.id
+                  WHERE o.customer_id = :customer_id
+                    AND (a.approval_status = 'waiting' OR a.approval_status = 'reject')
+                  ORDER BY o.created_at DESC";
+        $stmtOrders = $db->prepare($sqlOrders);
+        $stmtOrders->execute([':customer_id' => $customerId]);
+        $orders = $stmtOrders->fetchAll(PDO::FETCH_ASSOC);
 
-        // Grouping
-        $groupedOrders = [];
-        foreach ($items as $item) {
-            $orderId = $item['order_id'];
-            if (!isset($groupedOrders[$orderId])) {
-                $groupedOrders[$orderId] = [
-                    'order_details' => [
-                        'order_id'       => $item['order_id'],
-                        'order_status'   => $item['order_status'],
-                        'order_date'     => $item['order_date'],
-                        'approval_status' => $item['approval_status'],
-                        'spv_name'       => $item['spv_name']
-                    ],
-                    'items' => []
-                ];
-            }
-            $groupedOrders[$orderId]['items'][] = $item;
+        $result = [];
+        foreach ($orders as $order) {
+            // Ambil items untuk order ini
+            $sqlItems = "SELECT i.item_name, i.quantity, i.is_emergency, i.emergency_type,
+                            mt.name AS material_type, mt.material_number, md.dimension AS material_dimension
+                     FROM items i
+                     LEFT JOIN material_dimensions md ON i.material_dimension_id = md.id
+                     LEFT JOIN material_types mt ON md.material_type_id = mt.id
+                     WHERE i.order_id = :order_id
+                     ORDER BY i.item_name ASC";
+            $stmtItems = $db->prepare($sqlItems);
+            $stmtItems->execute([':order_id' => $order['order_id']]);
+            $items = $stmtItems->fetchAll(PDO::FETCH_ASSOC);
+
+            $result[] = [
+                'order_details' => $order,
+                'items' => $items
+            ];
         }
-        return $groupedOrders;
+
+        return $result;
     }
 
     /**
@@ -166,12 +154,12 @@ class OrderModel
     public static function getAllItemsForCustomer($customerId)
     {
         $pdo = Database::connect();
-        $sql = "SELECT o.id, o.created_at, a.approval_status, u.name as spv_name
+
+        // Ambil order unik saja
+        $sql = "SELECT o.id, o.created_at, o.approval_status
             FROM orders o
-            JOIN approvals a ON o.id = a.order_id
-            LEFT JOIN users u ON a.spv_id = u.id
             WHERE o.customer_id = ?
-              AND a.approval_status IN ('waiting','reject')
+              AND o.approval_status IN ('waiting','reject')
             ORDER BY o.created_at DESC";
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$customerId]);
@@ -180,16 +168,21 @@ class OrderModel
         $result = [];
         foreach ($orders as $order) {
             $items = self::findOrderItemsByOrderId($order['id']);
+
+            // Ambil satu approval detail (misalnya SPV pertama) kalau perlu
+            $approval = ApprovalModel::findApprovalByOrderId($order['id']);
+
             $result[] = [
                 'order_details' => [
                     'order_id'        => $order['id'],
                     'order_date'      => $order['created_at'],
                     'approval_status' => $order['approval_status'],
-                    'spv_name'        => $order['spv_name'] ?? null
+                    'spv_name'        => $approval['spv_name'] ?? null
                 ],
                 'items' => $items
             ];
         }
+
         return $result;
     }
 

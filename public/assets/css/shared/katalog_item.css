@@ -5,7 +5,8 @@ body {
 }
 
 #content {
-    padding-top: 64px !important;
+    padding-top:40px !important;
+    padding-bottom:40px !important;
 }
 
 .container-fluid {

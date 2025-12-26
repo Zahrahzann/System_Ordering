@@ -6,25 +6,29 @@ body {
 .container-fluid {
     max-width: 1600px;
     margin: 0 auto;
+    padding-bottom: 40px !important;
 }
 
 /* Page Header */
 .page-header {
-    margin-bottom: 30px;
+    margin-bottom: 2rem;
+    text-align: center;
 }
 
 .page-title {
-    font-size: 24px;
-    font-weight: 600;
-    color: #333;
-    display: flex;
-    align-items: center;
-    gap: 12px;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 0.5rem;
 }
 
-.page-title i {
-    color: #667eea;
-    font-size: 28px;
+.page-subtitle {
+    font-size: 0.95rem;
+    color: #6b7280;
+    font-weight: 400;
+    line-height: 1.6;
+    max-width: 700px;
+    margin: 0 auto;
 }
 
 /* Filter Card */
