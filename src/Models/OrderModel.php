@@ -11,7 +11,7 @@ class OrderModel
     {
         $pdo = Database::connect();
         $stmt = $pdo->prepare("
-        SELECT COUNT(*) 
+        SELECT COUNT(DISTINCT o.id) 
         FROM orders o
         JOIN approvals a ON o.id = a.order_id
         WHERE a.approval_status = :status
@@ -24,10 +24,18 @@ class OrderModel
     public static function getRecentOrders($limit = 5)
     {
         $pdo = Database::connect();
-        $limit = (int) $limit; 
-        $sql = "SELECT o.order_code, o.created_at AS date, a.approval_status AS status, u.name AS requested_by
+        $limit = (int) $limit;
+
+        $sql = "SELECT 
+                o.order_code, 
+                o.created_at AS date,
+                (SELECT a.approval_status 
+                 FROM approvals a 
+                 WHERE a.order_id = o.id 
+                 ORDER BY a.updated_at DESC 
+                 LIMIT 1) AS status,
+                u.name AS requested_by
             FROM orders o
-            JOIN approvals a ON o.id = a.order_id
             LEFT JOIN users u ON o.customer_id = u.id
             ORDER BY o.created_at DESC 
             LIMIT $limit";
@@ -36,7 +44,6 @@ class OrderModel
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-
     /**
      * Mengambil semua pesanan berdasarkan 'approvals.approval_status'
      */
@@ -44,24 +51,31 @@ class OrderModel
     {
         $db = Database::connect();
 
-        // Ambil distinct orders
-        $sqlOrders = "SELECT DISTINCT o.id AS order_id,
-                         o.created_at AS order_date,
-                         a.approval_status,
-                         u.name AS spv_name
+        $sqlOrders = "SELECT 
+                     o.id AS order_id,
+                     o.created_at AS order_date,
+                     (SELECT a.approval_status 
+                      FROM approvals a 
+                      WHERE a.order_id = o.id 
+                      ORDER BY a.updated_at DESC 
+                      LIMIT 1) AS approval_status,
+                     (SELECT u.name 
+                      FROM approvals a 
+                      JOIN users u ON a.spv_id = u.id 
+                      WHERE a.order_id = o.id 
+                      ORDER BY a.updated_at DESC 
+                      LIMIT 1) AS spv_name
                   FROM orders o
-                  JOIN approvals a ON o.id = a.order_id
-                  LEFT JOIN users u ON a.spv_id = u.id
                   WHERE o.customer_id = :customer_id
-                    AND (a.approval_status = 'waiting' OR a.approval_status = 'reject')
+                    AND o.approval_status IN ('waiting','reject','approve')
                   ORDER BY o.created_at DESC";
+
         $stmtOrders = $db->prepare($sqlOrders);
         $stmtOrders->execute([':customer_id' => $customerId]);
         $orders = $stmtOrders->fetchAll(PDO::FETCH_ASSOC);
 
         $result = [];
         foreach ($orders as $order) {
-            // Ambil items untuk order ini
             $sqlItems = "SELECT i.item_name, i.quantity, i.is_emergency, i.emergency_type,
                             mt.name AS material_type, mt.material_number, md.dimension AS material_dimension
                      FROM items i
@@ -125,7 +139,7 @@ class OrderModel
     }
 
     /**
-     * Mengambil jumlah Work Order masuk per bulan (berdasarkan created_at)
+     * Mengambil jumlah Work Order masuk per bulan (hanya yang sudah di-approve SPV)
      */
     public static function getMonthlyWoInData(int $year): array
     {
@@ -135,7 +149,9 @@ class OrderModel
                 MONTH(o.created_at) AS month,
                 COUNT(DISTINCT o.id) AS total_in
             FROM orders o
+            JOIN approvals a ON o.id = a.order_id
             WHERE YEAR(o.created_at) = :year
+              AND a.approval_status = 'approve'
             GROUP BY MONTH(o.created_at)
             ORDER BY MONTH(o.created_at)";
 

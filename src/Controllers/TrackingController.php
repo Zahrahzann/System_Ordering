@@ -27,6 +27,45 @@ class TrackingController
             $items = TrackingModel::getItemsByCustomer($customerId);
         }
 
+        // Grouping per order_id
+        $grouped = [];
+        foreach ($items as $item) {
+            $orderId = $item['order_id'];
+            if (!isset($grouped[$orderId])) {
+                $grouped[$orderId] = [
+                    'order_details' => [
+                        'order_id'       => $orderId,
+                        'customer_name'  => $item['customer_name'],
+                        'line'           => $item['line'],
+                        'department_name' => $item['department_name'],
+                    ],
+                    'items' => []
+                ];
+            }
+
+            // inject estimasi dari session kalau ada
+            if (isset($_SESSION['estimasi'][$item['item_id']])) {
+                $item['estimasi'] = $_SESSION['estimasi'][$item['item_id']];
+            }
+
+            $grouped[$orderId]['items'][] = $item;
+        }
+
+        // Tentukan emergency type di level order
+        foreach ($grouped as &$order) {
+            $types = array_column($order['items'], 'emergency_type');
+            if (in_array('line_stop', $types)) {
+                $order['order_details']['emergency_type'] = 'line_stop';
+            } elseif (in_array('safety', $types)) {
+                $order['order_details']['emergency_type'] = 'safety';
+            } else {
+                $order['order_details']['emergency_type'] = 'regular';
+            }
+        }
+
+        // Kirim $grouped ke view, bukan $items mentah
+        $orders = array_values($grouped);
+
         require_once __DIR__ . '/../../views/shared/tracking_order.php';
     }
 
@@ -35,15 +74,30 @@ class TrackingController
      */
     public static function updateItemDetails($itemId)
     {
-        /** @var int|string $itemId */
         SessionMiddleware::requireAdminLogin();
         $newStatus = $_POST['status'] ?? '';
-        $picMfg = trim($_POST['pic_mfg'] ?? '');
+        $picMfg    = trim($_POST['pic_mfg'] ?? '');
+        $estimasi  = trim($_POST['estimasi_pengerjaan'] ?? '');
+
         $validStatuses = ['pending', 'on_progress', 'finish', 'completed'];
 
+        // Ambil item sebelum update
+        $item = TrackingModel::findItemById($itemId);
+        $oldStatus = $item['production_status'] ?? null;
+
         if (in_array($newStatus, $validStatuses)) {
-            TrackingModel::updateItemDetails($itemId, $newStatus, $picMfg);
+            TrackingModel::updateItemDetails($itemId, $newStatus, $picMfg, $estimasi);
         }
+
+        // Hitung durasi aktual jika status berubah dari on_progress → finish
+        if ($oldStatus === 'on_progress' && $newStatus === 'finish') {
+            $startTime = strtotime($item['updated_at']); // pastikan ada kolom updated_at di items
+            $finishTime = time();
+            $durationMinutes = round(($finishTime - $startTime) / 60);
+
+            TrackingModel::updateItemDuration($itemId, $durationMinutes);
+        }
+
         header('Location: /system_ordering/public/admin/tracking');
         exit;
     }
@@ -63,7 +117,6 @@ class TrackingController
         }
         require_once __DIR__ . '/../../views/shared/detail_wo.php';
     }
-
 
     /**
      * KOREKSI: FUNGSI showHistoryPage() SEKARANG MENGGUNAKAN HISTORY MODEL

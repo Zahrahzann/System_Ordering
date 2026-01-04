@@ -74,7 +74,7 @@ $role = $_SESSION['user_data']['role'] ?? 'guest';
                         <?php
                         usort($items, function ($a, $b) {
                             $statusOrder = ['finish' => 1, 'on_progress' => 2, 'pending' => 3];
-                            $emergencyOrder = ['line_stop' => 1, 'Safety' => 2, 'Regular' => 3];
+                            $emergencyOrder = ['line_stop' => 1, 'safety' => 2, 'regular' => 3];
 
                             $statusA = $statusOrder[$a['production_status']] ?? 99;
                             $statusB = $statusOrder[$b['production_status']] ?? 99;
@@ -97,7 +97,7 @@ $role = $_SESSION['user_data']['role'] ?? 'guest';
                             <div class="order-card <?= htmlspecialchars($item['production_status']) ?>">
                                 <div class="order-header">
                                     <div class="customer-info">
-                                        <div class="order-number">Order #<?= htmlspecialchars($item['order_id']) ?></div>
+                                        <div class="order-number">Order</div>
                                         <h5><?= htmlspecialchars($item['customer_name']) ?></h5>
                                         <div class="customer-line">
                                             <i class="fas fa-layer-group"></i>
@@ -144,6 +144,17 @@ $role = $_SESSION['user_data']['role'] ?? 'guest';
                                             </div>
                                         </div>
                                         <div class="detail-item">
+                                            <div class="detail-label">Estimasi Pengerjaan</div>
+                                            <div class="detail-value">
+                                                <?php if (!empty($item['estimasi_pengerjaan'])): ?>
+                                                    <i class="fas fa-clock mr-1" style="color:#ff9800;"></i>
+                                                    <?= htmlspecialchars($item['estimasi_pengerjaan']) ?>
+                                                <?php else: ?>
+                                                    <span style="color:#545454ff;">Belum ditentukan</span>
+                                                <?php endif; ?>
+                                            </div>
+                                        </div>
+                                        <div class="detail-item">
                                             <div class="detail-label">Emergency</div>
                                             <div class="detail-value">
                                                 <?php
@@ -178,9 +189,15 @@ $role = $_SESSION['user_data']['role'] ?? 'guest';
                                     <form method="POST" action="<?= $basePath ?>/admin/tracking/update_item/<?= $item['item_id'] ?>" class="update-form">
                                         <input type="hidden" name="item_id" value="<?= $item['item_id'] ?>">
 
+                                        <!-- Input PIC MFG -->
                                         <input type="text" name="pic_mfg" class="form-control" placeholder="Nama PIC MFG"
                                             value="<?= htmlspecialchars($item['pic_mfg'] ?? '') ?>">
 
+                                        <!-- Input Estimasi Pengerjaan -->
+                                        <input type="text" name="estimasi_pengerjaan" class="form-control" placeholder="Estimasi Pengerjaan (contoh: 2 Hari)"
+                                            value="<?= htmlspecialchars($item['estimasi_pengerjaan'] ?? '') ?>">
+
+                                        <!-- Status Produksi -->
                                         <select name="status" class="form-control">
                                             <option value="pending" <?= $item['production_status'] == 'pending' ? 'selected' : '' ?>>Pending</option>
                                             <option value="on_progress" <?= $item['production_status'] == 'on_progress' ? 'selected' : '' ?>>On Progress</option>
@@ -192,8 +209,8 @@ $role = $_SESSION['user_data']['role'] ?? 'guest';
                                             <i class="fas fa-save"></i> Update
                                         </button>
                                     </form>
-
                                 <?php endif; ?>
+
                             </div>
                         <?php endforeach; ?>
                     <?php endif; ?>

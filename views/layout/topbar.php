@@ -106,7 +106,8 @@ if ($currentRole === 'spv') {
             </div>
         </li>
 
-        <?php if ($currentRole === 'admin'): ?>
+        <!-- NOTIFIKASI -->
+        <?php if (in_array($currentRole, ['admin', 'spv', 'customer'])): ?>
             <li class="nav-item dropdown no-arrow mx-1">
                 <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button"
                     data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -115,71 +116,68 @@ if ($currentRole === 'spv') {
                 </a>
                 <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
                     aria-labelledby="alertsDropdown">
-                    <h6 class="dropdown-header">Notifikasi Admin</h6>
+
+                    <!-- Judul header sesuai role + icon hapus -->
+                    <h6 class="dropdown-header d-flex justify-content-between align-items-center">
+                        <?php if ($currentRole === 'admin'): ?>
+                            Notifikasi Admin
+                        <?php elseif ($currentRole === 'spv'): ?>
+                            Pesanan Baru
+                        <?php else: ?>
+                            Notifikasi Customer
+                        <?php endif; ?>
+                        <i id="clearAllNotif" class="fas fa-trash text-danger ml-2" style="cursor:pointer;"
+                            title="Hapus semua notifikasi"></i>
+                    </h6>
+
+                    <!-- Isi notifikasi -->
                     <?php if (!empty($alerts)): ?>
-                        <?php foreach ($alerts as $alert): ?>
-                            <a class="dropdown-item d-flex align-items-center"
-                                href="<?= $basePath ?>/admin/product_items.php">
-                                <div class="mr-3">
-                                    <div class="icon-circle bg-<?= $alert['color'] ?? 'warning' ?>">
-                                        <i class="<?= $alert['icon'] ?? 'fas fa-exclamation-triangle' ?> text-white"></i>
+                        <div style="max-height: 300px; overflow-y: auto;">
+                            <?php foreach ($alerts as $alert): ?>
+                                <a class="dropdown-item d-flex align-items-center"
+                                    href="<?php
+                                            if ($currentRole === 'admin') echo $basePath . '/admin/product_items.php';
+                                            elseif ($currentRole === 'spv') echo $basePath . '/spv/work_order/approval';
+                                            else echo $basePath . '/customer/orders.php';
+                                            ?>">
+                                    <div class="mr-3">
+                                        <div class="icon-circle bg-<?= $alert['color'] ?? 'warning' ?>">
+                                            <i class="<?= $alert['icon'] ?? 'fas fa-exclamation-triangle' ?> text-white"></i>
+                                        </div>
                                     </div>
-                                </div>
-                                <div>
-                                    <div class="small text-gray-500"><?= $alert['date'] ?? '-' ?></div>
-                                    <span class="font-weight-bold">
-                                        <?= $alert['message'] ?? 'Notifikasi sistem' ?>
-                                    </span>
-                                </div>
-                            </a>
-                        <?php endforeach; ?>
+                                    <div>
+                                        <div class="small text-gray-500"><?= $alert['date'] ?? '-' ?></div>
+                                        <span class="font-weight-bold">
+                                            <?= $alert['message'] ?? 'Notifikasi sistem' ?>
+                                        </span>
+                                    </div>
+                                </a>
+                            <?php endforeach; ?>
+                        </div>
                     <?php else: ?>
-                        <div class="dropdown-item text-center small text-gray-500">Belum ada notifikasi</div>
+                        <div class="dropdown-item text-center small text-gray-500">
+                            <?php if ($currentRole === 'admin'): ?>
+                                Belum ada notifikasi
+                            <?php elseif ($currentRole === 'spv'): ?>
+                                Belum ada pesanan baru
+                            <?php else: ?>
+                                Belum ada notifikasi pesanan
+                            <?php endif; ?>
+                        </div>
                     <?php endif; ?>
-                    <a class="dropdown-item text-center small text-gray-500" href="<?= $basePath ?>/admin/product_items.php">
-                        Lihat Semua Produk
-                    </a>
+
+                    <!-- Footer aksi: tandai semua dibaca -->
+                    <div class="dropdown-item text-center">
+                        <button id="markAllRead" class="btn btn-sm btn-secondary">
+                            <i class="fas fa-check"></i> Tandai Semua Dibaca
+                        </button>
+                    </div>
                 </div>
             </li>
         <?php endif; ?>
 
-        <?php if ($currentRole === 'spv'): ?>
-            <li class="nav-item dropdown no-arrow mx-1">
-                <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button"
-                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    <i class="fas fa-bell fa-fw"></i>
-                    <span class="badge badge-danger badge-counter"><?= $alertCount ?? 0 ?></span>
-                </a>
-                <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
-                    aria-labelledby="alertsDropdown">
-                    <h6 class="dropdown-header">Pesanan Baru</h6>
-                    <?php if (!empty($alerts)): ?>
-                        <?php foreach ($alerts as $alert): ?>
-                            <a class="dropdown-item d-flex align-items-center"
-                                href="<?= $basePath ?>/spv/work_order/approval">
-                                <div class="mr-3">
-                                    <div class="icon-circle bg-<?= $alert['color'] ?? 'warning' ?>">
-                                        <i class="<?= $alert['icon'] ?? 'fas fa-exclamation-triangle' ?> text-white"></i>
-                                    </div>
-                                </div>
-                                <div>
-                                    <div class="small text-gray-500"><?= $alert['date'] ?? '-' ?></div>
-                                    <span class="font-weight-bold">
-                                        <?= $alert['message'] ?? 'Pengajuan Work Order' ?>
-                                    </span>
-                                </div>
-                            </a>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <div class="dropdown-item text-center small text-gray-500">Belum ada pesanan baru</div>
-                    <?php endif; ?>
-                    <a class="dropdown-item text-center small text-gray-500" href="<?= $basePath ?>/spv/work_order/approval">
-                        Lihat Semua Pesanan
-                    </a>
-                </div>
-            </li>
-        <?php endif; ?>
 
+        <!-- PESAN/CHAT -->
         <li class="nav-item dropdown no-arrow mx-1">
             <a class="nav-link dropdown-toggle" href="#" id="messagesDropdown" role="button"
                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -239,56 +237,144 @@ if ($currentRole === 'spv') {
 </nav>
 <!-- End of Topbar -->
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    let lastNotifId = null;
-
-    function checkNotifications() {
-        fetch('/system_ordering/public/notifications.php')
+    // Hapus semua notifikasi (icon trash di header)
+    document.getElementById('clearAllNotif')?.addEventListener('click', () => {
+        fetch('/system_ordering/public/clear_notifications.php', {
+                method: 'POST'
+            })
             .then(res => res.json())
             .then(data => {
-                // Update badge lonceng
-                const badge = document.querySelector('#alertsDropdown .badge-counter');
-                if (badge) badge.textContent = data.count ?? 0;
+                if (data.success) {
+                    let msg = '';
+                    if (data.role === 'admin') msg = 'Semua notifikasi stok rendah dihapus';
+                    else if (data.role === 'spv') msg = 'Semua pengajuan WO dihapus';
+                    else msg = 'Semua notifikasi pesanan dihapus';
 
-                // Debug: lihat isi JSON
-                console.log('Notif data:', data);
-
-                // Munculkan pop-up hanya kalau notif baru
-                if (data.new && data.id && data.id !== lastNotifId) {
-                    lastNotifId = data.id;
-                    Swal.fire({
-                        icon: data.type,
-                        title: 'Pesanan Baru',
-                        html: data.message,
-                        confirmButtonText: 'OK'
-                    });
+                    Swal.fire('Berhasil', msg, 'success');
+                    // reset badge & isi dropdown
+                    document.querySelector('#alertsDropdown .badge-counter').textContent = '0';
+                    document.querySelector('#alertsDropdown .dropdown-list').innerHTML =
+                        '<div class="dropdown-item text-center small text-gray-500">Belum ada notifikasi</div>';
                 }
             })
-            .catch(err => console.error('Notif error:', err));
-    }
+            .catch(err => console.error('Clear notif error:', err));
+    });
 
-    // Cek notif tiap 10 detik
-    setInterval(checkNotifications, 10000);
+    // Tandai semua notifikasi sebagai dibaca (button di footer)
+    document.getElementById('markAllRead')?.addEventListener('click', () => {
+        fetch('/system_ordering/public/mark_notifications.php', {
+                method: 'POST'
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    let msg = '';
+                    if (data.role === 'admin') msg = 'Semua notifikasi stok rendah ditandai sudah dibaca';
+                    else if (data.role === 'spv') msg = 'Semua pengajuan WO ditandai sudah dibaca';
+                    else msg = 'Semua notifikasi pesanan ditandai sudah dibaca';
+
+                    Swal.fire('Berhasil', msg, 'success');
+                    // reset badge counter
+                    document.querySelector('#alertsDropdown .badge-counter').textContent = '0';
+                }
+            })
+            .catch(err => console.error('Mark read error:', err));
+    });
 </script>
 
-<script>
-    <?php if ($currentRole === 'admin'): ?>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+<?php if ($currentRole === 'customer'): ?>
+    <script>
+        let lastCustomerNotifId = null;
+
+        function checkCustomerNotifications() {
+            fetch('/system_ordering/public/notifications.php')
+                .then(res => res.json())
+                .then(data => {
+                    const badge = document.querySelector('#alertsDropdown .badge-counter');
+                    if (badge) badge.textContent = data.count ?? 0;
+
+                    console.log('Customer notif data:', data);
+
+                    if (data.new && data.id && data.id !== lastCustomerNotifId) {
+                        lastCustomerNotifId = data.id;
+                        Swal.fire({
+                            icon: data.type ?? 'info',
+                            title: 'Status Pesanan',
+                            html: data.message,
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                })
+                .catch(err => console.error('Customer notif error:', err));
+        }
+
+        // Panggil sekali saat halaman dibuka
+        checkCustomerNotifications();
+    </script>
+<?php endif; ?>
+
+<?php if ($currentRole === 'spv'): ?>
+    <script>
+        let lastNotifId = null;
+
+        function checkNotifications() {
+            fetch('/system_ordering/public/notifications.php')
+                .then(res => res.json())
+                .then(data => {
+                    const badge = document.querySelector('#alertsDropdown .badge-counter');
+                    if (badge) badge.textContent = data.count ?? 0;
+
+                    console.log('Notif data:', data);
+
+                    if (data.new && data.id && data.id !== lastNotifId) {
+                        lastNotifId = data.id;
+                        Swal.fire({
+                            icon: data.type ?? 'info',
+                            title: 'Pengajuan Approval Baru',
+                            html: data.message,
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                })
+                .catch(err => console.error('Notif error:', err));
+        }
+
+        // Jalankan polling hanya kalau masih ada WO waiting
+        if (typeof spvPendingCount !== 'undefined' && spvPendingCount > 0) {
+            setInterval(checkNotifications, 10000);
+        }
+    </script>
+<?php endif; ?>
+
+<?php if ($currentRole === 'admin'): ?>
+    <script>
         function checkLowStock() {
+            // Ambil waktu terakhir alert dari localStorage
+            const lastAlert = localStorage.getItem('lastLowStockAlert');
+            const now = Date.now();
+
+            // Kalau belum 1 jam sejak alert terakhir, skip
+            if (lastAlert && (now - parseInt(lastAlert, 10)) < 3600000) {
+                console.log("Skip alert, belum 1 jam");
+                return;
+            }
+
             fetch('/system_ordering/public/low_stock.php')
                 .then(res => res.json())
                 .then(data => {
-                    console.log('Low stock data:', data); // debug di console
+                    console.log('Low stock data:', data);
                     if (data.alert) {
                         Swal.fire({
                             icon: 'warning',
                             title: 'Pengingat Stok Rendah',
                             html: data.message,
-                            confirmButtonText: 'Kelola Stok'
-                        }).then(() => {
-                            window.location.href = '/system_ordering/views/admin/product-items.php';
+                            confirmButtonText: 'OK'
                         });
+                        // Simpan timestamp alert terakhir
+                        localStorage.setItem('lastLowStockAlert', now.toString());
                     }
                 })
                 .catch(err => console.error('Low stock error:', err));
@@ -297,7 +383,7 @@ if ($currentRole === 'spv') {
         // Jalankan saat halaman dibuka
         checkLowStock();
 
-        // Jalankan ulang tiap 1 jam (3600000 ms)
-        setInterval(checkLowStock, 3600000); 
-    <?php endif; ?>
-</script>
+        // Jalankan ulang tiap 1 jam
+        setInterval(checkLowStock, 3600000);
+    </script>
+<?php endif; ?>

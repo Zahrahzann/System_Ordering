@@ -13,8 +13,9 @@ if (!isset($types) || !isset($dimensions) || !isset($title)) {
 <head>
     <meta charset="UTF-8">
     <title><?= htmlspecialchars($title) ?></title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="<?= $basePath ?>/assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
-    <link href="<?= $basePath ?>/assets/css/admin/manage/materials.css" rel="stylesheet">
+    <link href="<?= $basePath ?>/assets/css/admin/manage/materials.css?v=<?= time() ?>" rel="stylesheet">
     <link href="<?= $basePath ?>/assets/css/sb-admin-2.min.css?v=<?= time() ?>" rel="stylesheet">
 </head>
 
@@ -26,8 +27,18 @@ if (!isset($types) || !isset($dimensions) || !isset($title)) {
                 <?php include __DIR__ . '/../../layout/topbar.php'; ?>
                 <div class="container-fluid">
 
-                    <div class="page-header d-flex justify-content-between align-items-center">
-                        <h1 class="page-title"><i class="fas fa-cubes"></i> <?= htmlspecialchars($title) ?></h1>
+                    <!-- Page Header -->
+                    <div class="page-header">
+                        <h1 class="page-title"><?= htmlspecialchars($title) ?></h1>
+                        <p class="page-subtitle">
+                            <?php if ($currentRole === 'admin'): ?>
+                                Pantau status pesanan customer terbaru, kelola pengembalian dengan mudah, dan dapatkan insight berharga
+                            <?php elseif ($currentRole === 'spv'): ?>
+                                Pantau status pesanan departemen terbaru dan kelola pengembalian dengan mudah
+                            <?php else: ?>
+                                Pantau status pesanan terbaru Anda, kelola pengembalian dengan mudah, dan dapatkan insight berharga
+                            <?php endif; ?>
+                        </p>
                         <?php if ($currentRole === 'admin'): ?>
                             <button class="btn btn-primary" id="btnAddType">
                                 <i class="fas fa-plus"></i> Tambah Jenis Material
@@ -38,6 +49,7 @@ if (!isset($types) || !isset($dimensions) || !isset($title)) {
                     <!-- Flash Notification -->
                     <?php if (!empty($_SESSION['flash_notification'])): ?>
                         <div class="alert alert-<?= $_SESSION['flash_notification']['type'] ?>">
+                            <i class="fas fa-<?= $_SESSION['flash_notification']['type'] === 'success' ? 'check-circle' : 'exclamation-circle' ?>"></i>
                             <?= htmlspecialchars($_SESSION['flash_notification']['message']) ?>
                         </div>
                         <?php unset($_SESSION['flash_notification']); ?>
@@ -47,16 +59,24 @@ if (!isset($types) || !isset($dimensions) || !isset($title)) {
                         <div class="empty-state">
                             <i class="fas fa-box-open"></i>
                             <h4>Tidak Ada Data Material</h4>
-                            <p>Belum ada material yang terdaftar.</p>
+                            <p>Belum ada material yang terdaftar dalam sistem.</p>
                             <?php if ($currentRole === 'admin'): ?>
-                                <p>Silakan tambah jenis material baru.</p>
+                                <p>Silakan tambah jenis material baru untuk memulai.</p>
                             <?php endif; ?>
                         </div>
                     <?php else: ?>
-                        <?php foreach ($types as $t): ?>
+                        <?php foreach ($types as $t):
+                            // Hitung jumlah dimensi untuk material ini
+                            $dimensionCount = 0;
+                            foreach ($dimensions as $d) {
+                                if ($d['material_type_id'] == $t['id']) {
+                                    $dimensionCount++;
+                                }
+                            }
+                        ?>
                             <div class="card mt-3">
-                                <div class="card-header d-flex justify-content-between align-items-center">
-                                    <strong><?= htmlspecialchars($t['material_number']) ?> - <?= htmlspecialchars($t['name']) ?></strong>
+                                <div class="card-header collapsed d-flex justify-content-between align-items-center">
+                                    <strong><?= htmlspecialchars($t['material_number']) ?> - <?= htmlspecialchars($t['name']) ?> (<?= $dimensionCount ?> dimensi)</strong>
                                     <?php if ($currentRole === 'admin'): ?>
                                         <div>
                                             <button class="btn btn-sm btn-warning btnEditType"
@@ -68,7 +88,7 @@ if (!isset($types) || !isset($dimensions) || !isset($title)) {
                                             <a href="<?= $basePath ?>/admin/materials/type/delete/<?= $t['id'] ?>"
                                                 class="btn btn-sm btn-danger"
                                                 onclick="return confirm('Hapus jenis material ini beserta dimensinya?')">
-                                                <i class="fas fa-trash"></i> Delete
+                                                <i class="fas fa-trash"></i> Hapus
                                             </a>
                                         </div>
                                     <?php endif; ?>
@@ -77,8 +97,9 @@ if (!isset($types) || !isset($dimensions) || !isset($title)) {
                                     <table class="table table-sm">
                                         <thead>
                                             <tr>
-                                                <th>Dimension</th>
-                                                <th>Stock</th>
+                                                <th>Dimensi</th>
+                                                <th>Stok</th>
+                                                <th>Riwayat</th>
                                                 <?php if ($currentRole === 'admin'): ?>
                                                     <th>Aksi</th>
                                                 <?php endif; ?>
@@ -86,11 +107,23 @@ if (!isset($types) || !isset($dimensions) || !isset($title)) {
                                         </thead>
                                         <tbody>
                                             <?php foreach ($dimensions as $d): ?>
-                                                <?php if ($d['material_type_id'] == $t['id']): ?>
+                                                <?php if ($d['material_type_id'] == $t['id']):
+                                                    $logs = \App\Models\MaterialStockLogModel::getByDimension($d['id']);
+                                                    $logCount = count($logs);
+                                                ?>
                                                     <!-- Baris utama dimension -->
                                                     <tr>
-                                                        <td><?= htmlspecialchars($d['dimension']) ?></td>
-                                                        <td><?= (int)$d['stock'] ?> Unit</td>
+                                                        <td><strong><?= htmlspecialchars($d['dimension']) ?></strong></td>
+                                                        <td><span style="font-weight: 600; color: #667eea;"><?= (int)$d['stock'] ?></span> Unit</td>
+                                                        <td>
+                                                            <?php if ($logCount > 0): ?>
+                                                                <button class="btn btn-sm btn-info btnToggleLogs" data-dimension-id="<?= $d['id'] ?>">
+                                                                    <i class="fas fa-history"></i> Lihat (<?= $logCount ?>)
+                                                                </button>
+                                                            <?php else: ?>
+                                                                <span style="color: #9ca3af; font-size: 0.8rem;">Tidak ada riwayat</span>
+                                                            <?php endif; ?>
+                                                        </td>
                                                         <?php if ($currentRole === 'admin'): ?>
                                                             <td>
                                                                 <button class="btn btn-sm btn-warning btnEditDimension"
@@ -102,44 +135,48 @@ if (!isset($types) || !isset($dimensions) || !isset($title)) {
                                                                 <a href="<?= $basePath ?>/admin/materials/dimension/delete/<?= $d['id'] ?>"
                                                                     class="btn btn-sm btn-danger"
                                                                     onclick="return confirm('Hapus dimensi ini?')">
-                                                                    <i class="fas fa-trash"></i> Delete
+                                                                    <i class="fas fa-trash"></i> Hapus
                                                                 </a>
                                                             </td>
                                                         <?php endif; ?>
                                                     </tr>
 
-                                                    <!-- Tambahan: Riwayat stok untuk dimension ini -->
-                                                    <?php
-                                                    $logs = \App\Models\MaterialStockLogModel::getByDimension($d['id']);
-                                                    if (!empty($logs)):
-                                                    ?>
-                                                        <tr>
-                                                            <td colspan="<?= $currentRole === 'admin' ? 3 : 2 ?>">
-                                                                <h6>Riwayat Stok</h6>
-                                                                <table class="table table-bordered table-sm mt-2">
-                                                                    <thead>
-                                                                        <tr>
-                                                                            <th>Tanggal</th>
-                                                                            <th>Jenis</th>
-                                                                            <th>Jumlah</th>
-                                                                        </tr>
-                                                                    </thead>
-                                                                    <tbody>
-                                                                        <?php foreach ($logs as $log): ?>
-                                                                            <tr>
-                                                                                <td><?= htmlspecialchars($log['created_at']) ?></td>
-                                                                                <td>
-                                                                                    <?php if ($log['change_type'] === 'IN'): ?>
-                                                                                        <span class="text-success">Masuk</span>
-                                                                                    <?php else: ?>
-                                                                                        <span class="text-danger">Keluar</span>
-                                                                                    <?php endif; ?>
-                                                                                </td>
-                                                                                <td><?= htmlspecialchars($log['quantity']) ?> Unit</td>
-                                                                            </tr>
-                                                                        <?php endforeach; ?>
-                                                                    </tbody>
-                                                                </table>
+                                                    <!-- Baris Riwayat Stok (Hidden by default) -->
+                                                    <?php if ($logCount > 0): ?>
+                                                        <tr class="stock-history-row" id="logs-<?= $d['id'] ?>" style="display: none;">
+                                                            <td colspan="<?= $currentRole === 'admin' ? 4 : 3 ?>">
+                                                                <div class="stock-history-wrapper">
+                                                                    <div class="stock-history-header collapsed">
+                                                                        <h6><i class="fas fa-chevron-down"></i> Riwayat Stok Material</h6>
+                                                                        <span style="font-size: 0.75rem; color: #6b7280;"><?= $logCount ?> transaksi</span>
+                                                                    </div>
+                                                                    <div class="stock-history-content">
+                                                                        <table class="table table-bordered table-sm">
+                                                                            <thead>
+                                                                                <tr>
+                                                                                    <th>Tanggal & Waktu</th>
+                                                                                    <th>Jenis Transaksi</th>
+                                                                                    <th>Jumlah</th>
+                                                                                </tr>
+                                                                            </thead>
+                                                                            <tbody>
+                                                                                <?php foreach ($logs as $log): ?>
+                                                                                    <tr>
+                                                                                        <td><?= date('d M Y, H:i', strtotime($log['created_at'])) ?></td>
+                                                                                        <td>
+                                                                                            <?php if ($log['change_type'] === 'IN'): ?>
+                                                                                                <span class="text-success">Stok Masuk</span>
+                                                                                            <?php else: ?>
+                                                                                                <span class="text-danger">Stok Keluar</span>
+                                                                                            <?php endif; ?>
+                                                                                        </td>
+                                                                                        <td><strong><?= htmlspecialchars($log['quantity']) ?></strong> Unit</td>
+                                                                                    </tr>
+                                                                                <?php endforeach; ?>
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </div>
+                                                                </div>
                                                             </td>
                                                         </tr>
                                                     <?php endif; ?>
@@ -152,9 +189,11 @@ if (!isset($types) || !isset($dimensions) || !isset($title)) {
                                         <!-- Form tambah dimension -->
                                         <form action="<?= $basePath ?>/admin/materials/dimension/store" method="POST" class="mt-2">
                                             <input type="hidden" name="material_type_id" value="<?= $t['id'] ?>">
-                                            <input type="text" name="dimension" placeholder="Dimension" required>
-                                            <input type="number" step="0.01" name="stock" placeholder="Stock" required>
-                                            <button type="submit" class="btn btn-sm btn-primary">Tambah Dimensi</button>
+                                            <input type="text" name="dimension" placeholder="Masukkan dimensi material" required>
+                                            <input type="number" step="0.01" name="stock" placeholder="Jumlah stok" required>
+                                            <button type="submit" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-plus-circle"></i> Tambah Dimensi
+                                            </button>
                                         </form>
                                     <?php endif; ?>
                                 </div>
@@ -176,16 +215,18 @@ if (!isset($types) || !isset($dimensions) || !isset($title)) {
                                             <input type="hidden" name="id" id="typeId">
                                             <div class="form-group">
                                                 <label>Nomor Material</label>
-                                                <input type="text" name="material_number" id="typeNumber" class="form-control" required>
+                                                <input type="text" name="material_number" id="typeNumber" class="form-control" placeholder="Contoh: MAT-001" required>
                                             </div>
                                             <div class="form-group">
                                                 <label>Nama Material</label>
-                                                <input type="text" name="name" id="typeName" class="form-control" required>
+                                                <input type="text" name="name" id="typeName" class="form-control" placeholder="Contoh: Besi Beton" required>
                                             </div>
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                                            <button type="submit" class="btn btn-primary">Simpan</button>
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-save"></i> Simpan
+                                            </button>
                                         </div>
                                     </form>
                                 </div>
@@ -205,16 +246,18 @@ if (!isset($types) || !isset($dimensions) || !isset($title)) {
                                             <input type="hidden" name="id" id="dimensionId">
                                             <div class="form-group">
                                                 <label>Dimensi</label>
-                                                <input type="text" name="dimension" id="dimensionValue" class="form-control" required>
+                                                <input type="text" name="dimension" id="dimensionValue" class="form-control" placeholder="Contoh: 10mm x 12m" required>
                                             </div>
                                             <div class="form-group">
-                                                <label>Stock</label>
-                                                <input type="number" name="stock" id="dimensionStock" class="form-control" min="0" step="0.01" required>
+                                                <label>Stok</label>
+                                                <input type="number" name="stock" id="dimensionStock" class="form-control" min="0" step="0.01" placeholder="Jumlah unit" required>
                                             </div>
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                                            <button type="submit" class="btn btn-primary">Simpan</button>
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-save"></i> Simpan
+                                            </button>
                                         </div>
                                     </form>
                                 </div>
@@ -229,23 +272,11 @@ if (!isset($types) || !isset($dimensions) || !isset($title)) {
                     <script>
                         $(function() {
                             // ==================== Setup Initial State ====================
-
-                            $('.card').each(function() {
-                                const $card = $(this);
-                                const dimensionCount = $card.find('tbody tr').length;
-
-                                // Tambahkan jumlah dimensi ke teks header
-                                const $headerText = $card.find('.card-header strong');
-                                const originalText = $headerText.text().trim();
-                                $headerText.text(originalText + ' (' + dimensionCount + ' dimensi)');
-                            });
-
                             $('.card-body').removeClass('show');
                             $('.card-header').addClass('collapsed');
                             $('.card').removeClass('active');
 
                             // ==================== Accordion Functionality ====================
-
                             $('.card-header').on('click', function(e) {
                                 if ($(e.target).closest('.btn-sm, .btn-warning, .btn-danger').length > 0) return;
 
@@ -263,19 +294,47 @@ if (!isset($types) || !isset($dimensions) || !isset($title)) {
                                     $body.removeClass('show');
                                     $card.removeClass('active');
                                 }
+                            });
 
-                                // Optional strict accordion mode
-                                /*
-                                if (isCollapsed) {
-                                    $('.card').not($card).removeClass('active');
-                                    $('.card-header').not($header).addClass('collapsed');
-                                    $('.card-body').not($body).removeClass('show');
+                            // ==================== Toggle Stock History Logs ====================
+                            $('.btnToggleLogs').on('click', function(e) {
+                                e.stopPropagation();
+
+                                const dimensionId = $(this).data('dimension-id');
+                                const $logsRow = $('#logs-' + dimensionId);
+                                const $historyHeader = $logsRow.find('.stock-history-header');
+                                const $historyContent = $logsRow.find('.stock-history-content');
+
+                                // Toggle visibility row
+                                $logsRow.slideToggle(300);
+
+                                // Update button text
+                                const $icon = $(this).find('i');
+                                if ($logsRow.is(':visible')) {
+                                    $icon.removeClass('fa-history').addClass('fa-times');
+                                } else {
+                                    $icon.removeClass('fa-times').addClass('fa-history');
                                 }
-                                */
+                            });
+
+                            // ==================== Toggle History Content (Accordion dalam Accordion) ====================
+                            $(document).on('click', '.stock-history-header', function(e) {
+                                e.stopPropagation();
+
+                                const $header = $(this);
+                                const $content = $header.next('.stock-history-content');
+                                const isCollapsed = $header.hasClass('collapsed');
+
+                                if (isCollapsed) {
+                                    $header.removeClass('collapsed');
+                                    $content.addClass('show');
+                                } else {
+                                    $header.addClass('collapsed');
+                                    $content.removeClass('show');
+                                }
                             });
 
                             // ==================== Modal Type ====================
-
                             $('#btnAddType').on('click', function() {
                                 $('#typeForm')[0].reset();
                                 $('#typeId').val('');
@@ -303,7 +362,6 @@ if (!isset($types) || !isset($dimensions) || !isset($title)) {
                             });
 
                             // ==================== Modal Dimension ====================
-
                             $('.btnEditDimension').on('click', function(e) {
                                 e.stopPropagation();
 
@@ -313,7 +371,7 @@ if (!isset($types) || !isset($dimensions) || !isset($title)) {
                                 const dimension = $(this).data('dimension');
                                 const stock = $(this).data('stock');
 
-                                $('#dimensionModalTitle').text('Edit Dimensi');
+                                $('#dimensionModalTitle').text('Edit Dimensi Material');
                                 $('#dimensionForm').attr('action', '<?= $basePath ?>/admin/materials/dimension/update/' + encodeURIComponent(id));
                                 $('#dimensionId').val(id);
                                 $('#dimensionValue').val(dimension);
@@ -323,17 +381,15 @@ if (!isset($types) || !isset($dimensions) || !isset($title)) {
                             });
 
                             // ==================== Prevent Event Bubbling ====================
-
                             $('.btn-sm, .btn-warning, .btn-danger, a[href*="delete"]').on('click', function(e) {
                                 e.stopPropagation();
                             });
 
-                            $('.card-body form, .card-body form input').on('click', function(e) {
+                            $('.card-body form, .card-body form input, .card-body form button').on('click', function(e) {
                                 e.stopPropagation();
                             });
 
                             // ==================== Smooth Scroll to Opened Card ====================
-
                             $('.card-header').on('click', function() {
                                 const $header = $(this);
                                 setTimeout(function() {
@@ -342,15 +398,8 @@ if (!isset($types) || !isset($dimensions) || !isset($title)) {
                                             scrollTop: $header.offset().top - 100
                                         }, 400);
                                     }
-                                }, 100);
+                                }, 150);
                             });
-
-                            // ==================== Auto-open first card (optional) ====================
-                            /*
-                            if ($('.card').length > 0) {
-                                $('.card').first().find('.card-header').trigger('click');
-                            }
-                            */
                         });
                     </script>
 

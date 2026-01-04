@@ -7,10 +7,6 @@ use PDO;
 
 class NotificationModel
 {
-
-    /**
-     * Hitung jumlah notifikasi belum dibaca untuk user sesuai role.
-     */
     public static function countUnread($targetKey, $role = 'customer')
     {
         $pdo = Database::connect();
@@ -42,9 +38,6 @@ class NotificationModel
         return (int) $stmt->fetchColumn();
     }
 
-    /**
-     * Ambil notifikasi terbaru untuk user sesuai role.
-     */
     public static function getLatest($targetKey, $role = 'customer', $limit = 5)
     {
         $pdo = Database::connect();
@@ -54,7 +47,7 @@ class NotificationModel
             case 'spv':
                 $sql = "SELECT id, message, created_at AS date, icon, color, is_read, type
                         FROM notifications 
-                        WHERE department = ? 
+                        WHERE department = ? AND is_read = 0
                         ORDER BY created_at DESC 
                         LIMIT $limit";
                 break;
@@ -68,7 +61,7 @@ class NotificationModel
             default: // customer
                 $sql = "SELECT id, message, created_at AS date, icon, color, is_read, type
                         FROM notifications 
-                        WHERE customer_id = ? 
+                        WHERE customer_id = ? AND is_read = 0
                         ORDER BY created_at DESC 
                         LIMIT $limit";
         }
@@ -78,9 +71,6 @@ class NotificationModel
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    /**
-     * Tandai notifikasi sebagai sudah dibaca.
-     */
     public static function markAsRead($id)
     {
         $pdo = Database::connect();
@@ -88,9 +78,38 @@ class NotificationModel
         $stmt->execute([$id]);
     }
 
-    /**
-     * Buat notifikasi baru untuk role tertentu.
-     */
+    public static function markAllRead($targetKey, $role)
+    {
+        $pdo = Database::connect();
+        switch ($role) {
+            case 'spv':
+                $stmt = $pdo->prepare("UPDATE notifications SET is_read = 1 WHERE department = ?");
+                break;
+            case 'admin':
+                $stmt = $pdo->prepare("UPDATE notifications SET is_read = 1 WHERE user_id = ?");
+                break;
+            default: // customer
+                $stmt = $pdo->prepare("UPDATE notifications SET is_read = 1 WHERE customer_id = ?");
+        }
+        $stmt->execute([$targetKey]);
+    }
+
+    public static function clearAll($targetKey, $role)
+    {
+        $pdo = Database::connect();
+        switch ($role) {
+            case 'spv':
+                $stmt = $pdo->prepare("DELETE FROM notifications WHERE department = ?");
+                break;
+            case 'admin':
+                $stmt = $pdo->prepare("DELETE FROM notifications WHERE user_id = ?");
+                break;
+            default: // customer
+                $stmt = $pdo->prepare("DELETE FROM notifications WHERE customer_id = ?");
+        }
+        $stmt->execute([$targetKey]);
+    }
+
     public static function create(
         $targetKey,
         $message,
@@ -105,22 +124,58 @@ class NotificationModel
             case 'spv':
                 $stmt = $pdo->prepare(
                     "INSERT INTO notifications (department, message, icon, color, type, is_read, created_at) 
-                 VALUES (?, ?, ?, ?, ?, 0, NOW())"
+                     VALUES (?, ?, ?, ?, ?, 0, NOW())"
                 );
                 break;
             case 'admin':
                 $stmt = $pdo->prepare(
                     "INSERT INTO notifications (user_id, message, icon, color, type, is_read, created_at) 
-                 VALUES (?, ?, ?, ?, ?, 0, NOW())"
+                     VALUES (?, ?, ?, ?, ?, 0, NOW())"
                 );
                 break;
             default: // customer
                 $stmt = $pdo->prepare(
                     "INSERT INTO notifications (customer_id, message, icon, color, type, is_read, created_at) 
-                 VALUES (?, ?, ?, ?, ?, 0, NOW())"
+                     VALUES (?, ?, ?, ?, ?, 0, NOW())"
                 );
         }
 
         $stmt->execute([$targetKey, $message, $icon, $color, $type]);
+    }
+
+    public static function findUnreadByMessage($targetKey, $role, $type, $message)
+    {
+        $db = Database::connect();
+        switch ($role) {
+            case 'spv':
+                $stmt = $db->prepare("SELECT id FROM notifications WHERE department = ? AND type = ? AND is_read = 0 AND message = ?");
+                break;
+            case 'admin':
+                $stmt = $db->prepare("SELECT id FROM notifications WHERE user_id = ? AND type = ? AND is_read = 0 AND message = ?");
+                break;
+            default: // customer
+                $stmt = $db->prepare("SELECT id FROM notifications WHERE customer_id = ? AND type = ? AND is_read = 0 AND message = ?");
+        }
+        $stmt->execute([$targetKey, $type, $message]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public static function createUnique(
+        $targetKey,
+        $message,
+        $icon = 'fas fa-info-circle',
+        $color = 'primary',
+        $type = 'general',
+        $role = 'customer'
+    ) {
+        $pdo = Database::connect();
+
+        // cek apakah notif unread dengan message sama sudah ada
+        $existing = self::findUnreadByMessage($targetKey, $role, $type, $message);
+        if ($existing) {
+            return; // jangan insert duplikat
+        }
+
+        self::create($targetKey, $message, $icon, $color, $type, $role);
     }
 }

@@ -134,14 +134,14 @@ class WorkOrderController
             $sqlDept = "SELECT name FROM departments WHERE id = :id";
             $stmtDept = $pdo->prepare($sqlDept);
             $stmtDept->execute(['id' => $deptId]);
-            $deptName = $stmtDept->fetchColumn(); 
+            $deptName = $stmtDept->fetchColumn();
 
             $customerName = $_SESSION['user_data']['name'];
             $line         = $_SESSION['user_data']['line'] ?? '-';
 
             $message = "Pengajuan WO ($customerName), dari ($line) butuh approval dari SPV departemen $deptName";
 
-            NotificationModel::create(
+            NotificationModel::createUnique(
                 $deptId,
                 $message,
                 'fas fa-exclamation-triangle',

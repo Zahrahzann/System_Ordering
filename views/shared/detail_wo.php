@@ -30,14 +30,19 @@ if (!isset($order) || !isset($items) || !isset($approval)) {
                 <?php include __DIR__ . '/../layout/topbar.php'; ?>
 
                 <div class="container-fluid">
+
+                    <!-- Page Header -->
                     <div class="page-header">
-                        <h1 class="page-title">
-                            <i class="fas fa-file-invoice"></i>
-                            Detail Pesanan <span class="order-number">#<?= htmlspecialchars($order['id']) ?></span>
-                        </h1>
-                        <a href="<?= $basePath ?>/<?= htmlspecialchars($currentRole) ?>/tracking" class="btn btn-secondary">
-                            <i class="fas fa-arrow-left"></i> Kembali
-                        </a>
+                        <h1 class="page-title">Detail Pesanan</h1>
+                        <p class="page-subtitle">
+                            <?php if ($currentRole === 'admin'): ?>
+                                Kelola pesanan customer terbaru, pantau status produksi
+                            <?php elseif ($currentRole === 'spv'): ?>
+                                Tinjau dan kelola persetujuan pesanan customer dengan efisien
+                            <?php else: ?>
+                                Pantau status pesanan terbaru Anda, dan lihat detail produksinya
+                            <?php endif; ?>
+                        </p>
                     </div>
 
                     <!-- Informasi Pemesan -->
@@ -150,12 +155,38 @@ if (!isset($order) || !isset($items) || !isset($approval)) {
                                                 <div class="detail-value"><?= htmlspecialchars($item['quantity']) ?> Unit</div>
                                             </div>
                                             <div class="detail-item">
-                                                <div class="detail-label">Status Produksi</div>
+                                                <div class="detail-label">Estimasi Pengerjaan</div>
                                                 <div class="detail-value">
-                                                    <span class="badge badge-info">
-                                                        <?= htmlspecialchars(ucwords(str_replace('_', ' ', $item['production_status']))) ?>
-                                                    </span>
+                                                    <?php if (!empty($item['estimasi_pengerjaan'])): ?>
+                                                        <i class="fas fa-clock mr-1" style="color:#ff9800;"></i>
+                                                        <?= htmlspecialchars($item['estimasi_pengerjaan']) ?>
+                                                    <?php else: ?>
+                                                        <span style="color:#545454ff;">Belum ditentukan</span>
+                                                    <?php endif; ?>
                                                 </div>
+                                            </div>
+                                            <div class="detail-item">
+                                                <div class="detail-label">Aktual Waktu Pengerjaan</div>
+                                                <div class="detail-value">
+                                                    <?php if (!empty($item['actual_duration_minutes'])): ?>
+                                                        <i class="fas fa-stopwatch mr-1" style="color:#4caf50;"></i>
+                                                        <?= htmlspecialchars($item['actual_duration_minutes']) ?> menit
+                                                    <?php else: ?>
+                                                        <span style="color:#555;">Belum selesai</span>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+                                            <div class="detail-item">
+                                                <div class="detail-label">Status Produksi</div>
+                                                <div class="detail-value"> <?php $statusLabel = ucwords(str_replace('_', ' ', $item['production_status']));
+                                                                            $badgeClass = 'badge-info';
+                                                                            if ($item['production_status'] === 'finish') {
+                                                                                $badgeClass = 'badge-success';
+                                                                            } elseif ($item['production_status'] === 'pending') {
+                                                                                $badgeClass = 'badge-secondary';
+                                                                            } elseif ($item['production_status'] === 'on_progress') {
+                                                                                $badgeClass = 'badge-warning';
+                                                                            } ?> <span class="badge <?= $badgeClass ?>"> <?= htmlspecialchars($statusLabel) ?> </span> </div>
                                             </div>
                                             <div class="detail-item">
                                                 <div class="detail-label">PIC MFG</div>
@@ -206,7 +237,6 @@ if (!isset($order) || !isset($items) || !isset($approval)) {
                     </div>
                 </div>
             </div>
-            <?php include __DIR__ . '/../layout/footer.php'; ?>
         </div>
     </div>
     <script src="/system_ordering/public/assets/vendor/jquery/jquery.min.js"></script>

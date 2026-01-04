@@ -1,3 +1,6 @@
+/* ===================================
+   Base & Container Styles
+   =================================== */
 body.tracking-page {
     font-family: 'Poppins', sans-serif;
     background: #f5f5f5 !important;
@@ -9,7 +12,9 @@ body.tracking-page .container-fluid {
     padding-bottom: 40px !important;
 }
 
-/* Page Header */
+/* ===================================
+   Page Header
+   =================================== */
 body.tracking-page .page-header {
     margin-bottom: 2rem;
     text-align: center;
@@ -32,7 +37,9 @@ body.tracking-page .page-subtitle {
     margin: 0 auto;
 }
 
-/* Order Card */
+/* ===================================
+   Order Card Base
+   =================================== */
 body.tracking-page .order-card {
     display: block !important;
     background: white !important;
@@ -45,7 +52,15 @@ body.tracking-page .order-card {
     position: relative;
 }
 
-/* Gradient Bar di Atas */
+body.tracking-page .order-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+    transform: translateY(-2px);
+}
+
+/* ===================================
+   Status Gradient Bars
+   =================================== */
+/* Top Gradient Bar */
 body.tracking-page .order-card::before {
     content: '';
     position: absolute;
@@ -58,7 +73,7 @@ body.tracking-page .order-card::before {
     border-radius: 12px 12px 0 0;
 }
 
-/* Gradient Bar di Kiri */
+/* Left Gradient Bar */
 body.tracking-page .order-card::after {
     content: '';
     position: absolute;
@@ -68,10 +83,14 @@ body.tracking-page .order-card::after {
     width: 8px;
     background: linear-gradient(180deg, transparent 0%, #e5e7eb 100%);
     transition: all 0.3s ease;
-    border-radius: 12px 15px 0 0;
+    border-radius: 12px 0 0 12px;
 }
 
-/* Pending */
+body.tracking-page .order-card:hover::before {
+    height: 6px;
+}
+
+/* Pending Status */
 body.tracking-page .order-card.pending::before {
     background: linear-gradient(90deg, #d1d5db 0%, #9ca3af 50%, #6b7280 100%);
 }
@@ -80,7 +99,7 @@ body.tracking-page .order-card.pending::after {
     background: linear-gradient(180deg, #d1d5db 0%, #9ca3af 50%, #6b7280 100%);
 }
 
-/* On Progress */
+/* On Progress Status */
 body.tracking-page .order-card.on_progress::before {
     background: linear-gradient(90deg, #9f8003 0%, #fde047 50%, #facc15 100%);
 }
@@ -89,7 +108,7 @@ body.tracking-page .order-card.on_progress::after {
     background: linear-gradient(180deg, #9f8003 0%, #fde047 50%, #facc15 100%);
 }
 
-/* Finish */
+/* Finish Status */
 body.tracking-page .order-card.finish::before {
     background: linear-gradient(90deg, #087e41 0%, #6ee7b7 50%, #34d399 100%);
 }
@@ -98,7 +117,7 @@ body.tracking-page .order-card.finish::after {
     background: linear-gradient(180deg, #087e41 0%, #6ee7b7 50%, #34d399 100%);
 }
 
-/* Completed */
+/* Completed Status */
 body.tracking-page .order-card.completed::before {
     background: linear-gradient(90deg, #02a7b6 0%, #67e8f9 50%, #22d3ee 100%);
 }
@@ -107,7 +126,7 @@ body.tracking-page .order-card.completed::after {
     background: linear-gradient(180deg, #02a7b6 0%, #67e8f9 50%, #22d3ee 100%);
 }
 
-/* Rejected */
+/* Rejected Status */
 body.tracking-page .order-card.rejected::before {
     background: linear-gradient(90deg, #fee2e2 0%, #fca5a5 50%, #ef4444 100%);
 }
@@ -116,29 +135,16 @@ body.tracking-page .order-card.rejected::after {
     background: linear-gradient(180deg, #fee2e2 0%, #fca5a5 50%, #ef4444 100%);
 }
 
-/* Card Inner Content - padding dengan margin top untuk gradient bar */
-body.tracking-page .order-card>* {
-    padding: 20px;
-    padding-top: 25px;
-}
-
-body.tracking-page .order-card:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
-    transform: translateY(-2px);
-}
-
-body.tracking-page .order-card:hover::before {
-    height: 6px;
-}
-
-/* Order Header */
+/* ===================================
+   Order Header
+   =================================== */
 body.tracking-page .order-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 15px;
-    padding-bottom: 15px;
-    padding-top: 25px !important;
+    padding: 20px;
+    padding-top: 25px;
+    margin-bottom: 0;
     border-bottom: 1px solid #f0f0f0;
 }
 
@@ -155,7 +161,7 @@ body.tracking-page .customer-info h5 {
     font-size: 16px;
     font-weight: 600;
     color: #333;
-    margin: 0;
+    margin: 0 0 5px 0;
 }
 
 body.tracking-page .customer-line {
@@ -164,7 +170,6 @@ body.tracking-page .customer-line {
     display: flex;
     align-items: center;
     gap: 5px;
-    margin-top: 5px;
 }
 
 body.tracking-page .customer-line i {
@@ -172,7 +177,9 @@ body.tracking-page .customer-line i {
     color: #999;
 }
 
-/* Status Badge */
+/* ===================================
+   Status Badge
+   =================================== */
 body.tracking-page .status-badge-wrapper {
     text-align: right;
 }
@@ -192,6 +199,7 @@ body.tracking-page .badge {
     font-weight: 500;
     font-size: 11px;
     text-transform: capitalize;
+    white-space: nowrap;
 }
 
 body.tracking-page .badge-secondary {
@@ -205,12 +213,12 @@ body.tracking-page .badge-warning {
 }
 
 body.tracking-page .badge-success {
-    background: #d1ecf1;
+    background: #d4edda;
     color: #155724;
 }
 
 body.tracking-page .badge-info {
-    background: #d4edda;
+    background: #d1ecf1;
     color: #0c5460;
 }
 
@@ -219,19 +227,20 @@ body.tracking-page .badge-danger {
     color: #721c24;
 }
 
-/* Order Content */
+/* ===================================
+   Order Content & Details
+   =================================== */
 body.tracking-page .order-content {
     display: grid;
     grid-template-columns: 1fr auto;
     gap: 20px;
     align-items: center;
-    padding: 20px !important;
-    padding-top: 0 !important;
+    padding: 20px;
 }
 
 body.tracking-page .order-details {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 15px;
 }
 
@@ -257,10 +266,11 @@ body.tracking-page .detail-value {
 
 body.tracking-page .detail-value.highlight {
     color: #4f69dc;
-    font-weight: 600;
 }
 
-/* Order Actions */
+/* ===================================
+   Action Buttons
+   =================================== */
 body.tracking-page .order-actions {
     display: flex;
     flex-direction: column;
@@ -309,14 +319,16 @@ body.tracking-page .btn-primary:hover {
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
-/* Admin Update Form */
+/* ===================================
+   Admin Update Form
+   =================================== */
 body.tracking-page .update-form {
     margin-top: 0;
     padding: 20px;
     padding-top: 15px;
     border-top: 1px solid #f0f0f0;
     display: grid;
-    grid-template-columns: 1fr 1fr auto;
+    grid-template-columns: repeat(3, 1fr) auto;
     gap: 10px;
     align-items: center;
 }
@@ -326,11 +338,13 @@ body.tracking-page .update-form .form-control {
     border: 2px solid #e9ecef;
     padding: 8px 12px;
     font-size: 13px;
+    transition: all 0.2s;
 }
 
 body.tracking-page .update-form .form-control:focus {
     border-color: #667eea;
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    outline: none;
 }
 
 body.tracking-page .update-form select.form-control {
@@ -342,10 +356,13 @@ body.tracking-page .update-form select.form-control {
 }
 
 body.tracking-page .update-form .btn {
-    width: 100%;
+    width: auto;
+    min-width: 100px;
 }
 
-/* Empty State */
+/* ===================================
+   Empty State
+   =================================== */
 body.tracking-page .empty-state {
     text-align: center;
     padding: 80px 20px;
@@ -372,7 +389,24 @@ body.tracking-page .empty-state p {
     font-size: 14px;
 }
 
-/* Responsive */
+/* ===================================
+   Responsive Styles
+   =================================== */
+@media (max-width: 1200px) {
+    body.tracking-page .order-details {
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    }
+    
+    body.tracking-page .update-form {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    body.tracking-page .update-form .btn {
+        grid-column: 1 / -1;
+        width: 100%;
+    }
+}
+
 @media (max-width: 1024px) {
     body.tracking-page .order-content {
         grid-template-columns: 1fr;
@@ -384,15 +418,19 @@ body.tracking-page .empty-state p {
     }
 
     body.tracking-page .order-details {
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    }
-
-    body.tracking-page .update-form {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
     }
 }
 
 @media (max-width: 768px) {
+    body.tracking-page .page-title {
+        font-size: 1.5rem;
+    }
+    
+    body.tracking-page .page-subtitle {
+        font-size: 0.875rem;
+    }
+    
     body.tracking-page .order-header {
         flex-direction: column;
         gap: 10px;
@@ -406,7 +444,32 @@ body.tracking-page .empty-state p {
         grid-template-columns: 1fr;
     }
 
-    body.tracking-page .btn {
+    body.tracking-page .update-form {
+        grid-template-columns: 1fr;
+    }
+    
+    body.tracking-page .update-form .btn {
         width: 100%;
+    }
+    
+    body.tracking-page .order-actions {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 480px) {
+    body.tracking-page .order-card {
+        margin-bottom: 12px !important;
+    }
+    
+    body.tracking-page .order-header,
+    body.tracking-page .order-content,
+    body.tracking-page .update-form {
+        padding: 15px;
+    }
+    
+    body.tracking-page .btn {
+        font-size: 12px;
+        padding: 7px 12px;
     }
 }

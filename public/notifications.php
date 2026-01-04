@@ -4,8 +4,8 @@ use App\Models\NotificationModel;
 use App\Models\ProductItemModel;
 
 session_start();
-require_once '../models/NotificationModel.php';
-require_once '../models/ProductItemModel.php';
+
+require_once __DIR__ . '/../vendor/autoload.php';
 
 header('Content-Type: application/json');
 
@@ -17,53 +17,79 @@ $userId     = $userData['id'] ?? null;
 $alerts = [];
 $count  = 0;
 
-// --- SPV Notif ---
+// --- SPV Notif: pengajuan WO dari departemen customer yang sama
 if ($role === 'spv') {
+    // Ambil notif unread
     $alerts = NotificationModel::getLatest($department, 'spv');
+
+    if (!empty($alerts)) {
+        // Tandai notif terbaru sebagai sudah dibaca
+        NotificationModel::markAsRead($alerts[0]['id']);
+    }
+
+    // Hitung ulang setelah tandai
     $count  = NotificationModel::countUnread($department, 'spv');
 }
 
-// --- Admin Notif (stok rendah) ---
+// --- Admin Notif: stok rendah
 if ($role === 'admin') {
-    // Ambil notif biasa
+    // Ambil notif unread
     $alerts = NotificationModel::getLatest($userId, 'admin');
-    $count  = NotificationModel::countUnread($userId, 'admin');
-
+ 
     // Cek stok rendah
     $lowStockItems = ProductItemModel::getLowStockItems(10);
     foreach ($lowStockItems as $item) {
-        // Buat notif baru kalau stok rendah
-        NotificationModel::create(
+        $message = "Stok produk {$item['name']} tinggal {$item['stock']}, segera kelola!";
+        $existing = NotificationModel::findUnreadByMessage(
             $userId,
-            "Stok produk {$item['name']} tinggal {$item['stock']}, segera kelola!",
-            'fas fa-box',
-            'danger',
+            'admin',
             'stock_alert',
-            'admin'
+            $message
         );
+
+        if (!$existing) {
+            NotificationModel::createUnique(
+                $userId,
+                $message,
+                'fas fa-box',
+                'danger',
+                'stock_alert',
+                'admin'
+            );
+        }
     }
-    // Refresh alerts setelah insert
+
+    // Refresh alerts & count setelah insert
     $alerts = NotificationModel::getLatest($userId, 'admin');
     $count  = NotificationModel::countUnread($userId, 'admin');
 }
 
-// --- Customer Notif ---
+// --- Customer Notif: status pesanan
 if ($role === 'customer') {
+    // Ambil notif unread
     $alerts = NotificationModel::getLatest($userId, 'customer');
+
+    if (!empty($alerts)) {
+        // Tandai notif terbaru sebagai sudah dibaca
+        NotificationModel::markAsRead($alerts[0]['id']);
+    }
+
+    // Hitung ulang setelah tandai
     $count  = NotificationModel::countUnread($userId, 'customer');
 }
 
-// --- Output JSON ---
+// --- Output JSON untuk pop-up dan badge
 if (!empty($alerts)) {
     $latest = $alerts[0];
     echo json_encode([
         'new'     => true,
         'id'      => $latest['id'],
         'count'   => $count,
-        'message' => $latest['message'],
+        'message' => nl2br($latest['message']), 
         'type'    => $latest['color'] ?? 'info',
         'icon'    => $latest['icon'] ?? 'info'
     ]);
 } else {
     echo json_encode(['new' => false, 'count' => 0]);
 }
+

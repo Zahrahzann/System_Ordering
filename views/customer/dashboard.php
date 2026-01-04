@@ -23,7 +23,7 @@ if (isset($_SESSION['flash_notification'])) {
     $notif = $_SESSION['flash_notification'];
     unset($_SESSION['flash_notification']); 
 }
-
+8
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -145,7 +145,7 @@ if (isset($_SESSION['flash_notification'])) {
                         </div>
 
                         <!-- Consumable Card -->
-                        <div class="menu-card" onclick="window.location.href='/system_ordering/public/customer/consumable/katalog_kategori'">
+                        <div class="menu-card" onclick="window.location.href='/system_ordering/public/admin/consumable/sections'">
                             <div class="menu-card-header">
                                 <i class="fas fa-box-open"></i>
                             </div>
