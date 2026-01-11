@@ -2,7 +2,7 @@
 if (!isset($userData)) die('Controller tidak menyediakan data user.');
 if (!isset($qtyData) || !is_array($qtyData)) $qtyData = [];
 
-// ✅ FALLBACK untuk variabel chart consumable
+// FALLBACK untuk variabel chart consumable
 if (!isset($chartMonths)) $chartMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
 if (!isset($chartSections)) $chartSections = [];
 if (!isset($chartDatasets)) $chartDatasets = [];
@@ -134,7 +134,7 @@ if (isset($_SESSION['flash_notification'])) {
                     <!-- Chart Card Work Order -->
                     <div class="chart-card">
                         <div class="chart-card-header">
-                            <h2><i class="fas fa-chart-bar"></i> Report Total Manufacture Work Order</h2>
+                            <h2><i class="fas fa-chart-bar"></i> Report Monthly Total Manufacture Work Order</h2>
                         </div>
                         <div class="chart-card-body">
                             <div class="chart-container">
@@ -152,7 +152,7 @@ if (isset($_SESSION['flash_notification'])) {
                     <!-- Chart Card Consumable -->
                     <div class="chart-card">
                         <div class="chart-card-header">
-                            <h2><i class="fas fa-box"></i> ME - Consumable Part <?= htmlspecialchars($year) ?></h2>
+                            <h2><i class="fas fa-box"></i> Report Monthly Total Manufacture Consumable Part <?= htmlspecialchars($year) ?></h2>
                             <!-- Dropdown Tahun -->
                             <form method="get" class="year-dropdown-form">
                                 <label for="year">Tahun:</label>

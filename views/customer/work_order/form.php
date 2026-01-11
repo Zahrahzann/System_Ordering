@@ -143,7 +143,8 @@ $prefill = $_SESSION['reorder_item'] ?? null;
                                         <div class="col-md-4">
                                             <div class="form-group">
                                                 <label for="stock">Stock Material yang Tersedia</label>
-                                                <input type="text" class="form-control" id="stock" readonly placeholder="Stock akan muncul di sini"
+                                                <input type="text" class="form-control" id="stock" readonly
+                                                    placeholder="Stock akan muncul di sini"
                                                     value="<?= htmlspecialchars($item['stock'] ?? '') ?>">
                                             </div>
                                         </div>
@@ -290,7 +291,7 @@ $prefill = $_SESSION['reorder_item'] ?? null;
                 }
             });
 
-            // ==================== Dropdown Jenis Material ====================
+            // ==================== Dropdown Dimensi Material berdasarkan Jenis ====================
             $('#material_type_id').on('change', function() {
                 const typeId = $(this).val();
                 const $dimension = $('#material_dimension_id');
@@ -304,6 +305,16 @@ $prefill = $_SESSION['reorder_item'] ?? null;
 
                 $.getJSON('<?= $basePath ?>/materials/dimensions?type_id=' + encodeURIComponent(typeId))
                     .done(function(data) {
+                        if (!Array.isArray(data)) {
+                            alert('Format data dimensi tidak valid.');
+                            return;
+                        }
+
+                        if (data.length === 0) {
+                            $dimension.append('<option disabled>(Tidak ada dimensi untuk jenis ini)</option>');
+                            return;
+                        }
+
                         data.forEach(function(dim) {
                             $dimension.append(
                                 $('<option>', {
@@ -318,37 +329,22 @@ $prefill = $_SESSION['reorder_item'] ?? null;
                     });
             });
 
-            // ==================== Load Jenis Material saat halaman dibuka ====================
-            $.getJSON('<?= $basePath ?>/materials/types')
-                .done(function(data) {
-                    const $type = $('#material_type_id');
-                    $type.html('<option value="">-- Pilih Jenis Material --</option>');
-                    data.forEach(function(t) {
-                        $type.append(
-                            $('<option>', {
-                                value: t.id,
-                                text: t.material_number + ' - ' + t.name
-                            })
-                        );
-                    });
-                })
-                .fail(function() {
-                    alert('Gagal memuat data jenis material.');
-                });
-
-            // ==================== Dropdown Dimensi Material ====================
+            // ==================== Stock Material berdasarkan Dimensi ====================
             $('#material_dimension_id').on('change', function() {
                 const dimensionId = $(this).val();
                 const $stock = $('#stock');
 
-                if (!dimensionId) {
-                    $stock.val('');
-                    return;
-                }
+                $stock.val('');
+
+                if (!dimensionId) return;
 
                 $.getJSON('<?= $basePath ?>/materials/dimension/' + encodeURIComponent(dimensionId))
                     .done(function(data) {
-                        $stock.val(Math.round(data.stock) + ' Unit');
+                        if (!data || typeof data.stock === 'undefined') {
+                            $stock.val('');
+                            return;
+                        }
+                        $stock.val(Math.round(Number(data.stock)) + ' Unit');
                     })
                     .fail(function() {
                         alert('Gagal memuat data stock material.');

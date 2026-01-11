@@ -9,6 +9,7 @@ use App\Controllers\AdminController;
 use App\Controllers\UserManagementController;
 use App\Controllers\ConsumableController;
 use App\Controllers\MaterialController;
+use App\Controllers\WorkOrderCostController;
 
 // ROUTING DINAMIS
 $matches = [];
@@ -114,9 +115,17 @@ switch (true) {
         MaterialController::destroyDimension($matches[1]);
         break;
 
-    // default:
-    //     http_response_code(404);
-    //     echo "404 Not Found :) <br>";
-    //     echo "Route Admin yang dicari: " . htmlspecialchars($route);
-    //     break;
+    // Work Order Cost 
+    case ($route === '/admin/workorder/savecost' && $_SERVER['REQUEST_METHOD'] === 'POST'):
+        WorkOrderCostController::saveCost();
+        break;
+    case ($route === '/admin/report/workorder'):
+        WorkOrderCostController::showMonthlyReport();
+        break;
+
+        // default:
+        //     http_response_code(404);
+        //     echo "404 Not Found :) <br>";
+        //     echo "Route Admin yang dicari: " . htmlspecialchars($route);
+        //     break;
 }

@@ -1,6 +1,30 @@
-<?php
-// routes/web.php
+<?php // routes/web.php 
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 global $route;
+
+// Normalisasi route agar cocok dengan case di bawah 
+$route = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$route = preg_replace('#^/system_ordering/public#', '', $route);
+
+$requestMethod = $_SERVER['REQUEST_METHOD'];
+
+error_log("REQUEST_URI: " . $_SERVER['REQUEST_URI']);
+error_log("PARSED ROUTE: " . $route);
+error_log("METHOD: " . $requestMethod);
+if (!empty($_POST)) {
+    error_log("POST DATA: " . print_r($_POST, true));
+} else {
+    error_log("POST DATA: kosong");
+}
+
+// 🔍 Debug log setelah variabel ada
+error_log("Route: $route, Method: $requestMethod");
+
+// Tambahan debug ke browser 
+//echo "<pre>DEBUG ROUTE: $route, METHOD: $requestMethod</pre>";
 
 // CONTROLLER
 use App\Controllers\AuthController;
@@ -13,10 +37,11 @@ use App\Controllers\ProductItemController;
 use App\Controllers\ConsumOrderController;
 use App\Controllers\ConsumHistoryController;
 use App\Controllers\MaterialController;
+use App\Controllers\WorkOrderCostController;
 
-$requestMethod = $_SERVER['REQUEST_METHOD'];
-
-// ROUTING DINAMIS
+// =====================
+// ROUTING DINAMIS (Regex)
+// =====================
 $matches = [];
 if (preg_match('#^/(admin|spv|customer)/tracking/detail/(\d+)$#', $route, $matches)) {
     TrackingController::showDetailPage($matches[2]);
@@ -33,20 +58,36 @@ if (preg_match('#^/customer/history/reorder/(\d+)$#', $route, $matches)) {
     exit;
 }
 
-if (preg_match('#^/system_ordering/public/customer/workorder/reorder/(\d+)$#', $route, $matches)) {
+if (preg_match('#^/customer/workorder/reorder/(\d+)$#', $route, $matches)) {
     HistoryController::reorderItem($matches[1]);
     exit;
 }
 
 // =====================
-// WORK ORDER ROUTES  
+// WORK ORDER COST ROUTES
 // =====================
-switch ($route) {
-    case '/':
+
+if (preg_match('#^/admin/workorder/savecost/?$#', $route) && $requestMethod === 'POST') {
+    WorkOrderCostController::saveCost();
+    exit;
+}
+
+if (preg_match('#^/(admin|spv|customer)/report/workorder$#', $route)) {
+    WorkOrderCostController::showMonthlyReport();
+    exit;
+}
+
+// =====================
+// ROUTES UTAMA
+// =====================
+switch (true) {
+    // Root redirect
+    case ($route === '/'):
         header('Location: /system_ordering/public/customer/login');
         exit;
 
-    case '/logout':
+        // Logout
+    case ($route === '/logout'):
         if (session_status() === PHP_SESSION_NONE) session_start();
         $role = $_SESSION['user_data']['role'] ?? 'customer';
         if ($role === 'admin' || $role === 'spv') {
@@ -56,53 +97,39 @@ switch ($route) {
         }
         break;
 
-    case '/customer/tracking':
-    case '/spv/tracking':
-    case '/admin/tracking':
+    // Tracking
+    case ($route === '/customer/tracking' || $route === '/spv/tracking' || $route === '/admin/tracking'):
         TrackingController::showTrackingPage();
         break;
 
-    case '/admin/history':
-    case '/spv/history':
-    case '/customer/history':
+    // History
+    case ($route === '/admin/history' || $route === '/spv/history' || $route === '/customer/history'):
         HistoryController::showHistoryPage();
         break;
 
-    case '/customer/consumable/sections':
-    case '/spv/consumable/sections':
-    case '/admin/consumable/sections':
+    // Consumable sections
+    case ($route === '/customer/consumable/sections' || $route === '/spv/consumable/sections' || $route === '/admin/consumable/sections'):
         ConsumableController::listSection();
         break;
-}
 
-// Customer Material Route (AJAX untuk dropdown)
-switch (true) {
-    // Ambil semua jenis material
+    // =====================
+    // MATERIAL ROUTES (AJAX)
+    // =====================
     case ($route === '/materials/types'):
         MaterialController::getTypes();
         break;
 
-    // Ambil semua dimensi berdasarkan type_id
     case ($route === '/materials/dimensions' && isset($_GET['type_id'])):
         MaterialController::getDimensionsByType($_GET['type_id']);
         break;
 
-    // Ambil detail dimension (stock)
     case preg_match('#^/materials/dimension/(\d+)$#', $route, $matches):
         MaterialController::showDimension($matches[1]);
         break;
 
-    default:
-        http_response_code(404);
-        echo "Route tidak ditemukan";
-        break;
-}
-
-// =====================
-// ROUTING DINAMIS PRODUCT TYPE & ITEM
-// =====================
-switch (true) {
+    // =====================
     // PRODUCT TYPE ROUTES
+    // =====================
     case preg_match('#^/shared/consumable/product-types/(\d+)$#', $route, $matches):
         ProductTypeController::listBySection($matches[1]);
         break;
@@ -123,7 +150,7 @@ switch (true) {
         ProductTypeController::delete($matches[1]);
         break;
 
-    case preg_match('#^/admin/consumable/product-types$#', $route):
+    case ($route === '/admin/consumable/product-types'):
         $sectionId = $_GET['section'] ?? null;
         if ($sectionId && is_numeric($sectionId)) {
             ProductTypeController::listBySection($sectionId);
@@ -132,7 +159,9 @@ switch (true) {
         }
         break;
 
+    // =====================
     // PRODUCT ITEM ROUTES
+    // =====================
     case preg_match('#^/shared/consumable/product-items/(\d+)$#', $route, $matches):
         ProductItemController::listByProductType($matches[1]);
         break;
@@ -149,7 +178,7 @@ switch (true) {
         ProductItemController::delete($matches[1]);
         break;
 
-    case preg_match('#^/admin/consumable/product-items$#', $route):
+    case ($route === '/admin/consumable/product-items'):
         if (isset($_GET['type'])) {
             ProductItemController::listByProductType($_GET['type']);
         } else {
@@ -157,10 +186,10 @@ switch (true) {
         }
         break;
 
+    // =====================
     // CONSUMABLE ORDER ROUTES
-    case ($route === '/customer/shared/consumable/orders'
-        || $route === '/spv/shared/consumable/orders'
-        || $route === '/admin/shared/consumable/orders'):
+    // =====================
+    case ($route === '/customer/shared/consumable/orders' || $route === '/spv/shared/consumable/orders' || $route === '/admin/shared/consumable/orders'):
         ConsumOrderController::showOrders();
         break;
 
@@ -168,7 +197,6 @@ switch (true) {
         ConsumOrderController::reorder();
         break;
 
-    // ACTION ROUTES (Admin only)
     case preg_match('#^/admin/consumable/orders/send/(\d+)$#', $route, $matches):
         ConsumOrderController::sendOrder($matches[1]);
         break;
@@ -181,14 +209,16 @@ switch (true) {
         ConsumOrderController::deleteOrder($matches[1]);
         break;
 
+    // =====================
     // CONSUMABLE HISTORY ROUTES
-    case '/customer/consumable/history':
-    case '/spv/consumable/history':
-    case '/admin/consumable/history':
+    // =====================
+    case ($route === '/customer/consumable/history' || $route === '/spv/consumable/history' || $route === '/admin/consumable/history'):
         ConsumHistoryController::showHistory();
         break;
 
-    // Default 404
+    // =====================
+    // DEFAULT 404
+    // =====================
     default:
         http_response_code(404);
         echo "404 Not Found :) <br>";

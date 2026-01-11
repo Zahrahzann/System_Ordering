@@ -8,10 +8,11 @@ $currentRole = $_SESSION['user_data']['role'] ?? '';
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Riwayat Pesanan Work Order</title>
     <link href="<?= $basePath ?>/assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
-    <link href="<?= $basePath ?>/assets/css/sb-admin-2.min.css" rel="stylesheet">
     <link href="<?= $basePath ?>/assets/css/shared/history_pesanan.css?v=<?= time() ?>" rel="stylesheet">
+    <link href="<?= $basePath ?>/assets/css/sb-admin-2.min.css" rel="stylesheet">
 </head>
 
 <body id="page-top">
@@ -35,14 +36,16 @@ $currentRole = $_SESSION['user_data']['role'] ?? '';
 
                     <!-- Page Header -->
                     <div class="page-header">
-                        <h1 class="page-title">Riwayat Pesanan Work Order</h1>
+                        <h1 class="page-title">
+                            <i class="fas fa-history mr-2"></i>Riwayat Pesanan Work Order
+                        </h1>
                         <p class="page-subtitle">
                             <?php if ($currentRole === 'admin'): ?>
-                                Riwayat Pesanan Work Order seluruh customer
+                                <i class="fas fa-info-circle mr-1"></i>Riwayat Pesanan Work Order seluruh customer
                             <?php elseif ($currentRole === 'spv'): ?>
-                                Riwayat Pesanan Work Order dari departemen Anda
+                                <i class="fas fa-info-circle mr-1"></i>Riwayat Pesanan Work Order dari departemen Anda
                             <?php else: ?>
-                                Riwayat Pesanan Anda
+                                <i class="fas fa-info-circle mr-1"></i>Riwayat Pesanan Anda
                             <?php endif; ?>
                         </p>
                     </div>
@@ -52,7 +55,7 @@ $currentRole = $_SESSION['user_data']['role'] ?? '';
                         <div class="card-body">
                             <form method="GET" class="form-inline">
                                 <div class="form-group mr-3 mb-2">
-                                    <label class="mr-2">Tahun</label>
+                                    <label class="mr-2"><i class="fas fa-calendar-alt mr-1"></i>Tahun</label>
                                     <select name="year" class="form-control">
                                         <?php foreach ($availableYears as $y): ?>
                                             <option value="<?= $y ?>" <?= ($y == $year) ? 'selected' : '' ?>><?= $y ?></option>
@@ -61,7 +64,7 @@ $currentRole = $_SESSION['user_data']['role'] ?? '';
                                 </div>
 
                                 <div class="form-group mr-3 mb-2">
-                                    <label class="mr-2">Bulan</label>
+                                    <label class="mr-2"><i class="fas fa-calendar mr-1"></i>Bulan</label>
                                     <select name="month" class="form-control">
                                         <option value="">Semua</option>
                                         <?php for ($m = 1; $m <= 12; $m++): ?>
@@ -74,7 +77,7 @@ $currentRole = $_SESSION['user_data']['role'] ?? '';
 
                                 <?php if ($currentRole === 'admin'): ?>
                                     <div class="form-group mr-3 mb-2">
-                                        <label class="mr-2">Departemen</label>
+                                        <label class="mr-2"><i class="fas fa-building mr-1"></i>Departemen</label>
                                         <select name="department" class="form-control">
                                             <option value="">Semua</option>
                                             <?php foreach ($departments as $dept): ?>
@@ -87,7 +90,7 @@ $currentRole = $_SESSION['user_data']['role'] ?? '';
                                 <?php endif; ?>
 
                                 <button class="btn btn-primary mb-2">
-                                    <i class="fas fa-filter mr-1"></i> Filter
+                                    <i class="fas fa-filter mr-1"></i> Filter Data
                                 </button>
                             </form>
                         </div>
@@ -96,60 +99,75 @@ $currentRole = $_SESSION['user_data']['role'] ?? '';
                     <!-- Tabel Riwayat -->
                     <div class="card shadow-sm mb-4">
                         <div class="card-header">
-                            <h6 class="m-0">Daftar Item Selesai</h6>
+                            <h6 class="m-0"><i class="fas fa-list mr-2"></i>Daftar Item Selesai</h6>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">
                                 <table class="table table-hover">
                                     <thead>
                                         <tr>
-                                            <th>Nama Item</th>
-                                            <th>Qty</th>
-                                            <th>Kategori</th>
-                                            <th>Jenis Material</th>
-                                            <th>PIC MFG</th>
-                                            <th>SPV</th>
-                                            <th>Tgl Selesai</th>
-                                            <th>Catatan</th>
-                                            <th>Detail</th>
+                                            <?php if ($currentRole === 'admin'): ?>
+                                                <th><i class="fas fa-user mr-1"></i>Customer</th>
+                                            <?php endif; ?>
+                                            <th><i class="fas fa-box mr-1"></i>Nama Item</th>
+                                            <th><i class="fas fa-sort-numeric-up mr-1"></i>Qty</th>
+                                            <th><i class="fas fa-tags mr-1"></i>Kategori</th>
+                                            <th><i class="fas fa-layer-group mr-1"></i>Material</th>
+                                            <th><i class="fas fa-user-tie mr-1"></i>PIC MFG</th>
+                                            <th><i class="fas fa-user-shield mr-1"></i>SPV</th>
+                                            <th><i class="fas fa-calendar-check mr-1"></i>Selesai</th>
+                                            <th class="text-center"><i class="fas fa-info-circle mr-1"></i>Note</th>
+                                            <th class="text-center"><i class="fas fa-cog mr-1"></i>Aksi</th>
                                             <?php if ($currentRole === 'customer'): ?>
-                                                <th>Aksi</th>
+                                                <th class="text-center"><i class="fas fa-redo mr-1"></i>Reorder</th>
                                             <?php endif; ?>
                                         </tr>
                                     </thead>
                                     <tbody>
+                                        <?php
+                                        $colCount = 9;
+                                        if ($currentRole === 'admin') $colCount++;
+                                        if ($currentRole === 'customer') $colCount++;
+                                        ?>
                                         <?php if (empty($items)): ?>
                                             <tr>
-                                                <td colspan="<?= $currentRole === 'customer' ? '10' : '9' ?>" class="text-center" style="padding: 3rem;">
-                                                    <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                                                <td colspan="<?= $colCount ?>" class="empty-state-cell">
+                                                    <i class="fas fa-inbox fa-4x"></i>
                                                     <p class="mb-0">Tidak ada riwayat untuk periode ini.</p>
                                                 </td>
                                             </tr>
                                         <?php else: ?>
                                             <?php foreach ($items as $item): ?>
                                                 <tr>
-                                                    <td><strong><?= htmlspecialchars($item['item_name']) ?></strong></td>
-                                                    <td><?= htmlspecialchars($item['quantity']) ?></td>
+                                                    <?php if ($currentRole === 'admin'): ?>
+                                                        <td><strong><?= htmlspecialchars($item['customer_name'] ?? '-') ?></strong></td>
+                                                    <?php endif; ?>
+                                                    <td><strong><?= htmlspecialchars($item['item_name'] ?? '-') ?></strong></td>
+                                                    <td><?= htmlspecialchars($item['quantity'] ?? '-') ?></td>
                                                     <td><?= htmlspecialchars($item['category'] ?? '-') ?></td>
                                                     <td><?= htmlspecialchars($item['material_type'] ?? '-') ?></td>
                                                     <td><?= htmlspecialchars($item['pic_mfg'] ?? '-') ?></td>
                                                     <td><?= htmlspecialchars($item['spv_name'] ?? '-') ?></td>
-                                                    <td><?= date('d M Y', strtotime($item['completed_date'])) ?></td>
+                                                    <td>
+                                                        <?= !empty($item['completed_date'])
+                                                            ? date('d M Y', strtotime($item['completed_date']))
+                                                            : '-' ?>
+                                                    </td>
                                                     <td class="text-center">
                                                         <?php if (!empty($item['note'])): ?>
-                                                            <i class="fas fa-comment-dots" title="<?= htmlspecialchars($item['note']) ?>"></i>
+                                                            <i class="fas fa-comment-dots text-info" style="cursor: pointer;" title="<?= htmlspecialchars($item['note']) ?>"></i>
                                                         <?php else: ?>
                                                             <span class="text-muted">-</span>
                                                         <?php endif; ?>
                                                     </td>
-                                                    <td>
-                                                        <button class="btn btn-info btn-sm" data-toggle="modal" data-target="#detailModal<?= $item['item_id'] ?>">
+                                                    <td class="text-center">
+                                                        <button class="btn btn-info btn-sm" data-toggle="modal" data-target="#detailModal<?= $item['item_id'] ?? '' ?>">
                                                             <i class="fas fa-eye"></i> Detail
                                                         </button>
                                                     </td>
                                                     <?php if ($currentRole === 'customer'): ?>
-                                                        <td>
-                                                            <a href="<?= $basePath ?>/customer/history/reorder/<?= $item['item_id'] ?>"
+                                                        <td class="text-center">
+                                                            <a href="<?= $basePath ?>/customer/history/reorder/<?= $item['item_id'] ?? '' ?>"
                                                                 class="btn btn-success btn-sm"
                                                                 onclick="return confirm('Item ini akan dibuka di Form Work Order untuk diedit sebelum dipesan ulang. Lanjutkan?')">
                                                                 <i class="fas fa-redo"></i> Pesan Lagi
@@ -168,12 +186,12 @@ $currentRole = $_SESSION['user_data']['role'] ?? '';
                     <!-- Modal Detail Loop -->
                     <?php if (!empty($items)): ?>
                         <?php foreach ($items as $item): ?>
-                            <div class="modal fade" id="detailModal<?= $item['item_id'] ?>" tabindex="-1" role="dialog" aria-labelledby="detailModalLabel<?= $item['item_id'] ?>" aria-hidden="true">
+                            <div class="modal fade" id="detailModal<?= $item['item_id'] ?? '' ?>" tabindex="-1" role="dialog" aria-hidden="true">
                                 <div class="modal-dialog modal-lg" role="document">
                                     <div class="modal-content">
                                         <div class="modal-header">
-                                            <h5 class="modal-title text-white" id="detailModalLabel<?= $item['item_id'] ?>">
-                                                Detail Work Order
+                                            <h5 class="modal-title text-white">
+                                                <i class="fas fa-file-alt mr-2"></i>Detail Work Order - <?= htmlspecialchars($item['item_name'] ?? '') ?>
                                             </h5>
                                             <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                                                 <span aria-hidden="true">&times;</span>
@@ -181,73 +199,188 @@ $currentRole = $_SESSION['user_data']['role'] ?? '';
                                         </div>
 
                                         <div class="modal-body">
-                                            <div class="item-details-grid">
-                                                <div class="detail-item">
-                                                    <div class="detail-label">Nama Item</div>
-                                                    <div class="detail-value"><?= htmlspecialchars($item['item_name']) ?></div>
-                                                </div>
-                                                <div class="detail-item">
-                                                    <div class="detail-label">Kategori</div>
-                                                    <div class="detail-value"><?= htmlspecialchars($item['category'] ?? '-') ?></div>
-                                                </div>
-                                                <div class="detail-item">
-                                                    <div class="detail-label">Jenis Material</div>
-                                                    <div class="detail-value"><?= htmlspecialchars($item['material_type'] ?? '-') ?></div>
-                                                </div>
-                                                <div class="detail-item">
-                                                    <div class="detail-label">Dimensi Material</div>
-                                                    <div class="detail-value"><?= htmlspecialchars($item['material_dimension'] ?? '-') ?></div>
-                                                </div>
-                                                <div class="detail-item">
-                                                    <div class="detail-label">Quantity</div>
-                                                    <div class="detail-value"><?= htmlspecialchars($item['quantity']) ?> Unit</div>
-                                                </div>
-                                                <div class="detail-item">
-                                                    <div class="detail-label">Tanggal Dibutuhkan</div>
-                                                    <div class="detail-value"><?= date('d M Y', strtotime($item['needed_date'])) ?></div>
-                                                </div>
-                                                <div class="detail-item">
-                                                    <div class="detail-label">Status Produksi</div>
-                                                    <div class="detail-value"><span class="badge badge-info"><?= htmlspecialchars(ucwords(str_replace('_', ' ', $item['production_status']))) ?></span></div>
-                                                </div>
-                                                <div class="detail-item">
-                                                    <div class="detail-label">SPV Approval</div>
-                                                    <div class="detail-value"><?= htmlspecialchars($item['spv_name'] ?? '-') ?></div>
-                                                </div>
-                                                <div class="detail-item">
-                                                    <div class="detail-label">Catatan</div>
-                                                    <div class="detail-value"><?= htmlspecialchars($item['note'] ?? '-') ?></div>
-                                                </div>
-                                            </div>
+                                            <!-- Tabs -->
+                                            <ul class="nav nav-tabs" role="tablist">
+                                                <li class="nav-item">
+                                                    <a class="nav-link active" data-toggle="tab" href="#detailTab<?= $item['item_id'] ?? '' ?>">
+                                                        <i class="fas fa-info-circle mr-1"></i>Detail WO
+                                                    </a>
+                                                </li>
+                                                <?php if ($currentRole === 'admin' && ($item['production_status'] ?? '') === 'completed'): ?>
+                                                    <li class="nav-item">
+                                                        <a class="nav-link" data-toggle="tab" href="#costTab<?= $item['item_id'] ?? '' ?>">
+                                                            <i class="fas fa-dollar-sign mr-1"></i>Input Data Laporan
+                                                        </a>
+                                                    </li>
+                                                <?php endif; ?>
+                                            </ul>
 
-                                            <?php if (!empty($item['file_path'])):
-                                                $files = json_decode($item['file_path'], true);
-                                                if (is_array($files)): ?>
-                                                    <hr>
-                                                    <div class="files-section">
-                                                        <div class="files-label">File Drawing</div>
-                                                        <div>
-                                                            <?php foreach ($files as $file):
-                                                                $extension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
-                                                                $icon = 'fa-file-alt';
-                                                                if (in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
-                                                                    $icon = 'fa-file-image';
-                                                                } elseif ($extension === 'pdf') {
-                                                                    $icon = 'fa-file-pdf';
-                                                                }
-                                                            ?>
-                                                                <a href="<?= htmlspecialchars($file) ?>" target="_blank" class="file-link">
-                                                                    <i class="fas <?= $icon ?>"></i> <?= basename($file) ?>
-                                                                </a>
-                                                            <?php endforeach; ?>
+                                            <!-- Tab Content -->
+                                            <div class="tab-content">
+                                                <!-- Detail WO Tab -->
+                                                <div class="tab-pane fade show active" id="detailTab<?= $item['item_id'] ?? '' ?>">
+                                                    <div class="item-details-grid">
+                                                        <?php if ($currentRole === 'admin'): ?>
+                                                            <div class="detail-item">
+                                                                <div class="detail-label"><i class="fas fa-user mr-1"></i>Nama Customer</div>
+                                                                <div class="detail-value"><?= htmlspecialchars($item['customer_name'] ?? '-') ?></div>
+                                                            </div>
+                                                        <?php endif; ?>
+                                                        <div class="detail-item">
+                                                            <div class="detail-label"><i class="fas fa-box mr-1"></i>Nama Item</div>
+                                                            <div class="detail-value"><?= htmlspecialchars($item['item_name'] ?? '-') ?></div>
+                                                        </div>
+                                                        <div class="detail-item">
+                                                            <div class="detail-label"><i class="fas fa-tags mr-1"></i>Kategori</div>
+                                                            <div class="detail-value"><?= htmlspecialchars($item['category'] ?? '-') ?></div>
+                                                        </div>
+                                                        <div class="detail-item">
+                                                            <div class="detail-label"><i class="fas fa-layer-group mr-1"></i>Jenis Material</div>
+                                                            <div class="detail-value"><?= htmlspecialchars($item['material_type'] ?? '-') ?></div>
+                                                        </div>
+                                                        <div class="detail-item">
+                                                            <div class="detail-label"><i class="fas fa-ruler mr-1"></i>Dimensi Material</div>
+                                                            <div class="detail-value"><?= htmlspecialchars($item['material_dimension'] ?? '-') ?></div>
+                                                        </div>
+                                                        <div class="detail-item">
+                                                            <div class="detail-label"><i class="fas fa-sort-numeric-up mr-1"></i>Quantity</div>
+                                                            <div class="detail-value"><?= htmlspecialchars($item['quantity'] ?? '-') ?> Unit</div>
+                                                        </div>
+                                                        <div class="detail-item">
+                                                            <div class="detail-label"><i class="fas fa-calendar-alt mr-1"></i>Tanggal Dibutuhkan</div>
+                                                            <div class="detail-value">
+                                                                <?= !empty($item['needed_date']) ? date('d M Y', strtotime($item['needed_date'])) : '-' ?>
+                                                            </div>
+                                                        </div>
+                                                        <div class="detail-item">
+                                                            <div class="detail-label"><i class="fas fa-tasks mr-1"></i>Status Produksi</div>
+                                                            <div class="detail-value">
+                                                                <span class="badge badge-info">
+                                                                    <?= !empty($item['production_status'])
+                                                                        ? htmlspecialchars(ucwords(str_replace('_', ' ', $item['production_status'])))
+                                                                        : '-' ?>
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <div class="detail-item">
+                                                            <div class="detail-label"><i class="fas fa-user-shield mr-1"></i>SPV Approval</div>
+                                                            <div class="detail-value"><?= htmlspecialchars($item['spv_name'] ?? '-') ?></div>
                                                         </div>
                                                     </div>
-                                            <?php endif;
-                                            endif; ?>
-                                        </div>
 
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+                                                    <?php if (!empty($item['file_path'])):
+                                                        $files = json_decode($item['file_path'], true);
+                                                        if (is_array($files)): ?>
+                                                            <div class="files-section">
+                                                                <div class="files-label"><i class="fas fa-file-image mr-2"></i>File Drawing</div>
+                                                                <div>
+                                                                    <?php foreach ($files as $file):
+                                                                        $extension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+                                                                        $icon = 'fa-file-alt';
+                                                                        if (in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) $icon = 'fa-file-image';
+                                                                        elseif ($extension === 'pdf') $icon = 'fa-file-pdf';
+                                                                    ?>
+                                                                        <a href="<?= htmlspecialchars($file) ?>" target="_blank" class="file-link">
+                                                                            <i class="fas <?= $icon ?>"></i> <?= htmlspecialchars(basename($file)) ?>
+                                                                        </a>
+                                                                    <?php endforeach; ?>
+                                                                </div>
+                                                            </div>
+                                                    <?php endif;
+                                                    endif; ?>
+                                                </div>
+
+                                                <!-- Cost Input Tab (Admin Only) -->
+                                                <?php if ($currentRole === 'admin' && ($item['production_status'] ?? '') === 'completed'): ?>
+                                                    <div class="tab-pane fade" id="costTab<?= htmlspecialchars($item['item_id'] ?? '') ?>">
+                                                        <div class="cost-form-wrapper">
+                                                            <h5 class="cost-form-title">
+                                                                <i class="fas fa-calculator mr-2"></i>Input Biaya Work Order
+                                                            </h5>
+                                                            <form method="POST" action="/system_ordering/public/admin/workorder/savecost">
+
+                                                                <!-- Hidden Fields -->
+                                                                <input type="hidden" name="order_id" value="<?= htmlspecialchars($item['order_id'] ?? '') ?>">
+                                                                <input type="hidden" name="item_name" value="<?= htmlspecialchars($item['item_name'] ?? '') ?>">
+                                                                <input type="hidden" name="department_id" value="<?= htmlspecialchars($item['department_id'] ?? ($_SESSION['user_data']['department_id'] ?? '')) ?>">
+                                                                <input type="hidden" name="customer_id" value="<?= htmlspecialchars($item['customer_id'] ?? ($_SESSION['user_data']['customer_id'] ?? '')) ?>">
+                                                                <input type="hidden" name="status" value="<?= htmlspecialchars($item['production_status'] ?? '') ?>">
+
+                                                                <!-- Material Cost -->
+                                                                <div class="form-group">
+                                                                    <label><i class="fas fa-boxes mr-1"></i>Material Cost (Rp)</label>
+                                                                    <input type="number" step="0.01" name="material_cost" class="form-control" min="0"
+                                                                        placeholder="Masukkan biaya material" required>
+                                                                </div>
+
+                                                                <!-- Machine Section -->
+                                                                <div class="form-row-grid">
+                                                                    <div class="form-group">
+                                                                        <label><i class="fas fa-cogs mr-1"></i>Machine Process</label>
+                                                                        <select name="machine_process" class="form-control" required>
+                                                                            <option value="">Pilih Proses Mesin</option>
+                                                                            <?php if (!empty($machineRates)): ?>
+                                                                                <?php foreach ($machineRates as $rate): ?>
+                                                                                    <option value="<?= htmlspecialchars($rate['process_name']) ?>">
+                                                                                        <?= htmlspecialchars($rate['process_name']) ?>
+                                                                                        (Rp <?= number_format($rate['price_per_minute'], 0, ',', '.') ?>/menit)
+                                                                                    </option>
+                                                                                <?php endforeach; ?>
+                                                                            <?php else: ?>
+                                                                                <option value="">Data rate mesin tidak tersedia</option>
+                                                                            <?php endif; ?>
+                                                                        </select>
+                                                                    </div>
+                                                                    <div class="form-group">
+                                                                        <label><i class="fas fa-clock mr-1"></i>Machine Time (minutes)</label>
+                                                                        <input type="number" name="machine_time" class="form-control" min="0"
+                                                                            placeholder="Durasi dalam menit" required>
+                                                                    </div>
+                                                                </div>
+
+                                                                <!-- Manpower Section -->
+                                                                <div class="form-row-grid">
+                                                                    <div class="form-group">
+                                                                        <label><i class="fas fa-users mr-1"></i>Manpower Process</label>
+                                                                        <select name="manpower_process" class="form-control" required>
+                                                                            <option value="">Pilih Proses Tenaga Kerja</option>
+                                                                            <?php if (!empty($manpowerRates)): ?>
+                                                                                <?php foreach ($manpowerRates as $rate): ?>
+                                                                                    <option value="<?= htmlspecialchars($rate['process_name']) ?>">
+                                                                                        <?= htmlspecialchars($rate['process_name']) ?>
+                                                                                        (Rp <?= number_format($rate['price_per_minute'], 0, ',', '.') ?>/menit)
+                                                                                    </option>
+                                                                                <?php endforeach; ?>
+                                                                            <?php else: ?>
+                                                                                <option value="">Data rate tenaga kerja tidak tersedia</option>
+                                                                            <?php endif; ?>
+                                                                        </select>
+                                                                    </div>
+                                                                    <div class="form-group">
+                                                                        <label><i class="fas fa-clock mr-1"></i>Manpower Time (minutes)</label>
+                                                                        <input type="number" name="manpower_time" class="form-control" min="0"
+                                                                            placeholder="Durasi dalam menit" required>
+                                                                    </div>
+                                                                </div>
+
+                                                                <!-- Vendor Price -->
+                                                                <div class="form-group">
+                                                                    <label><i class="fas fa-handshake mr-1"></i>Vendor Price per pcs (Rp)</label>
+                                                                    <!-- ✅ nama field disamakan dengan controller/model -->
+                                                                    <input type="number" step="0.01" name="vendor_price_per_pcs" class="form-control" min="0"
+                                                                        placeholder="Masukkan harga vendor per unit" required>
+                                                                </div>
+
+                                                                <div class="text-right mt-4">
+                                                                    <button type="submit" class="btn btn-success">
+                                                                        <i class="fas fa-save mr-2"></i> Simpan Data Biaya
+                                                                    </button>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                <?php endif; ?>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

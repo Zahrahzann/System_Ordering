@@ -209,7 +209,7 @@ if ($currentRole === 'customer') {
                     <h6 class="collapse-header">Menu</h6>
                     <a class="collapse-item" href="<?= $basePath ?>/admin/tracking">Pesanan WO</a>
                     <a class="collapse-item" href="<?= $basePath ?>/admin/history">History</a>
-                    <a class="collapse-item" href="#">Laporan WO</a>
+                    <a class="collapse-item" href="<?= $basePath ?>/admin/report/workorder">Laporan WO</a>
                 </div>
             </div>
         </li>

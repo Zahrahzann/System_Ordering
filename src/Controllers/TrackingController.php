@@ -81,21 +81,51 @@ class TrackingController
 
         $validStatuses = ['pending', 'on_progress', 'finish', 'completed'];
 
-        // Ambil item sebelum update
+        // Ambil item sebelum update untuk mengetahui oldStatus
         $item = TrackingModel::findItemById($itemId);
         $oldStatus = $item['production_status'] ?? null;
 
-        if (in_array($newStatus, $validStatuses)) {
+        // Validasi status
+        if (!in_array($newStatus, $validStatuses)) {
+            header('Location: /system_ordering/public/admin/tracking');
+            exit;
+        }
+
+        // Jika status berubah ke on_progress, set updated_at bersamaan dengan update lainnya
+        if ($oldStatus === 'pending' && $newStatus === 'on_progress') {
+            $pdo = \ManufactureEngineering\SystemOrdering\Config\Database::connect();
+            $stmt = $pdo->prepare("UPDATE items 
+            SET pic_mfg = ?, 
+                production_status = ?, 
+                estimasi_pengerjaan = ?, 
+                updated_at = NOW() 
+            WHERE id = ?");
+            $stmt->execute([$picMfg, $newStatus, $estimasi, $itemId]);
+        } else {
+            // Status lain: update biasa tanpa sentuh updated_at
             TrackingModel::updateItemDetails($itemId, $newStatus, $picMfg, $estimasi);
         }
 
-        // Hitung durasi aktual jika status berubah dari on_progress → finish
-        if ($oldStatus === 'on_progress' && $newStatus === 'finish') {
-            $startTime = strtotime($item['updated_at']); // pastikan ada kolom updated_at di items
-            $finishTime = time();
-            $durationMinutes = round(($finishTime - $startTime) / 60);
+        // Refresh item setelah semua update
+        $item = TrackingModel::findItemById($itemId);
 
-            TrackingModel::updateItemDuration($itemId, $durationMinutes);
+        // Jika status berubah ke finish, hitung durasi dari updated_at ke NOW()
+        if ($oldStatus === 'on_progress' && $newStatus === 'finish') {
+            $startTime  = !empty($item['updated_at']) ? strtotime($item['updated_at']) : null;
+            $finishTime = time();
+
+            if ($startTime && $finishTime > $startTime) {
+                $durationMinutes = round(($finishTime - $startTime) / 60);
+                TrackingModel::updateItemDuration($itemId, $durationMinutes);
+            } else {
+                // Fallback kalau updated_at kosong atau invalid
+                TrackingModel::updateItemDuration($itemId, 0);
+            }
+        }
+
+        // Fallback: kalau langsung pending → finish, isi 0 agar tidak NULL
+        if ($oldStatus === 'pending' && $newStatus === 'finish') {
+            TrackingModel::updateItemDuration($itemId, 0);
         }
 
         header('Location: /system_ordering/public/admin/tracking');

@@ -184,7 +184,20 @@ class MaterialController
     {
         SessionMiddleware::requireCustomerLogin();
         header('Content-Type: application/json');
-        echo json_encode(MaterialDimensionModel::getByType((int)$typeId));
+
+        if (!$typeId || !ctype_digit((string)$typeId)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'type_id wajib dan harus angka']);
+            exit;
+        }
+
+        try {
+            $dimensions = MaterialDimensionModel::getByType((int)$typeId);
+            echo json_encode($dimensions);
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            echo json_encode(['error' => 'Gagal ambil data', 'detail' => $e->getMessage()]);
+        }
         exit;
     }
 }

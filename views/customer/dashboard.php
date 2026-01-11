@@ -51,7 +51,7 @@ if (isset($_SESSION['flash_notification'])) {
                     <div class="welcome-card">
                         <div class="welcome-card-content">
                             <div class="welcome-text">
-                                <h2>Selamat Datang, <?= htmlspecialchars($userData['name']) ?>! 👋</h2>
+                                <h2>Selamat Datang, Customer <?= htmlspecialchars($userData['name']) ?>! 👋</h2>
                                 <div class="welcome-info">
                                     <div class="info-item">
                                         <i class="fas fa-industry"></i>

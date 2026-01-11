@@ -168,12 +168,19 @@ if (!isset($order) || !isset($items) || !isset($approval)) {
                                             <div class="detail-item">
                                                 <div class="detail-label">Aktual Waktu Pengerjaan</div>
                                                 <div class="detail-value">
-                                                    <?php if (!empty($item['actual_duration_minutes'])): ?>
-                                                        <i class="fas fa-stopwatch mr-1" style="color:#4caf50;"></i>
-                                                        <?= htmlspecialchars($item['actual_duration_minutes']) ?> menit
-                                                    <?php else: ?>
-                                                        <span style="color:#555;">Belum selesai</span>
-                                                    <?php endif; ?>
+                                                    <?php
+                                                    $minutes = $item['actual_duration_minutes'] ?? null;
+
+                                                    if ($minutes === null || $minutes <= 0) {
+                                                        echo '<span style="color:#ff9800;"><i class="fas fa-stopwatch mr-1"></i> Belum dihitung</span>';
+                                                    } elseif ($minutes < 60) {
+                                                        echo '<i class="fas fa-stopwatch mr-1" style="color:#4caf50;"></i>' . $minutes . ' menit';
+                                                    } elseif ($minutes < 1440) {
+                                                        echo '<i class="fas fa-stopwatch mr-1" style="color:#4caf50;"></i>' . round($minutes / 60, 1) . ' jam';
+                                                    } else {
+                                                        echo '<i class="fas fa-stopwatch mr-1" style="color:#4caf50;"></i>' . round($minutes / 1440, 1) . ' hari';
+                                                    }
+                                                    ?>
                                                 </div>
                                             </div>
                                             <div class="detail-item">

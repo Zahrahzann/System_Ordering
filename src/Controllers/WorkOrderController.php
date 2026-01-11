@@ -7,6 +7,8 @@ use Respect\Validation\Validator as v;
 use App\Models\CartModel;
 use App\Middleware\SessionMiddleware;
 use App\Models\NotificationModel;
+use App\Models\MaterialTypeModel;
+use App\Models\MaterialDimensionModel;
 use PDO;
 
 class WorkOrderController
@@ -175,6 +177,9 @@ class WorkOrderController
             exit;
         }
 
+        $materialTypes = MaterialTypeModel::getAll();
+        $materialDimensions = MaterialDimensionModel::getAllGrouped();
+
         require_once __DIR__ . '/../../views/customer/work_order/form.php';
     }
 
@@ -293,12 +298,11 @@ class WorkOrderController
     public static function showForm()
     {
         SessionMiddleware::requireCustomerLogin();
-
-        // Kalau akses langsung dari sidebar (tanpa ?reorder=1), reset session
         if (empty($_GET['reorder'])) {
             unset($_SESSION['reorder_item']);
         }
-
+        $materialTypes = MaterialTypeModel::getAll();
+        $materialDimensions = MaterialDimensionModel::getAllGrouped();
         require_once __DIR__ . '/../../views/customer/work_order/form.php';
     }
 
