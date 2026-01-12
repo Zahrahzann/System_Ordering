@@ -48,14 +48,16 @@ class ProductItemModel
         $filePath  = self::uploadFile($files['file_path'] ?? null);
 
         $st = self::db()->prepare("
-        INSERT INTO product_items (product_type_id, item_code, name, price, description, image_path, file_path, stock, section_id)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    ");
+            INSERT INTO product_items 
+            (product_type_id, item_code, name, price, maker_price, description, image_path, file_path, stock, section_id, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+        ");
         $st->execute([
             $typeId,
             $itemCode,
             $data['name'],
             is_numeric($data['price']) ? $data['price'] : null,
+            is_numeric($data['maker_price']) ? $data['maker_price'] : null,
             $data['description'],
             $imagePath,
             $filePath,
@@ -63,7 +65,6 @@ class ProductItemModel
             $sectionId
         ]);
     }
-
 
     // Update item
     public static function update($id, $data, $files): void
@@ -85,15 +86,16 @@ class ProductItemModel
         $sectionId   = $productType['section_id'];
 
         $st = self::db()->prepare("
-        UPDATE product_items 
-        SET product_type_id=?, item_code=?, name=?, price=?, description=?, image_path=?, file_path=?, stock=?, section_id=? 
-        WHERE id=?
-    ");
+            UPDATE product_items 
+            SET product_type_id=?, item_code=?, name=?, price=?, maker_price=?, description=?, image_path=?, file_path=?, stock=?, section_id=?, updated_at=NOW()
+            WHERE id=?
+        ");
         $st->execute([
             $oldItem['product_type_id'],
             $oldItem['item_code'],
             $data['name'],
             is_numeric($data['price']) ? $data['price'] : null,
+            is_numeric($data['maker_price']) ? $data['maker_price'] : null,
             $data['description'],
             $imagePath,
             $filePath,
@@ -116,7 +118,6 @@ class ProductItemModel
 
         $targetDir = '/uploads/consum-katalog-item/';
         $target    = $targetDir . basename($file['name']);
-
 
         $destination = __DIR__ . '/../../public' . $target;
         if (!is_dir(__DIR__ . '/../../public' . $targetDir)) {

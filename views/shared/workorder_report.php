@@ -100,10 +100,21 @@ $month       = $month ?? null;
 
                     <!-- Stats Summary hanya untuk Admin -->
                     <?php if ($currentRole === 'admin' && !empty($reportData) && is_array($reportData)):
-                        $totalMachine   = array_sum(array_column($reportData, 'cost_machine'));
-                        $totalManpower  = array_sum(array_column($reportData, 'cost_manpower'));
-                        $totalProcess   = array_sum(array_column($reportData, 'total_process_cost'));
-                        $totalOrders    = count($reportData);
+                        // Jika reportData berasal dari getReportDirect()
+                        $hasDirectFields = isset($reportData[0]['cost_machine']) && isset($reportData[0]['total_process_cost']);
+
+                        if ($hasDirectFields) {
+                            $totalMachine   = array_sum(array_column($reportData, 'cost_machine'));
+                            $totalManpower  = array_sum(array_column($reportData, 'cost_manpower'));
+                            $totalProcess   = array_sum(array_column($reportData, 'total_process_cost'));
+                        } else {
+                            // Jika reportData berasal dari getSummaryReport()
+                            $totalMachine   = array_sum(array_column($reportData, 'cost_machine_tool_electric'));
+                            $totalManpower  = array_sum(array_column($reportData, 'cost_manpower'));
+                            $totalProcess   = array_sum(array_column($reportData, 'cost_inhouse_total'));
+                        }
+
+                        $totalOrders = count($reportData);
                     ?>
                         <div class="row stats-row">
                             <div class="col-xl-3 col-md-6 mb-4">
@@ -129,7 +140,7 @@ $month       = $month ?? null;
                             </div>
                             <div class="col-xl-3 col-md-6 mb-4">
                                 <div class="stat-card success">
-                                    <div class="stat-label">Total Process Cost</div>
+                                    <div class="stat-label">Total Cost Inhouse</div>
                                     <div class="stat-value">Rp <?= number_format($totalProcess, 0, ',', '.') ?></div>
                                     <i class="fas fa-chart-line stat-icon"></i>
                                 </div>

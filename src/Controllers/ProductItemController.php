@@ -28,7 +28,12 @@ class ProductItemController
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            ProductItemModel::create($typeId, $_POST, $_FILES);
+            // Pastikan maker_price ikut dikirim ke model
+            $data = $_POST;
+            $data['maker_price'] = isset($_POST['maker_price']) ? (float)$_POST['maker_price'] : null;
+
+            ProductItemModel::create($typeId, $data, $_FILES);
+
             header("Location: /system_ordering/public/admin/consumable/product-items?type={$typeId}");
             exit;
         } else {
@@ -48,8 +53,11 @@ class ProductItemController
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            // Update produk
-            ProductItemModel::update($id, $_POST, $_FILES);
+            // Update produk, termasuk maker_price
+            $data = $_POST;
+            $data['maker_price'] = isset($_POST['maker_price']) ? (float)$_POST['maker_price'] : null;
+
+            ProductItemModel::update($id, $data, $_FILES);
 
             // Setelah stok diupdate → cek order pending
             ConsumOrderModel::checkAndUpdatePendingOrders($id);

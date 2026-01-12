@@ -16,56 +16,84 @@ class WorkOrderCostController
     {
         SessionMiddleware::requireAdminLogin();
 
-        // ini_set('display_errors', 1);
-        // ini_set('display_startup_errors', 1);
-        // error_reporting(E_ALL);
-
         try {
-            // Debug awal
             error_log("saveCost() dipanggil");
             error_log("POST DATA: " . print_r($_POST, true));
 
             // Ambil data POST
-            $orderId         = isset($_POST['order_id']) ? (int)$_POST['order_id'] : null;
-            $itemName        = $_POST['item_name'] ?? '';
+            $orderId      = isset($_POST['order_id']) ? (int)$_POST['order_id'] : null;
+            $itemName     = $_POST['item_name'] ?? '';
             $departmentId = $_POST['department_id'] ?? null;
-            $customerId      = isset($_POST['customer_id']) ? (int)$_POST['customer_id'] : null;
-            $status          = $_POST['status'] ?? 'on_progress';
-            $materialCost    = (float)($_POST['material_cost'] ?? 0);
-            $vendorPrice     = (float)($_POST['vendor_price_per_pcs'] ?? 0);
-            $machineProcess  = trim($_POST['machine_process'] ?? '');
-            $machineTime     = (int)($_POST['machine_time'] ?? 0);
-            $manpowerProcess = trim($_POST['manpower_process'] ?? '');
-            $manpowerTime    = (int)($_POST['manpower_time'] ?? 0);
+            $customerId   = isset($_POST['customer_id']) ? (int)$_POST['customer_id'] : null;
+            $status       = $_POST['status'] ?? 'on_progress';
+            $materialCost = (float)($_POST['material_cost'] ?? 0);
+            $vendorPrice  = (float)($_POST['vendor_price_per_pcs'] ?? 0);
 
-            // Validasi minimal
-            if (!$orderId || !$machineProcess || !$manpowerProcess) {
-                throw new \RuntimeException("Data tidak lengkap. Cek kembali input form.");
+            if (!$orderId) {
+                throw new \RuntimeException("Order ID tidak boleh kosong.");
             }
 
-            // Ambil rate dari tabel machine_rates & manpower_rates
-            $machineRate  = MachineRateModel::getRateByProcess($machineProcess);
-            $manpowerRate = ManpowerRateModel::getRateByProcess($manpowerProcess);
+            // --- Hitung total machine cost (multi process) ---
+            $machineTotal = 0.0;
 
-            error_log("Rate mesin: $machineRate, Rate tenaga kerja: $manpowerRate");
+            if (!empty($_POST['machine_process']) && is_array($_POST['machine_process'])) {
+                foreach ($_POST['machine_process'] as $idx => $proc) {
+                    $proc = trim((string)$proc);
+                    $time = (int)($_POST['machine_time'][$idx] ?? 0);
 
-            // Simpan detail proses ke workorder_processes
-            error_log("Memanggil saveFullProcess()");
-            WorkOrderCostModel::saveFullProcess(
-                $orderId,
-                $machineProcess,
-                $machineTime,
-                $machineRate,
-                $manpowerProcess,
-                $manpowerTime,
-                $manpowerRate,
-                $materialCost,
-                $vendorPrice
-            );
-            error_log("saveFullProcess selesai");
+                    if ($proc === '' || $time <= 0) {
+                        continue;
+                    }
 
-            // Simpan summary ke workorder_costs
-            error_log("Memanggil saveWorkOrderCost()");
+                    $rate = (float)MachineRateModel::getRateByProcess($proc);
+                    $cost = $rate * $time;
+                    $machineTotal += $cost;
+
+                    WorkOrderCostModel::saveFullProcess(
+                        $orderId,
+                        $proc,
+                        $time,
+                        $rate,
+                        '',       
+                        0,
+                        0.0,
+                        $materialCost,
+                        $vendorPrice
+                    );
+                }
+            }
+
+            // --- Hitung total manpower cost (multi process) ---
+            $manpowerTotal = 0.0;
+
+            if (!empty($_POST['manpower_process']) && is_array($_POST['manpower_process'])) {
+                foreach ($_POST['manpower_process'] as $idx => $proc) {
+                    $proc = trim((string)$proc);
+                    $time = (int)($_POST['manpower_time'][$idx] ?? 0);
+
+                    if ($proc === '' || $time <= 0) {
+                        continue;
+                    }
+
+                    $rate = (float)ManpowerRateModel::getRateByProcess($proc);
+                    $cost = $rate * $time;
+                    $manpowerTotal += $cost;
+
+                    WorkOrderCostModel::saveFullProcess(
+                        $orderId,
+                        '', // machine kosong
+                        0,
+                        0.0,
+                        $proc,
+                        $time,
+                        $rate,
+                        $materialCost,
+                        $vendorPrice
+                    );
+                }
+            }
+
+            // --- Simpan summary ke workorder_costs ---
             WorkOrderCostModel::saveWorkOrderCost(
                 $orderId,
                 $itemName,
@@ -74,30 +102,22 @@ class WorkOrderCostController
                 $status,
                 $materialCost,
                 $vendorPrice,
-                $machineRate,
-                $machineTime,
-                $manpowerRate,
-                $manpowerTime
+                $machineTotal,
+                $manpowerTotal
             );
-            error_log("saveWorkOrderCost selesai");
 
-            // Redirect ke laporan
-            $year = date('Y');
-            error_log("Redirect ke laporan tahun $year");
             self::redirect("/system_ordering/public/admin/history");
         } catch (\Throwable $e) {
-            error_log(" ERROR di saveCost(): " . $e->getMessage());
+            error_log("ERROR di saveCost(): " . $e->getMessage());
             echo "<!DOCTYPE html><html><body>";
-            echo "<h2 style='color:red;'> ERROR saat saveCost</h2>";
+            echo "<h2 style='color:red;'>ERROR saat saveCost</h2>";
             echo "<pre>" . htmlspecialchars($e->getMessage()) . "</pre>";
             echo "</body></html>";
             exit;
         }
     }
 
-    /**
-     * Laporan bulanan WO
-     */
+    // --- Report functions tetap sama ---
     public static function showMonthlyReport()
     {
         ini_set('display_errors', 1);
@@ -113,15 +133,10 @@ class WorkOrderCostController
         $year  = isset($_GET['year']) ? (int)$_GET['year'] : (int)date('Y');
         $month = isset($_GET['month']) && $_GET['month'] !== '' ? (int)$_GET['month'] : null;
 
-        // Ambil data di workorder_costs
         $reportData = WorkOrderCostModel::getSummaryReport($year, $month);
 
-
-        // Khusus SPV, filter berdasarkan departemen
         if ($role === 'spv' && $department) {
-            $reportData = array_filter($reportData, function ($row) use ($department) {
-                return isset($row['department_id']) && $row['department_id'] === $department;
-            });
+            $reportData = array_filter($reportData, fn($row) => isset($row['department_id']) && $row['department_id'] === $department);
         }
 
         $basePath    = '/system_ordering/public';

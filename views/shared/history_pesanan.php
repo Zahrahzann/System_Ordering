@@ -295,10 +295,10 @@ $currentRole = $_SESSION['user_data']['role'] ?? '';
                                                     <div class="tab-pane fade" id="costTab<?= htmlspecialchars($item['item_id'] ?? '') ?>">
                                                         <div class="cost-form-wrapper">
                                                             <h5 class="cost-form-title">
-                                                                <i class="fas fa-calculator mr-2"></i>Input Biaya Work Order
+                                                                <i class="fas fa-calculator mr-2"></i> Input Biaya Work Order
                                                             </h5>
-                                                            <form method="POST" action="/system_ordering/public/admin/workorder/savecost">
 
+                                                            <form method="POST" action="/system_ordering/public/admin/workorder/savecost">
                                                                 <!-- Hidden Fields -->
                                                                 <input type="hidden" name="order_id" value="<?= htmlspecialchars($item['order_id'] ?? '') ?>">
                                                                 <input type="hidden" name="item_name" value="<?= htmlspecialchars($item['item_name'] ?? '') ?>">
@@ -308,65 +308,90 @@ $currentRole = $_SESSION['user_data']['role'] ?? '';
 
                                                                 <!-- Material Cost -->
                                                                 <div class="form-group">
-                                                                    <label><i class="fas fa-boxes mr-1"></i>Material Cost (Rp)</label>
+                                                                    <label><i class="fas fa-boxes mr-1"></i> Material Cost (Rp)</label>
                                                                     <input type="number" step="0.01" name="material_cost" class="form-control" min="0"
                                                                         placeholder="Masukkan biaya material" required>
                                                                 </div>
 
-                                                                <!-- Machine Section -->
-                                                                <div class="form-row-grid">
-                                                                    <div class="form-group">
-                                                                        <label><i class="fas fa-cogs mr-1"></i>Machine Process</label>
-                                                                        <select name="machine_process" class="form-control" required>
-                                                                            <option value="">Pilih Proses Mesin</option>
-                                                                            <?php if (!empty($machineRates)): ?>
-                                                                                <?php foreach ($machineRates as $rate): ?>
-                                                                                    <option value="<?= htmlspecialchars($rate['process_name']) ?>">
-                                                                                        <?= htmlspecialchars($rate['process_name']) ?>
-                                                                                        (Rp <?= number_format($rate['price_per_minute'], 0, ',', '.') ?>/menit)
-                                                                                    </option>
-                                                                                <?php endforeach; ?>
-                                                                            <?php else: ?>
-                                                                                <option value="">Data rate mesin tidak tersedia</option>
-                                                                            <?php endif; ?>
-                                                                        </select>
+                                                                <!-- Machine Section (multi process) -->
+                                                                <div class="machine-section">
+                                                                    <h6><i class="fas fa-cogs mr-1"></i> Machine Process</h6>
+
+                                                                    <!-- Container untuk semua baris proses mesin -->
+                                                                    <div id="machineRows">
+                                                                        <!-- Baris pertama -->
+                                                                        <div class="form-row-grid">
+                                                                            <div class="form-group">
+                                                                                <label>Proses Mesin</label>
+                                                                                <select name="machine_process[]" class="form-control" required>
+                                                                                    <option value="">Pilih Proses Mesin</option>
+                                                                                    <?php if (!empty($machineRates)): ?>
+                                                                                        <?php foreach ($machineRates as $rate): ?>
+                                                                                            <option value="<?= htmlspecialchars($rate['process_name']) ?>">
+                                                                                                <?= htmlspecialchars($rate['process_name']) ?>
+                                                                                                (Rp <?= number_format($rate['price_per_minute'], 0, ',', '.') ?>/menit)
+                                                                                            </option>
+                                                                                        <?php endforeach; ?>
+                                                                                    <?php else: ?>
+                                                                                        <option value="">Data rate mesin tidak tersedia</option>
+                                                                                    <?php endif; ?>
+                                                                                </select>
+                                                                            </div>
+                                                                            <div class="form-group">
+                                                                                <label>Durasi (menit)</label>
+                                                                                <input type="number" name="machine_time[]" class="form-control" min="0"
+                                                                                    placeholder="Durasi dalam menit" required>
+                                                                            </div>
+                                                                        </div>
                                                                     </div>
-                                                                    <div class="form-group">
-                                                                        <label><i class="fas fa-clock mr-1"></i>Machine Time (minutes)</label>
-                                                                        <input type="number" name="machine_time" class="form-control" min="0"
-                                                                            placeholder="Durasi dalam menit" required>
-                                                                    </div>
+
+                                                                    <!-- Tombol tambah baris -->
+                                                                    <button type="button" class="btn btn-sm btn-secondary mt-2" onclick="addMachineRow()">
+                                                                        <i class="fas fa-plus mr-1"></i> Tambah Proses Mesin
+                                                                    </button>
                                                                 </div>
 
-                                                                <!-- Manpower Section -->
-                                                                <div class="form-row-grid">
-                                                                    <div class="form-group">
-                                                                        <label><i class="fas fa-users mr-1"></i>Manpower Process</label>
-                                                                        <select name="manpower_process" class="form-control" required>
-                                                                            <option value="">Pilih Proses Tenaga Kerja</option>
-                                                                            <?php if (!empty($manpowerRates)): ?>
-                                                                                <?php foreach ($manpowerRates as $rate): ?>
-                                                                                    <option value="<?= htmlspecialchars($rate['process_name']) ?>">
-                                                                                        <?= htmlspecialchars($rate['process_name']) ?>
-                                                                                        (Rp <?= number_format($rate['price_per_minute'], 0, ',', '.') ?>/menit)
-                                                                                    </option>
-                                                                                <?php endforeach; ?>
-                                                                            <?php else: ?>
-                                                                                <option value="">Data rate tenaga kerja tidak tersedia</option>
-                                                                            <?php endif; ?>
-                                                                        </select>
+                                                                <!-- Manpower Section (multi process) -->
+                                                                <div class="manpower-section mt-3">
+                                                                    <h6><i class="fas fa-users mr-1"></i> Manpower Process</h6>
+
+                                                                    <!-- Container untuk semua baris manpower -->
+                                                                    <div id="manpowerRows">
+                                                                        <!-- Baris pertama -->
+                                                                        <div class="form-row-grid">
+                                                                            <div class="form-group">
+                                                                                <label>Proses Tenaga Kerja</label>
+                                                                                <select name="manpower_process[]" class="form-control" required>
+                                                                                    <option value="">Pilih Proses Tenaga Kerja</option>
+                                                                                    <?php if (!empty($manpowerRates)): ?>
+                                                                                        <?php foreach ($manpowerRates as $rate): ?>
+                                                                                            <option value="<?= htmlspecialchars($rate['process_name']) ?>">
+                                                                                                <?= htmlspecialchars($rate['process_name']) ?>
+                                                                                                (Rp <?= number_format($rate['price_per_minute'], 0, ',', '.') ?>/menit)
+                                                                                            </option>
+                                                                                        <?php endforeach; ?>
+                                                                                    <?php else: ?>
+                                                                                        <option value="">Data rate tenaga kerja tidak tersedia</option>
+                                                                                    <?php endif; ?>
+                                                                                </select>
+                                                                            </div>
+                                                                            <div class="form-group">
+                                                                                <label>Durasi (menit)</label>
+                                                                                <input type="number" name="manpower_time[]" class="form-control" min="0"
+                                                                                    placeholder="Durasi dalam menit" required>
+                                                                            </div>
+                                                                        </div>
                                                                     </div>
-                                                                    <div class="form-group">
-                                                                        <label><i class="fas fa-clock mr-1"></i>Manpower Time (minutes)</label>
-                                                                        <input type="number" name="manpower_time" class="form-control" min="0"
-                                                                            placeholder="Durasi dalam menit" required>
-                                                                    </div>
+
+                                                                    <!-- Tombol tambah baris -->
+                                                                    <button type="button" class="btn btn-sm btn-secondary mt-2" onclick="addManpowerRow()">
+                                                                        <i class="fas fa-plus mr-1"></i> Tambah Proses Tenaga Kerja
+                                                                    </button>
                                                                 </div>
 
                                                                 <!-- Vendor Price -->
-                                                                <div class="form-group">
-                                                                    <label><i class="fas fa-handshake mr-1"></i>Vendor Price per pcs (Rp)</label>
-                                                                    <!-- ✅ nama field disamakan dengan controller/model -->
+                                                                <div class="form-group mt-3">
+                                                                    <label><i class="fas fa-handshake mr-1"></i> Vendor Price per pcs (Rp)</label>
                                                                     <input type="number" step="0.01" name="vendor_price_per_pcs" class="form-control" min="0"
                                                                         placeholder="Masukkan harga vendor per unit" required>
                                                                 </div>
@@ -403,6 +428,79 @@ $currentRole = $_SESSION['user_data']['role'] ?? '';
     <script src="<?= $basePath ?>/assets/vendor/jquery/jquery.min.js"></script>
     <script src="<?= $basePath ?>/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="<?= $basePath ?>/assets/js/sb-admin-2.min.js"></script>
+
+    <script>
+        function addMachineRow() {
+            const container = document.getElementById('machineRows');
+            const firstRow = container.querySelector('.form-row-grid');
+            if (!firstRow) {
+                console.error("Baris pertama machine tidak ditemukan");
+                return;
+            }
+
+            // Clone baris pertama
+            const newRow = firstRow.cloneNode(true);
+
+            // Reset value select & input
+            const select = newRow.querySelector('select');
+            const input = newRow.querySelector('input');
+            if (select) select.selectedIndex = 0;
+            if (input) input.value = '';
+
+            // Tambahkan tombol hapus jika belum ada
+            let removeBtn = newRow.querySelector('.remove-row');
+            if (!removeBtn) {
+                removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.className = 'btn btn-sm btn-danger remove-row ml-2';
+                removeBtn.textContent = 'Hapus';
+                removeBtn.addEventListener('click', () => newRow.remove());
+                newRow.appendChild(removeBtn);
+            }
+
+            container.appendChild(newRow);
+        }
+
+        function addManpowerRow() {
+            const container = document.getElementById('manpowerRows');
+            const firstRow = container.querySelector('.form-row-grid');
+            if (!firstRow) {
+                console.error("Baris pertama manpower tidak ditemukan");
+                return;
+            }
+
+            // Clone baris pertama
+            const newRow = firstRow.cloneNode(true);
+
+            // Reset value select & input
+            const select = newRow.querySelector('select');
+            const input = newRow.querySelector('input');
+            if (select) select.selectedIndex = 0;
+            if (input) input.value = '';
+
+            // Tambahkan tombol hapus jika belum ada
+            let removeBtn = newRow.querySelector('.remove-row');
+            if (!removeBtn) {
+                removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.className = 'btn btn-sm btn-danger remove-row ml-2';
+                removeBtn.textContent = 'Hapus';
+                removeBtn.addEventListener('click', () => newRow.remove());
+                newRow.appendChild(removeBtn);
+            }
+
+            container.appendChild(newRow);
+        }
+
+        // Pasang listener hapus untuk baris pertama juga
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.remove-row').forEach(btn => {
+                btn.addEventListener('click', e => {
+                    e.target.closest('.form-row-grid').remove();
+                });
+            });
+        });
+    </script>
 
 </body>
 

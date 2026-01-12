@@ -165,6 +165,11 @@ $productTypeId   = $productType['id'] ?? null;
                                                     <?= $item['price'] === null ? 'TBA' : 'Rp ' . number_format($item['price'], 0, ',', '.') ?>
                                                 </p>
 
+                                                <!-- Harga Maker (Vendor) -->
+                                                <p class="product-item-price text-muted" style="font-size:0.9em;">
+                                                    Harga Maker: <?= $item['maker_price'] === null ? 'TBA' : 'Rp ' . number_format($item['maker_price'], 0, ',', '.') ?>
+                                                </p>
+
                                                 <!-- Tombol Aksi -->
                                                 <?php if ($currentRole === 'customer'): ?>
                                                     <div class="quantity-control">
@@ -198,6 +203,7 @@ $productTypeId   = $productType['id'] ?? null;
                                                             data-id="<?= $item['id'] ?>"
                                                             data-name="<?= htmlspecialchars($item['name']) ?>"
                                                             data-price="<?= $item['price'] ?>"
+                                                            data-maker-price="<?= $item['maker_price'] ?>"
                                                             data-description="<?= htmlspecialchars($item['description'] ?? '') ?>"
                                                             data-stock="<?= $item['stock'] ?>">
                                                             <i class="fas fa-edit"></i> Edit
@@ -240,6 +246,11 @@ $productTypeId   = $productType['id'] ?? null;
                                 <div class="form-group">
                                     <label>Harga</label>
                                     <input type="number" name="price" id="itemPrice" class="form-control">
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Harga Maker (Vendor)</label>
+                                    <input type="number" name="maker_price" id="itemMakerPrice" class="form-control">
                                 </div>
 
                                 <div class="form-group">
@@ -335,6 +346,7 @@ $productTypeId   = $productType['id'] ?? null;
                     var id = button.data('id');
                     var name = button.data('name');
                     var price = button.data('price');
+                    var makerPrice = button.data('maker-price');
                     var desc = button.data('description');
                     var stock = button.data('stock');
 
@@ -345,6 +357,7 @@ $productTypeId   = $productType['id'] ?? null;
                         modal.find('#itemId').val(id);
                         modal.find('#itemName').val(name);
                         modal.find('#itemPrice').val(price);
+                        modal.find('#itemMakerPrice').val(makerPrice);
                         modal.find('#itemDescription').val(desc);
                         modal.find('#itemStock').val(stock);
                     } else {
@@ -353,6 +366,7 @@ $productTypeId   = $productType['id'] ?? null;
                         modal.find('#itemId').val('');
                         modal.find('#itemName').val('');
                         modal.find('#itemPrice').val('');
+                        modal.find('#itemMakerPrice').val(makerPrice);
                         modal.find('#itemDescription').val('');
                         modal.find('#itemStock').val('');
                     }

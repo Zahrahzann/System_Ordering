@@ -31,8 +31,8 @@ class WorkOrderCostModel
             INSERT INTO workorder_processes
             (order_id, machine_process, machine_time, machine_cost,
              manpower_process, manpower_time, manpower_cost,
-             material_cost, vendor_price_per_pcs)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+             material_cost, vendor_price_per_pcs, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
         ");
         $stmt->execute([
             $orderId,
@@ -58,10 +58,8 @@ class WorkOrderCostModel
         string $status,
         float $materialCost,
         float $vendorPricePerPcs,
-        float $machineRate,
-        int $machineTime,
-        float $manpowerRate,
-        int $manpowerTime
+        float $machineTotal,
+        float $manpowerTotal
     ): void {
         $pdo = Database::connect();
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -75,30 +73,15 @@ class WorkOrderCostModel
         }
 
         // Hitung biaya summary
-        $machineTotal   = $machineRate  * $machineTime;
-        $manpowerTotal  = $manpowerRate * $manpowerTime;
+        $baseCost    = $materialCost + $machineTotal + $manpowerTotal;
+        $overhead    = 0.10 * $baseCost;
+        $costPerPcs  = $baseCost + $overhead;
+        $costInhouse = $costPerPcs * $qty;
+        $vendorTotal = $vendorPricePerPcs * $qty;
+        $benefit     = $vendorTotal - $costInhouse;
+        $reportYear  = (int)date('Y');
 
-        // Base cost tanpa overhead
-        $baseCost       = $materialCost + $machineTotal + $manpowerTotal;
-
-        // Overhead 10% dari base cost
-        $overhead       = 0.10 * $baseCost;
-
-        // Cost per pcs = (base cost + overhead)
-        $costPerPcs     = ($baseCost + $overhead);
-
-        // Total cost inhouse = cost per pcs * qty
-        $costInhouse    = $costPerPcs * $qty;
-
-        // Total vendor price
-        $vendorTotal    = $vendorPricePerPcs * $qty;
-
-        // Benefit = vendor total - total inhouse
-        $benefit        = $vendorTotal - $costInhouse;
-
-        $reportYear     = (int)date('Y');
-
-        // Insert/Update summary
+        // Cek apakah sudah ada summary untuk order ini
         $stmt = $pdo->prepare("SELECT COUNT(*) FROM workorder_costs WHERE order_id = ?");
         $stmt->execute([$orderId]);
         $exists = ((int)$stmt->fetchColumn()) > 0;
@@ -201,6 +184,9 @@ class WorkOrderCostModel
         return $stmt->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
 
+    /**
+     * Report summary dari tabel workorder_costs
+     */
     public static function getSummaryReport(int $year, ?int $month = null): array
     {
         $pdo = Database::connect();
