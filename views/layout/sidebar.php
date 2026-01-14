@@ -236,7 +236,7 @@ if ($currentRole === 'customer') {
                     <a class="collapse-item" href="<?= $basePath ?>/admin/consumable/sections">Kelola Katalog</a>
                     <a class="collapse-item" href="<?= $basePath ?>/admin/shared/consumable/orders">Pesanan Consumable</a>
                     <a class="collapse-item" href="<?= $basePath ?>/admin/consumable/history">History</a>
-                    <a class="collapse-item" href="#">Laporan Consumable</a>
+                    <a class="collapse-item" href="<?= $basePath ?>/admin/consumable/report">Laporan Consumable</a>
                 </div>
             </div>
         </li>

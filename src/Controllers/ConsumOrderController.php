@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Models\ConsumOrderModel;
 use App\Models\ConsumCartModel;
+use App\Models\ConsumableReportModel;
 use App\Middleware\SessionMiddleware;
 use ManufactureEngineering\SystemOrdering\Config\Database;
 use PDO;
@@ -73,9 +74,23 @@ class ConsumOrderController
     /** Admin: tandai pesanan selesai */
     public static function completeOrder($orderId)
     {
-        SessionMiddleware::requireAdminLogin();
-        ConsumOrderModel::updateStatus($orderId, 'Selesai');
+        SessionMiddleware::requireAdminLogin(); // Update status order ke selesai 
+        ConsumOrderModel::updateStatus($orderId, 'Selesai'); // Ambil detail order 
+        $order = ConsumOrderModel::getOrderById($orderId);
 
+        // echo "<pre>";
+        // echo "DEBUG: Isi \$order setelah getOrderById:\n";
+        // print_r($order);
+        // echo "</pre>";
+        // exit;
+
+        if ($order && !empty($order['items'])) {
+            $month = (int)date('n');
+            $year = (int)date('Y');
+            foreach ($order['items'] as $item) {
+                ConsumableReportModel::saveQty($item['section_id'], $item['product_type_id'], $item['product_item_id'], $month, $year, (int)$item['quantity']);
+            }
+        }
         $role = $_SESSION['user_data']['role'] ?? 'customer';
         header("Location: /system_ordering/public/{$role}/consumable/history?status=completed");
         exit;

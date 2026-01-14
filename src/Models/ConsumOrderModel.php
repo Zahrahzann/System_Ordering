@@ -176,12 +176,42 @@ class ConsumOrderModel
         return false;
     }
 
-    public static function getOrderById($orderId)
+    public static function getOrderById($orderId): array
     {
         $pdo = Database::connect();
-        $stmt = $pdo->prepare("SELECT * FROM consum_orders WHERE id = ?");
+
+        $stmt = $pdo->prepare("
+        SELECT o.id, o.order_code, o.customer_id, o.status, o.created_at, o.updated_at,
+               o.product_item_id, o.product_type_id, o.section_id, o.quantity, o.price
+        FROM consum_orders o
+        WHERE o.id = ?
+    ");
         $stmt->execute([$orderId]);
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        if (!$rows) return [];
+
+        $order = [
+            'id'         => $rows[0]['id'],
+            'order_code' => $rows[0]['order_code'],
+            'customer_id' => $rows[0]['customer_id'],
+            'status'     => $rows[0]['status'],
+            'created_at' => $rows[0]['created_at'],
+            'updated_at' => $rows[0]['updated_at'],
+            'items'      => []
+        ];
+
+        foreach ($rows as $r) {
+            $order['items'][] = [
+                'section_id'      => $r['section_id'],
+                'product_type_id' => $r['product_type_id'],
+                'product_item_id' => $r['product_item_id'],
+                'quantity'        => $r['quantity'],
+                'price'           => $r['price']
+            ];
+        }
+
+        return $order;
     }
 
     // Cek dan update order pending jika stok sudah cukup

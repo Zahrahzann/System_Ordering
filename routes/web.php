@@ -38,6 +38,7 @@ use App\Controllers\ConsumOrderController;
 use App\Controllers\ConsumHistoryController;
 use App\Controllers\MaterialController;
 use App\Controllers\WorkOrderCostController;
+use App\Controllers\ConsumableReportController;
 
 // =====================
 // ROUTING DINAMIS (Regex)
@@ -74,6 +75,16 @@ if (preg_match('#^/admin/workorder/savecost/?$#', $route) && $requestMethod === 
 
 if (preg_match('#^/(admin|spv|customer)/report/workorder$#', $route)) {
     WorkOrderCostController::showMonthlyReport();
+    exit;
+}
+
+// ===== CONSUMABLE REPORT ===== 
+if ($route === '/admin/consumable/report' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+    ConsumableReportController::showReport();
+    exit;
+}
+if ($route === '/admin/consumable/report/save' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    ConsumableReportController::saveReport();
     exit;
 }
 

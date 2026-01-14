@@ -29,7 +29,7 @@ $currentRole = $_SESSION['user_data']['role'] ?? 'customer';
                     <div class="page-header">
                         <h1 class="page-title">Keranjang Consumable</h1>
                         <p class="page-subtitle">
-                           Daftar produk yang Anda pilih dari katalog
+                            Daftar produk yang Anda pilih dari katalog
                         </p>
                     </div>
 
@@ -267,7 +267,6 @@ $currentRole = $_SESSION['user_data']['role'] ?? 'customer';
                     qtyInput.value = newQty;
                     updateSummary();
 
-                    // Kirim ke server menggunakan XMLHttpRequest (PHP 7 compatible)
                     var xhr = new XMLHttpRequest();
                     xhr.open('POST', '<?= $basePath ?>/customer/consumable/cart/update', true);
                     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
@@ -275,7 +274,6 @@ $currentRole = $_SESSION['user_data']['role'] ?? 'customer';
                     xhr.onload = function() {
                         if (xhr.status !== 200) {
                             console.error('Error updating quantity');
-                            // Rollback jika error
                             location.reload();
                         }
                     };
@@ -285,7 +283,8 @@ $currentRole = $_SESSION['user_data']['role'] ?? 'customer';
                         location.reload();
                     };
 
-                    xhr.send('id=' + cartId + '&qty=' + newQty);
+                    // konsisten: kirim 'quantity', bukan 'qty'
+                    xhr.send('id=' + cartId + '&quantity=' + newQty);
                 });
             });
 

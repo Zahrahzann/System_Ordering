@@ -115,7 +115,7 @@ $currentRole = $_SESSION['user_data']['role'] ?? 'customer';
                                             <span class="order-meta-value">#<?= htmlspecialchars($orderCode) ?></span>
                                         </div>
                                         <div class="order-meta">
-                                            <span class="order-meta-label">Tanggal Pengiriman</span>
+                                            <span class="order-meta-label">Tanggal Selesai</span>
                                             <span class="order-meta-value"><?= date('d M Y', strtotime($firstItem['created_at'])) ?></span>
                                         </div>
                                         <?php if ($currentRole !== 'customer'): ?>

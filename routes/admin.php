@@ -10,6 +10,7 @@ use App\Controllers\UserManagementController;
 use App\Controllers\ConsumableController;
 use App\Controllers\MaterialController;
 use App\Controllers\WorkOrderCostController;
+use App\Controllers\ConsumableReportController;
 
 // ROUTING DINAMIS
 $matches = [];
@@ -121,6 +122,15 @@ switch (true) {
         break;
     case ($route === '/admin/report/workorder'):
         WorkOrderCostController::showMonthlyReport();
+        break;
+
+    // ===== CONSUMABLE REPORT =====
+    case ($route === '/admin/consumable/report' && $_SERVER['REQUEST_METHOD'] === 'GET'):
+        ConsumableReportController::showReport();
+        break;
+
+    case ($route === '/admin/consumable/report/save' && $_SERVER['REQUEST_METHOD'] === 'POST'):
+        ConsumableReportController::saveReport();
         break;
 
         // default:

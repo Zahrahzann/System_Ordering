@@ -164,7 +164,7 @@ class WorkOrderCostModel
                 SUM(p.manpower_cost) AS cost_manpower,
                 SUM(p.material_cost) AS cost_material,
                 SUM(p.machine_cost + p.manpower_cost + p.material_cost) AS total_process_cost,
-                MAX(p.created_at) AS completed_at
+                MAX(p.created_at) AS updated_at
             FROM orders o
             LEFT JOIN workorder_processes p ON o.id = p.order_id
             LEFT JOIN items i ON i.order_id = o.id
@@ -192,11 +192,24 @@ class WorkOrderCostModel
         $pdo = Database::connect();
         $params = [$year];
 
-        $sql = "SELECT * FROM workorder_costs WHERE report_year = ?";
+        $sql = "
+        SELECT order_id, item_name, department_id, customer_id,
+               qty, cost_material, cost_machine_tool_electric, cost_manpower,
+               overhead, cost_per_pcs, cost_inhouse_total,
+               vendor_price_per_pcs, vendor_price_total, benefit,
+               status, report_year,
+               DATE_FORMAT(updated_at, '%Y-%m-%d %H:%i:%s') AS updated_at,
+               (cost_inhouse_total / qty) AS inhouse_price,
+               (vendor_price_total / qty) AS maker_price
+        FROM workorder_costs
+        WHERE report_year = ?
+    ";
+
         if (!is_null($month)) {
             $sql .= " AND MONTH(updated_at) = ?";
             $params[] = $month;
         }
+
         $sql .= " ORDER BY updated_at DESC";
 
         $stmt = $pdo->prepare($sql);

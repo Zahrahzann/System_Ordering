@@ -54,7 +54,7 @@ class WorkOrderCostController
                         $proc,
                         $time,
                         $rate,
-                        '',       
+                        '',
                         0,
                         0.0,
                         $materialCost,
@@ -130,8 +130,12 @@ class WorkOrderCostController
         $department  = $_SESSION['user_data']['department_id'] ?? null;
         $customerId  = $_SESSION['user_data']['customer_id'] ?? null;
 
-        $year  = isset($_GET['year']) ? (int)$_GET['year'] : (int)date('Y');
-        $month = isset($_GET['month']) && $_GET['month'] !== '' ? (int)$_GET['month'] : null;
+        $month = isset($_GET['month']) && $_GET['month'] !== ''
+            ? (int)$_GET['month']
+            : (int)date('n');   // default bulan sekarang
+        $year  = isset($_GET['year']) && $_GET['year'] !== ''
+            ? (int)$_GET['year']
+            : (int)date('Y');   // default tahun sekarang
 
         $reportData = WorkOrderCostModel::getSummaryReport($year, $month);
 

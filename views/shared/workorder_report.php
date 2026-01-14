@@ -73,7 +73,7 @@ $month       = $month ?? null;
                     </div>
 
                     <!-- Filter (Admin & SPV) -->
-                    <?php if (isset($currentRole) && $currentRole !== 'customer'): ?>
+                    <?php if (isset($currentRole) && $currentRole === 'admin'): ?>
                         <div class="filter-card">
                             <form method="GET" class="form-inline">
                                 <label class="mr-2"><i class="fas fa-calendar-alt mr-1"></i>Tahun</label>
@@ -84,7 +84,7 @@ $month       = $month ?? null;
                                 </select>
                                 <label class="mr-2"><i class="fas fa-calendar mr-1"></i>Bulan</label>
                                 <select name="month" class="form-control mr-3">
-                                    <option value="">Semua</option>
+                                    <option value="">Bulan Ini</option>
                                     <?php for ($m = 1; $m <= 12; $m++): ?>
                                         <option value="<?= $m ?>" <?= (isset($month) && $m == $month) ? 'selected' : '' ?>>
                                             <?= date('F', mktime(0, 0, 0, $m, 1)) ?>
@@ -253,6 +253,8 @@ $month       = $month ?? null;
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <!-- Plugin -->
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>
+
+<pre><?php print_r($reportData); ?></pre>
 
 <script>
     const rawData = <?= json_encode($reportData ?? []) ?>;
