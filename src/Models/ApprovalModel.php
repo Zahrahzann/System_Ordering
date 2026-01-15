@@ -159,24 +159,24 @@ class ApprovalModel
     {
         $pdo = Database::connect();
 
-        // Cek apakah semua SPV sudah approve
-        $sql = "SELECT COUNT(*) AS total,
-                   SUM(CASE WHEN approval_status = 'approve' THEN 1 ELSE 0 END) AS approved
-            FROM approvals
-            WHERE order_id = ?";
+        // Ambil approval terbaru untuk order ini
+        $sql = "SELECT approval_status 
+              FROM approvals 
+             WHERE order_id = ? 
+          ORDER BY updated_at DESC 
+             LIMIT 1";
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$orderId]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        $status = $stmt->fetchColumn();
 
-        $total   = (int)$row['total'];
-        $approved = (int)$row['approved'];
+        if (!$status) {
+            $status = 'waiting'; // default kalau belum ada approval
+        }
 
-        $finalStatus = ($approved > 0) ? 'approve' : 'waiting';
-
-        // Update status di tabel orders
+        // Update status di tabel orders sesuai approval terbaru
         $sqlUpdate = "UPDATE orders SET approval_status = ? WHERE id = ?";
         $stmtUpdate = $pdo->prepare($sqlUpdate);
-        return $stmtUpdate->execute([$finalStatus, $orderId]);
+        return $stmtUpdate->execute([$status, $orderId]);
     }
 
     /**

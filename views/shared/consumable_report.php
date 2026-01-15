@@ -63,6 +63,11 @@ $month       = $month ?? null;
                                     <i class="fas fa-filter mr-1"></i> Filter Data
                                 </button>
                             </form>
+                            <!-- Tombol Lihat Detail Pesanan -->
+                            <a href="<?= $basePath ?>/admin/detail-consumable?year=<?= $year ?>"
+                                class="btn btn-secondary ml-2">
+                                <i class="fas fa-list mr-1"></i> Lihat Detail Pesanan
+                            </a>
                         </div>
                     <?php endif; ?>
 
@@ -185,9 +190,10 @@ $month       = $month ?? null;
                                 </div>
                             </div>
                         <?php endif; ?>
-                        <!-- Grafik Consumable --> <?php if (!empty($reportData) && is_array($reportData)): ?> <div class="chart-card">
+                        <!-- Grafik Consumable -->
+                        <?php if (!empty($reportData) && is_array($reportData)): ?> <div class="chart-card">
                                 <div class="chart-header">
-                                    <h3 class="chart-title"> <i class="fas fa-chart-bar mr-2"></i> Analisis Consumable Tahun <?= $year ?> </h3>
+                                    <h3 class="chart-title"> <i class="fas fa-chart-bar mr-2"></i> Analisis Consumable Bulan <?= $month ?> </h3>
                                     <p class="chart-subtitle"> Total biaya inhouse, vendor, dan benefit per section </p>
                                 </div> <canvas id="consumableChart"></canvas>
                             </div>
@@ -195,8 +201,10 @@ $month       = $month ?? null;
                                 <div class="chart-header">
                                     <h3 class="chart-title"> <i class="fas fa-chart-bar mr-2"></i> Grand Total Consumable Tahun <?= $year ?> </h3>
                                     <p class="chart-subtitle"> Ringkasan total inhouse, vendor, benefit, dan kumulatif benefit keseluruhan </p>
-                                </div> <canvas id="grandChart"></canvas>
-                            </div> <?php endif; ?>
+                                </div>
+                                <canvas id="grandChart"></canvas>
+                            </div>
+                        <?php endif; ?>
                     <?php endif; ?>
                 </div>
             </div>
@@ -204,9 +212,9 @@ $month       = $month ?? null;
     </div>
 
     <!-- Vendor JS -->
-    <script src="<?= htmlspecialchars($basePath) ?>/assets/vendor/jquery/jquery.min.js"></script>
-    <script src="<?= htmlspecialchars($basePath) ?>/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="<?= htmlspecialchars($basePath) ?>/assets/vendor/jquery-easing/jquery.easing.min.js"></script>
+    <script src="<?= $basePath ?>/assets/vendor/jquery/jquery.min.js"></script>
+    <script src="<?= $basePath ?>/assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="<?= $basePath ?>/assets/vendor/jquery-easing/jquery.easing.min.js"></script>
     <script src="<?= htmlspecialchars($basePath) ?>/assets/js/sb-admin-2.min.js"></script>
 
     <!-- Chart.js-->
@@ -302,7 +310,8 @@ $month       = $month ?? null;
                         pointBackgroundColor: 'rgba(0,0,0,1)',
                         pointBorderColor: '#fff',
                         pointBorderWidth: 2,
-                        yAxisID: 'yCost'
+                        yAxisID: 'yCost',
+                        spanGaps: true
                     }
                 ]
             },

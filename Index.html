@@ -104,6 +104,44 @@
             color: #7ac5ff;
         }
 
+        .nav-login {
+            position: relative;
+            display: inline-block;
+        }
+
+        .login-btn {
+            background: #7ac5ff;
+            color: #0e2f59;
+            border: none;
+            padding: 8px 14px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+
+        .login-dropdown {
+            display: none;
+            position: absolute;
+            right: 0;
+            background: #fff;
+            min-width: 160px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+            z-index: 1000;
+        }
+
+        .login-dropdown a {
+            display: block;
+            padding: 10px;
+            color: #333;
+            text-decoration: none;
+        }
+
+        .login-dropdown a:hover {
+            background: #f1f1f1;
+        }
+
+
         /* Hero Section */
         .hero {
             height: 100vh;
@@ -639,8 +677,15 @@
                 <li><a onclick="scrollToSection('reviews')">ULASAN</a></li>
                 <li><a onclick="scrollToSection('contact')">CONTACT</a></li>
             </ul>
+            <!-- LOGIN ROLE -->
             <div class="nav-login">
-                <button class="login-btn">Login</button>
+                <button class="login-btn" id="loginBtn">Login ▾</button>
+                <div class="login-dropdown" id="loginDropdown">
+                    <a href="http://localhost/system_ordering/public/admin/login">Admin</a>
+                    <a href="http://localhost/system_ordering/public/spv/login">Supervisor</a>
+                    <a href="http://localhost/system_ordering/public/customer/login">Customer</a>
+
+                </div>
             </div>
         </div>
     </nav>
@@ -869,19 +914,36 @@
     </footer>
 
     <script>
+        // Login Role Dropdown
+        const loginBtn = document.getElementById('loginBtn');
+        const loginDropdown = document.getElementById('loginDropdown');
+
+        loginBtn.addEventListener('click', () => {
+            loginDropdown.style.display =
+                loginDropdown.style.display === 'block' ? 'none' : 'block';
+        });
+
+        // Tutup dropdown kalau klik di luar
+        window.addEventListener('click', (e) => {
+            if (!loginBtn.contains(e.target) && !loginDropdown.contains(e.target)) {
+                loginDropdown.style.display = 'none';
+            }
+        });
+
+
         // Team Members Data
         const teamMembers = [
             {
                 name: "DETALANA NUGRAHA",
                 position: "Manager Maintenance",
                 photo: "public/uploads/member/detalana.jpg",
-                quote: "Kepemimpinan adalah tentang memberdayakan tim untuk mencapai yang terbaik"
+                quote: "Semangat tim tumbuh dari keberanian, dedikasi, dan tekad untuk mencapai yang terbaik"
             },
             {
                 name: "MARWAN TRIANA",
                 position: "Supervisor",
                 photo: "public/uploads/member/marwan.jpg",
-                quote: "Kepemimpinan adalah tentang memberdayakan tim untuk mencapai yang terbaik"
+                quote: "Sinergi, komitmen, dan solusi adalah kunci untuk mewujudkan tujuan bersama"
             },
             {
                 name: "DWI HARYANTO",
@@ -906,7 +968,7 @@
                 position: "Member",
                 photo: "public/uploads/member/irvan.jpg",
                 quote: "Setiap detail kecil berkontribusi pada kesempurnaan"
-            }, 
+            },
             {
                 name: "KHANIN FALIK",
                 position: "Member",
@@ -930,7 +992,7 @@
         // Reviews Data
         const reviews = [
             {
-                name: "Zahrah Annisa",
+                name: "",
                 rating: 5,
                 review: "Sistem ordering yang sangat membantu efisiensi produksi kami. Tim support sangat responsif dan profesional!"
             },
@@ -944,21 +1006,6 @@
                 rating: 4,
                 review: "Fitur lengkap dan user-friendly. Membantu meningkatkan produktivitas tim kami secara signifikan."
             },
-            {
-                name: "Zanni",
-                rating: 5,
-                review: "Pelayanan excellent! System SOME benar-benar solusi terbaik untuk bisnis kami."
-            },
-            {
-                name: "Zahrah",
-                rating: 5,
-                review: "ROI yang sangat baik. Investasi terbaik untuk digitalisasi proses manufaktur kami."
-            },
-            {
-                name: "Zanni Ramadhani",
-                rating: 4,
-                review: "Platform yang powerful dengan interface yang mudah dipahami. Sangat membantu operasional harian."
-            }
         ];
 
         // Render Team Members
@@ -1042,7 +1089,7 @@
                 navbar.style.background = 'rgba(14, 47, 89, 0.95)';
             }
         });
-</script>
+    </script>
 
 </body>
 

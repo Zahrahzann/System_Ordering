@@ -10,7 +10,8 @@
     "symfony/var-dumper": "^5.4",
     "ramsey/uuid": "^4.2",
     "respect/validation": "^2.2",
-    "guzzlehttp/guzzle": "^7.10"
+    "guzzlehttp/guzzle": "^7.10",
+    "phpoffice/phpspreadsheet": "*"
   },
   "license": "MIT",
   "autoload": {

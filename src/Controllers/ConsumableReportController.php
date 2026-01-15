@@ -23,7 +23,7 @@ class ConsumableReportController
 
         // Ambil semua section
         $sections   = SectionModel::getAll();
-        // Ambil data report per bulan
+        // Ambil data report per bulan (per section)
         $reportData = ConsumableReportModel::getReport(null, $year);
 
         // Gabungkan supaya semua section tetap muncul
@@ -68,7 +68,9 @@ class ConsumableReportController
             $cumulativeBenefit[] = $running;
         }
 
-        // Format untuk Chart.js
+        // =========================
+        // Grafik 1: Benefit per Section + Cumulative
+        // =========================
         $benefitChartData = [
             'labels' => ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
             'datasets' => []
@@ -105,10 +107,28 @@ class ConsumableReportController
             'pointBackgroundColor' => 'rgba(0,0,0,1)'
         ];
 
+        // =========================
+        // Grafik 2: Summary Bulanan (Inhouse, Vendor, Benefit, Cumulative)
+        // =========================
+        $monthlySummary = ConsumableReportModel::getMonthlySummary($year);
+
+        $grandChartData = [
+            'labels' => ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
+            'inhouse' => array_column($monthlySummary, 'total_inhouse'),
+            'maker' => array_column($monthlySummary, 'total_maker'),
+            'benefit' => array_column($monthlySummary, 'benefit'),
+            'cumulative' => array_column($monthlySummary, 'cumulative')
+        ];
+        $running = 0;
+        for ($i = 0; $i < 12; $i++) {
+            $val = $monthlySummary[$i]['benefit'] ?? 0;
+            $running += $val;
+            $grandChartData['cumulative'][$i] = $running;
+        }
+
         // Kirim ke view
         require_once __DIR__ . '/../../views/shared/consumable_report.php';
     }
-
 
     // Simpan qty input bulanan
     public static function saveReport(): void

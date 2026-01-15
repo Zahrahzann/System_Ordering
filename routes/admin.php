@@ -11,6 +11,7 @@ use App\Controllers\ConsumableController;
 use App\Controllers\MaterialController;
 use App\Controllers\WorkOrderCostController;
 use App\Controllers\ConsumableReportController;
+use App\Controllers\DetailReportController;
 
 // ROUTING DINAMIS
 $matches = [];
@@ -125,13 +126,27 @@ switch (true) {
         break;
 
     // ===== CONSUMABLE REPORT =====
-    case ($route === '/admin/consumable/report' && $_SERVER['REQUEST_METHOD'] === 'GET'):
-        ConsumableReportController::showReport();
+    case ($route === '/admin/detail-consumable' && $_SERVER['REQUEST_METHOD'] === 'GET'):
+        $year = $_GET['year'] ?? date('Y');
+        DetailReportController::show($year);
         break;
 
-    case ($route === '/admin/consumable/report/save' && $_SERVER['REQUEST_METHOD'] === 'POST'):
-        ConsumableReportController::saveReport();
+    case ($route === '/admin/detail-consumable/export' && $_SERVER['REQUEST_METHOD'] === 'GET'):
+        $year = $_GET['year'] ?? date('Y');
+        DetailReportController::exportExcel($year);
         break;
+
+    // ===== ROUTE LAPORAN DETAIL CONSUMABLE ===== //
+    case ($route === '/admin/reports/detail' && $_SERVER['REQUEST_METHOD'] === 'GET'):
+        $year = $_GET['year'] ?? date('Y');
+        DetailReportController::show($year);
+        break;
+
+    case ($route === '/admin/reports/detail/export' && $_SERVER['REQUEST_METHOD'] === 'GET'):
+        $year = $_GET['year'] ?? date('Y');
+        DetailReportController::exportExcel($year);
+        break;
+
 
         // default:
         //     http_response_code(404);

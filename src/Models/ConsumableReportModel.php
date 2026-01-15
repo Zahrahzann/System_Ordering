@@ -82,4 +82,59 @@ class ConsumableReportModel
         $st->execute($params);
         return $st->fetchAll(PDO::FETCH_ASSOC) ?: [];
     }
+
+    public static function getYearlyBreakdown($year)
+    {
+        $pdo = Database::connect();
+        $stmt = $pdo->prepare(
+            "SELECT 
+            s.name AS section_name,
+            pt.name AS product_type,
+            pi.name AS item_name,
+            MAX(o.price) AS inhouse_price,
+            MAX(pi.maker_price) AS maker_price,
+            MONTH(o.updated_at) AS month,
+            SUM(o.quantity) AS total_qty,
+            SUM(o.quantity * o.price) AS total_me,
+            SUM(o.quantity * pi.maker_price) AS total_maker,
+            SUM(o.quantity * (pi.maker_price - o.price)) AS total_benefit
+        FROM consum_orders o
+        JOIN product_items pi ON pi.id = o.product_item_id
+        JOIN product_types pt ON pt.id = pi.product_type_id
+        JOIN sections s ON s.id = pt.section_id
+        WHERE o.status = 'Selesai' AND YEAR(o.updated_at) = ?
+        GROUP BY s.name, pt.name, pi.name, MONTH(o.updated_at)
+        ORDER BY s.name, pt.name, pi.name, MONTH(o.updated_at)"
+        );
+        $stmt->execute([$year]);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public static function getMonthlySummary(int $year): array
+    {
+        $pdo = self::db();
+        $stmt = $pdo->prepare("
+        SELECT 
+            MONTH(o.updated_at) AS month,
+            COALESCE(SUM(o.quantity * o.price), 0) AS total_inhouse,
+            COALESCE(SUM(o.quantity * pi.maker_price), 0) AS total_maker,
+            COALESCE(SUM(o.quantity * (pi.maker_price - o.price)), 0) AS benefit
+        FROM consum_orders o
+        JOIN product_items pi ON pi.id = o.product_item_id
+        WHERE o.status = 'Selesai' AND YEAR(o.updated_at) = ?
+        GROUP BY MONTH(o.updated_at)
+        ORDER BY MONTH(o.updated_at)
+    ");
+        $stmt->execute([$year]);
+        $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        // Hitung cumulative benefit
+        $cumulative = 0;
+        foreach ($rows as &$row) {
+            $cumulative += $row['benefit'];
+            $row['cumulative'] = $cumulative;
+        }
+
+        return $rows;
+    }
 }
