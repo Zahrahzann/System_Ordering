@@ -31,9 +31,9 @@ $isEditMode = $editData !== null;
 
                     <!-- Page Header -->
                     <div class="page-header">
-                        <h1 class="page-title">Jenis Produk</h1>
+                        <h1 class="page-title">Jenis Slipper</h1>
                         <p class="page-subtitle">
-                            Daftar Jenis Produk yang termasuk dalam Section <?= htmlspecialchars($section['name']) ?>
+                            Daftar Jenis Slipper yang termasuk dalam Section <?= htmlspecialchars($section['name']) ?>
                         </p>
                     </div>
 
@@ -41,7 +41,7 @@ $isEditMode = $editData !== null;
                     <?php if ($currentRole === 'admin'): ?>
                         <div class="mb-3">
                             <button class="btn btn-info" onclick="toggleForm()">
-                                <i class="fas fa-plus"></i> <?= $isEditMode ? 'Edit Jenis Produk' : 'Tambah Jenis Produk' ?>
+                                <i class="fas fa-plus"></i> <?= $isEditMode ? 'Edit Jenis Slipper' : 'Tambah Jenis Slipper' ?>
                             </button>
                         </div>
                     <?php endif; ?>
@@ -56,12 +56,12 @@ $isEditMode = $editData !== null;
                                     <?php endif; ?>
                                     <?php if ($isEditMode): ?>
                                         <div class="form-group">
-                                            <label>Kode Produk</label>
+                                            <label>Kode Slipper</label>
                                             <input type="text" class="form-control" value="<?= htmlspecialchars($editData['product_code']) ?>" readonly>
                                         </div>
                                     <?php endif; ?>
                                     <div class="form-group">
-                                        <label>Nama Produk</label>
+                                        <label>Nama Slipper</label>
                                         <input type="text" name="name" class="form-control" required
                                             value="<?= $isEditMode ? htmlspecialchars($editData['name']) : '' ?>">
                                     </div>
@@ -99,8 +99,8 @@ $isEditMode = $editData !== null;
                     <?php if (empty($productTypes)): ?>
                         <div class="empty-state text-center mt-4">
                             <i class="fas fa-cube fa-2x text-muted"></i>
-                            <h4 class="mt-2">Belum Ada Jenis Produk</h4>
-                            <p>Section ini belum memiliki jenis produk.</p>
+                            <h4 class="mt-2">Belum Ada Jenis Slipper</h4>
+                            <p>Section ini belum memiliki jenis slipper.</p>
                         </div>
                     <?php else: ?>
                         <div class="product-types-container d-flex flex-wrap gap-3">

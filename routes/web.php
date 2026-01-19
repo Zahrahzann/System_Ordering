@@ -92,12 +92,12 @@ if ($route === '/admin/consumable/report/save' && $_SERVER['REQUEST_METHOD'] ===
 // ROUTES UTAMA
 // =====================
 switch (true) {
-    // Root redirect
+    // Root route → Landing Page 
     case ($route === '/'):
-        header('Location: /system_ordering/public/customer/login');
-        exit;
+        require __DIR__ . '/../views/landing_page.php';
+        break;
 
-        // Logout
+    // Logout
     case ($route === '/logout'):
         if (session_status() === PHP_SESSION_NONE) session_start();
         $role = $_SESSION['user_data']['role'] ?? 'customer';

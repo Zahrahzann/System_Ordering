@@ -113,7 +113,7 @@ if (!isset($types) || !isset($dimensions) || !isset($title)) {
                                                 ?>
                                                     <!-- Baris utama dimension -->
                                                     <tr>
-                                                        <td><strong><?= htmlspecialchars($d['dimension']) ?></strong></td>
+                                                        <td><?= htmlspecialchars($d['dimension']) ?></td>
                                                         <td><span style="font-weight: 600; color: #667eea;"><?= (int)$d['stock'] ?></span> Unit</td>
                                                         <td>
                                                             <?php if ($logCount > 0): ?>
@@ -121,7 +121,7 @@ if (!isset($types) || !isset($dimensions) || !isset($title)) {
                                                                     <i class="fas fa-history"></i> Lihat (<?= $logCount ?>)
                                                                 </button>
                                                             <?php else: ?>
-                                                                <span style="color: #9ca3af; font-size: 0.8rem;">Tidak ada riwayat</span>
+                                                                <span style="color: #7a7e86; font-size: 0.8rem;">Tidak ada riwayat</span>
                                                             <?php endif; ?>
                                                         </td>
                                                         <?php if ($currentRole === 'admin'): ?>

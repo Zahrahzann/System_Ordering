@@ -134,7 +134,7 @@
         color: white;
     }
 
-    .store-icon {
+    .nav-logo-box {
         width: 150px;
         height: 150px;
         background: rgba(255, 255, 255, 0.2);
@@ -145,6 +145,7 @@
         margin: 0 auto 30px;
         backdrop-filter: blur(10px);
         animation: pulse 2s infinite;
+        object-fit: cover;
     }
 
     @keyframes pulse {

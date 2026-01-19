@@ -349,13 +349,13 @@ body {
 
 .table tbody td {
     padding: 1rem 1.25rem;
-    font-size: 0.875rem;
+    font-size: 0.900rem;
     color: #374151;
 }
 
 .table tbody td:first-child {
     font-weight: 600;
-    color: #1a1a1a;
+    color: #3e3e3e;
 }
 
 /* ===================================

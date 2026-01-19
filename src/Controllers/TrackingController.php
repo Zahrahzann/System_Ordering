@@ -4,12 +4,14 @@ namespace App\Controllers;
 
 use App\Models\TrackingModel;
 use App\Models\HistoryModel;
+use App\Models\NotificationModel;
+use App\Models\ReviewModel;
 use App\Middleware\SessionMiddleware;
 
 class TrackingController
 {
     /**
-     * Menampilkan halaman tracking (AKTIF)
+     * Menampilkan halaman tracking (multi-role)
      */
     public static function showTrackingPage()
     {
@@ -34,9 +36,9 @@ class TrackingController
             if (!isset($grouped[$orderId])) {
                 $grouped[$orderId] = [
                     'order_details' => [
-                        'order_id'       => $orderId,
-                        'customer_name'  => $item['customer_name'],
-                        'line'           => $item['line'],
+                        'order_id'        => $orderId,
+                        'customer_name'   => $item['customer_name'],
+                        'line'            => $item['line'],
                         'department_name' => $item['department_name'],
                     ],
                     'items' => []
@@ -63,14 +65,14 @@ class TrackingController
             }
         }
 
-        // Kirim $grouped ke view, bukan $items mentah
+        // Kirim $grouped ke view
         $orders = array_values($grouped);
 
         require_once __DIR__ . '/../../views/shared/tracking_order.php';
     }
 
     /**
-     * (Hanya Admin) Memproses update status
+     * (Hanya Admin) Memproses update status produksi
      */
     public static function updateItemDetails($itemId)
     {
@@ -81,7 +83,7 @@ class TrackingController
 
         $validStatuses = ['pending', 'on_progress', 'finish', 'completed'];
 
-        // Ambil item sebelum update untuk mengetahui oldStatus
+        // Ambil item sebelum update
         $item = TrackingModel::findItemById($itemId);
         $oldStatus = $item['production_status'] ?? null;
 
@@ -91,25 +93,24 @@ class TrackingController
             exit;
         }
 
-        // Jika status berubah ke on_progress, set updated_at bersamaan dengan update lainnya
+        // Update status
         if ($oldStatus === 'pending' && $newStatus === 'on_progress') {
             $pdo = \ManufactureEngineering\SystemOrdering\Config\Database::connect();
             $stmt = $pdo->prepare("UPDATE items 
-            SET pic_mfg = ?, 
-                production_status = ?, 
-                estimasi_pengerjaan = ?, 
-                updated_at = NOW() 
-            WHERE id = ?");
+                SET pic_mfg = ?, 
+                    production_status = ?, 
+                    estimasi_pengerjaan = ?, 
+                    updated_at = NOW() 
+                WHERE id = ?");
             $stmt->execute([$picMfg, $newStatus, $estimasi, $itemId]);
         } else {
-            // Status lain: update biasa tanpa sentuh updated_at
             TrackingModel::updateItemDetails($itemId, $newStatus, $picMfg, $estimasi);
         }
 
-        // Refresh item setelah semua update
+        // Refresh item setelah update
         $item = TrackingModel::findItemById($itemId);
 
-        // Jika status berubah ke finish, hitung durasi dari updated_at ke NOW()
+        // Hitung durasi kalau status berubah ke finish
         if ($oldStatus === 'on_progress' && $newStatus === 'finish') {
             $startTime  = !empty($item['updated_at']) ? strtotime($item['updated_at']) : null;
             $finishTime = time();
@@ -118,14 +119,27 @@ class TrackingController
                 $durationMinutes = round(($finishTime - $startTime) / 60);
                 TrackingModel::updateItemDuration($itemId, $durationMinutes);
             } else {
-                // Fallback kalau updated_at kosong atau invalid
                 TrackingModel::updateItemDuration($itemId, 0);
             }
         }
 
-        // Fallback: kalau langsung pending → finish, isi 0 agar tidak NULL
+        // Fallback: langsung pending → finish
         if ($oldStatus === 'pending' && $newStatus === 'finish') {
             TrackingModel::updateItemDuration($itemId, 0);
+        }
+
+        // Jika status berubah ke finish → kirim notifikasi + flag review
+        if ($newStatus === 'finish') {
+            NotificationModel::create(
+                $item['customer_id'], 
+                'Pesanan #' . $item['order_id'] . ' HALOO!! Work Order kamu sudah selesai, segera ambil barang di ME ya, Terima kasih sudah menggunakan SOME. Mohon untuk isi Rating dan Reviewnya yaaa~~ , ', // message
+                'fas fa-check-circle',
+                'success',            
+                'order',              
+                'customer'             
+            );
+
+            ReviewModel::markPendingReview($item['order_id'], $item['customer_id']);
         }
 
         header('Location: /system_ordering/public/admin/tracking');
@@ -137,34 +151,34 @@ class TrackingController
      */
     public static function showDetailPage($orderId)
     {
-        /** @var int|string $orderId */
         SessionMiddleware::requireLogin();
-        $order = \App\Models\ApprovalModel::findOrderById($orderId);
-        $items = \App\Models\ApprovalModel::findOrderItemsByOrderId($orderId);
+        $order    = \App\Models\ApprovalModel::findOrderById($orderId);
+        $items    = \App\Models\ApprovalModel::findOrderItemsByOrderId($orderId);
         $approval = \App\Models\ApprovalModel::findApprovalByOrderId($orderId);
+
         if (!$order) {
             die('Error: Pesanan tidak ditemukan.');
         }
+
         require_once __DIR__ . '/../../views/shared/detail_wo.php';
     }
 
     /**
-     * KOREKSI: FUNGSI showHistoryPage() SEKARANG MENGGUNAKAN HISTORY MODEL
+     * Menampilkan halaman history order (multi-role)
      */
     public static function showHistoryPage()
     {
         SessionMiddleware::requireLogin();
 
-        $role = $_SESSION['user_data']['role'];
-
-        $year = $_GET['year'] ?? date('Y');
+        $role  = $_SESSION['user_data']['role'];
+        $year  = $_GET['year'] ?? date('Y');
         $month = $_GET['month'] ?? null;
 
-        $items = [];
+        $items     = [];
         $chartData = [];
 
         if ($role === 'admin') {
-            $items = HistoryModel::getHistoryItems(null, $year, $month);
+            $items     = HistoryModel::getHistoryItems(null, $year, $month);
             $chartData = HistoryModel::getMonthlyChartData($year);
         } elseif ($role === 'spv') {
             $departmentId = $_SESSION['user_data']['department_id'];
@@ -179,6 +193,9 @@ class TrackingController
         require_once __DIR__ . '/../../views/shared/history_order.php';
     }
 
+    /**
+     * Customer reorder item dari history
+     */
     public static function reorderItem($itemId)
     {
         SessionMiddleware::requireCustomerLogin();

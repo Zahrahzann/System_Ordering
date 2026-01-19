@@ -13,25 +13,13 @@ class NotificationModel
 
         switch ($role) {
             case 'spv':
-                $stmt = $pdo->prepare(
-                    "SELECT COUNT(*) 
-                     FROM notifications 
-                     WHERE department = ? AND is_read = 0"
-                );
+                $stmt = $pdo->prepare("SELECT COUNT(*) FROM notifications WHERE department = ? AND is_read = 0");
                 break;
             case 'admin':
-                $stmt = $pdo->prepare(
-                    "SELECT COUNT(*) 
-                     FROM notifications 
-                     WHERE user_id = ? AND is_read = 0"
-                );
+                $stmt = $pdo->prepare("SELECT COUNT(*) FROM notifications WHERE user_id = ? AND is_read = 0");
                 break;
             default: // customer
-                $stmt = $pdo->prepare(
-                    "SELECT COUNT(*) 
-                     FROM notifications 
-                     WHERE customer_id = ? AND is_read = 0"
-                );
+                $stmt = $pdo->prepare("SELECT COUNT(*) FROM notifications WHERE customer_id = ? AND is_read = 0");
         }
 
         $stmt->execute([$targetKey]);
@@ -47,7 +35,7 @@ class NotificationModel
             case 'spv':
                 $sql = "SELECT id, message, created_at AS date, icon, color, is_read, type
                         FROM notifications 
-                        WHERE department = ? AND is_read = 0
+                        WHERE department = ? 
                         ORDER BY created_at DESC 
                         LIMIT $limit";
                 break;
@@ -61,7 +49,7 @@ class NotificationModel
             default: // customer
                 $sql = "SELECT id, message, created_at AS date, icon, color, is_read, type
                         FROM notifications 
-                        WHERE customer_id = ? AND is_read = 0
+                        WHERE customer_id = ? 
                         ORDER BY created_at DESC 
                         LIMIT $limit";
         }
@@ -110,6 +98,9 @@ class NotificationModel
         $stmt->execute([$targetKey]);
     }
 
+    /**
+     * Buat notifikasi baru
+     */
     public static function create(
         $targetKey,
         $message,
