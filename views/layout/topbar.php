@@ -29,8 +29,8 @@ if ($currentRole === 'spv') {
 }
 
 // Pesan (sementara kosong dulu kalau belum ada MessageModel)
-// $messageCount = 0;
-// $messages     = [];
+$messageCount = 0;
+$messages     = [];
 ?>
 
 <head>
@@ -112,6 +112,7 @@ if ($currentRole === 'spv') {
                 <a class="nav-link dropdown-toggle" href="#" id="alertsDropdown" role="button"
                     data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     <i class="fas fa-bell fa-fw"></i>
+                    <!-- Badge counter pakai jumlah unread -->
                     <span class="badge badge-danger badge-counter"><?= $alertCount ?? 0 ?></span>
                 </a>
                 <div class="dropdown-list dropdown-menu dropdown-menu-right shadow animated--grow-in"
@@ -122,7 +123,7 @@ if ($currentRole === 'spv') {
                         <?php if ($currentRole === 'admin'): ?>
                             Notifikasi Admin
                         <?php elseif ($currentRole === 'spv'): ?>
-                            Pesanan Baru
+                            Notifikasi Supervisor
                         <?php else: ?>
                             Notifikasi Customer
                         <?php endif; ?>
@@ -136,9 +137,18 @@ if ($currentRole === 'spv') {
                             <?php foreach ($alerts as $alert): ?>
                                 <a class="dropdown-item d-flex align-items-center"
                                     href="<?php
-                                            if ($currentRole === 'admin') echo $basePath . '/admin/product_items.php';
-                                            elseif ($currentRole === 'spv') echo $basePath . '/spv/work_order/approval';
-                                            else echo $basePath . '/customer/orders.php';
+                                            // Link sesuai role + type notif
+                                            if ($currentRole === 'admin') {
+                                                if ($alert['type'] === 'stock_alert') {
+                                                    echo $basePath . '/admin/product_items.php';
+                                                } else {
+                                                    echo $basePath . '/admin/tracking';
+                                                }
+                                            } elseif ($currentRole === 'spv') {
+                                                echo $basePath . '/spv/work_order/approval';
+                                            } else {
+                                                echo $basePath . '/customer/orders.php';
+                                            }
                                             ?>">
                                     <div class="mr-3">
                                         <div class="icon-circle bg-<?= $alert['color'] ?? 'warning' ?>">
@@ -235,155 +245,479 @@ if ($currentRole === 'spv') {
         </li>
     </ul>
 </nav>
+
+<!-- SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- Bootstrap JS bundle (required for modal) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<div class="modal fade" id="ratingReviewModal" tabindex="-1" aria-labelledby="ratingReviewLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="reviewForm" method="post" action="/system_ordering/public/customer/review/submit">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="ratingReviewLabel">Isi Rating & Review</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- order_id akan diisi via JS saat notif diklik -->
+                    <input type="hidden" name="order_id" id="orderIdInput" value="">
+
+                    <label for="rating">Rating:</label>
+                    <select name="rating" id="rating" class="form-control" required>
+                        <option value="5">★★★★★</option>
+                        <option value="4">★★★★</option>
+                        <option value="3">★★★</option>
+                        <option value="2">★★</option>
+                        <option value="1">★</option>
+                    </select>
+
+                    <label for="review" class="mt-3">Review:</label>
+                    <textarea name="review" id="review" class="form-control" rows="4" placeholder="Tulis ulasanmu di sini..." required></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Kirim</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <!-- End of Topbar -->
 
 <script>
-    // Hapus semua notifikasi (icon trash di header)
-    document.getElementById('clearAllNotif')?.addEventListener('click', () => {
-        fetch('/system_ordering/public/clear_notifications.php', {
-                method: 'POST'
+    // Common function untuk mark notification as read
+    function markNotificationRead(notifId) {
+        if (!notifId) return Promise.resolve();
+
+        return fetch('/system_ordering/public/mark_notification.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    notif_id: notifId
+                })
             })
             .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    let msg = '';
-                    if (data.role === 'admin') msg = 'Semua notifikasi stok rendah dihapus';
-                    else if (data.role === 'spv') msg = 'Semua pengajuan WO dihapus';
-                    else msg = 'Semua notifikasi pesanan dihapus';
-
-                    Swal.fire('Berhasil', msg, 'success');
-                    // reset badge & isi dropdown
-                    document.querySelector('#alertsDropdown .badge-counter').textContent = '0';
-                    document.querySelector('#alertsDropdown .dropdown-list').innerHTML =
-                        '<div class="dropdown-item text-center small text-gray-500">Belum ada notifikasi</div>';
-                }
+            .then(result => {
+                console.log('Mark read result:', result);
+                return result;
             })
-            .catch(err => console.error('Clear notif error:', err));
-    });
+            .catch(err => {
+                console.error('Mark notification error:', err);
+            });
+    }
 
-    // Tandai semua notifikasi sebagai dibaca (button di footer)
-    document.getElementById('markAllRead')?.addEventListener('click', () => {
-        fetch('/system_ordering/public/mark_notifications.php', {
-                method: 'POST'
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.success) {
-                    let msg = '';
-                    if (data.role === 'admin') msg = 'Semua notifikasi stok rendah ditandai sudah dibaca';
-                    else if (data.role === 'spv') msg = 'Semua pengajuan WO ditandai sudah dibaca';
-                    else msg = 'Semua notifikasi pesanan ditandai sudah dibaca';
+    // Mark All Read Button Handler
+    document.addEventListener('DOMContentLoaded', function() {
+        const markAllBtn = document.getElementById('markAllRead');
+        if (markAllBtn) {
+            markAllBtn.addEventListener('click', function() {
+                fetch('/system_ordering/public/mark_all_read.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(res => res.json())
+                    .then(result => {
+                        if (result.success) {
+                            location.reload();
+                        }
+                    })
+                    .catch(err => console.error('Mark all read error:', err));
+            });
+        }
 
-                    Swal.fire('Berhasil', msg, 'success');
-                    // reset badge counter
-                    document.querySelector('#alertsDropdown .badge-counter').textContent = '0';
-                }
-            })
-            .catch(err => console.error('Mark read error:', err));
+        const clearAllBtn = document.getElementById('clearAllNotif');
+        if (clearAllBtn) {
+            clearAllBtn.addEventListener('click', function() {
+                Swal.fire({
+                    title: 'Hapus Semua Notifikasi?',
+                    text: 'Anda yakin ingin menghapus semua notifikasi?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, Hapus',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch('/system_ordering/public/clear_all_notifications.php', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                }
+                            })
+                            .then(res => res.json())
+                            .then(result => {
+                                if (result.success) {
+                                    Swal.fire('Berhasil!', 'Semua notifikasi telah dihapus', 'success')
+                                        .then(() => location.reload());
+                                }
+                            })
+                            .catch(err => console.error('Clear all error:', err));
+                    }
+                });
+            });
+        }
     });
 </script>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<?php if (!empty($_GET['status'])): ?>
+    <script>
+        (function() {
+            const status = "<?= htmlspecialchars($_GET['status']) ?>";
+            let config = null;
+
+            switch (status) {
+                case 'checkout_success':
+                    config = {
+                        icon: 'success',
+                        title: 'Checkout Berhasil!',
+                        text: 'Pesanan dari keranjang berhasil dibuat.',
+                        timer: 3000,
+                        showConfirmButton: false
+                    };
+                    break;
+                case 'order_success':
+                    config = {
+                        icon: 'success',
+                        title: 'Order Berhasil!',
+                        text: 'Pesanan langsung dari katalog berhasil dibuat.',
+                        timer: 2000,
+                        showConfirmButton: false
+                    };
+                    break;
+                case 'reorder_success':
+                    config = {
+                        icon: 'success',
+                        title: 'Reorder Berhasil!',
+                        text: 'Pesanan ulang berhasil dibuat.',
+                        timer: 3000,
+                        showConfirmButton: false
+                    };
+                    break;
+                case 'shipping':
+                    config = {
+                        icon: 'info',
+                        title: 'Pesanan Sedang Dikirim!',
+                        text: 'Barang sedang dalam perjalanan menuju customer.',
+                        timer: 3000,
+                        showConfirmButton: false
+                    };
+                    break;
+                case 'completed':
+                    config = {
+                        icon: 'success',
+                        title: 'Pesanan Sudah Selesai!',
+                        text: 'Barang telah diterima oleh customer.',
+                        timer: 3000,
+                        showConfirmButton: false
+                    };
+                    break;
+                case 'checkout_failed':
+                    config = {
+                        icon: 'error',
+                        title: 'Checkout Gagal!',
+                        text: 'Pesanan tidak bisa diproses.'
+                    };
+                    break;
+            }
+
+            if (config) {
+                Swal.fire(config).then(() => {
+                    const url = new URL(window.location);
+                    url.searchParams.delete('status');
+                    window.history.replaceState({}, document.title, url.pathname + url.search);
+                });
+            }
+        })();
+    </script>
+<?php endif; ?>
 
 <?php if ($currentRole === 'customer'): ?>
     <script>
-        let lastCustomerNotifId = null;
+        (function() {
+            let shown = JSON.parse(localStorage.getItem('shown_customer') || '[]');
 
-        function checkCustomerNotifications() {
-            fetch('/system_ordering/public/notifications.php')
-                .then(res => res.json())
-                .then(data => {
-                    const badge = document.querySelector('#alertsDropdown .badge-counter');
-                    if (badge) badge.textContent = data.count ?? 0;
+            function checkCustomerNotifications() {
+                fetch('/system_ordering/public/notifications.php')
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.new && !shown.includes(String(data.id))) {
+                            if (data.kind === 'shipping') {
+                                Swal.fire({
+                                    icon: 'info',
+                                    title: 'Pesanan Sedang Dikirim!',
+                                    text: data.message,
+                                    timer: 3000,
+                                    showConfirmButton: false
+                                });
+                            } else if (data.kind === 'completed') {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Pesanan Sudah Selesai!',
+                                    text: data.message,
+                                    timer: 3000,
+                                    showConfirmButton: false
+                                });
+                            }
+                            shown.push(String(data.id));
+                            localStorage.setItem('shown_customer', JSON.stringify(shown));
+                        }
+                    });
+            }
 
-                    console.log('Customer notif data:', data);
+            checkCustomerNotifications();
+            setInterval(checkCustomerNotifications, 10000);
+        })();
+    </script>
+<?php endif; ?>
 
-                    if (data.new && data.id && data.id !== lastCustomerNotifId) {
-                        lastCustomerNotifId = data.id;
-                        Swal.fire({
-                            icon: data.type ?? 'info',
-                            title: 'Status Pesanan',
-                            html: data.message,
-                            confirmButtonText: 'OK'
+
+<?php if ($currentRole === 'customer'): ?>
+    <script>
+        (function() {
+            // Variabel lokal untuk customer
+            let shownNotifications = JSON.parse(localStorage.getItem('shownNotifications_customer') || '[]');
+
+            function checkCustomerNotifications() {
+                fetch('/system_ordering/public/notifications.php')
+                    .then(res => {
+                        if (!res.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return res.json();
+                    })
+                    .then(data => {
+                        console.log('Customer notif data:', data);
+
+                        // Cek apakah ada notifikasi baru dan belum pernah ditampilkan
+                        if (data.new && data.id && !shownNotifications.includes(data.id)) {
+                            // Tentukan judul sesuai type
+                            let title = 'Notifikasi';
+                            if (data.kind === 'order') title = 'Work Order';
+                            else if (data.kind === 'approval') title = 'Pesanan Disetujui SPV';
+
+                            Swal.fire({
+                                icon: data.type ?? 'info',
+                                title: title,
+                                html: data.message,
+                                confirmButtonText: 'OKE',
+                                showCancelButton: true,
+                                // cancelButtonText: 'Nanti Saja'
+                            }).then((result) => {
+                                // Mark sebagai sudah dibaca
+                                markNotificationRead(data.id);
+
+                                // Simpan ID notifikasi yang sudah ditampilkan
+                                shownNotifications.push(data.id);
+                                localStorage.setItem('shownNotifications_customer', JSON.stringify(shownNotifications));
+
+                                if (result.isConfirmed) {
+                                    document.getElementById('orderIdInput').value = data.order_id || '';
+                                    const modalEl = document.getElementById('ratingReviewModal');
+                                    const modal = new bootstrap.Modal(modalEl);
+                                    modal.show();
+                                }
+                            });
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Customer notif error:', err);
+                    });
+            }
+
+            // Jalankan pertama kali saat halaman load
+            checkCustomerNotifications();
+
+            // Cek setiap 10 detik untuk notifikasi baru
+            setInterval(checkCustomerNotifications, 10000);
+        })();
+
+        // Submit review via AJAX (tetap di global scope karena butuh akses ke form)
+        document.addEventListener('DOMContentLoaded', function() {
+            const reviewForm = document.getElementById('reviewForm');
+            if (reviewForm) {
+                reviewForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const formData = new FormData(this);
+
+                    fetch(this.action, {
+                            method: 'POST',
+                            body: formData
+                        })
+                        .then(response => response.json())
+                        .then(result => {
+                            if (result.status === 'success') {
+                                const modalEl = document.getElementById('ratingReviewModal');
+                                const modal = bootstrap.Modal.getInstance(modalEl);
+                                if (modal) modal.hide();
+
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Terima Kasih!',
+                                    text: 'Review Anda telah terkirim. Kami menunggu pesananmu yang lainnya lagi~!'
+                                });
+
+                                // Reset form
+                                reviewForm.reset();
+                            } else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Gagal',
+                                    text: result.message || 'Data review tidak lengkap.'
+                                });
+                            }
+                        })
+                        .catch(err => {
+                            console.error('Submit review error:', err);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'Terjadi kesalahan saat mengirim review.'
+                            });
                         });
-                    }
-                })
-                .catch(err => console.error('Customer notif error:', err));
-        }
-
-        // Panggil sekali saat halaman dibuka
-        checkCustomerNotifications();
+                });
+            }
+        });
     </script>
 <?php endif; ?>
 
 <?php if ($currentRole === 'spv'): ?>
     <script>
-        let lastNotifId = null;
+        (function() {
+            // Variabel lokal untuk SPV
+            let shownNotifications = JSON.parse(localStorage.getItem('shownNotifications_spv') || '[]');
 
-        function checkNotifications() {
-            fetch('/system_ordering/public/notifications.php')
-                .then(res => res.json())
-                .then(data => {
-                    const badge = document.querySelector('#alertsDropdown .badge-counter');
-                    if (badge) badge.textContent = data.count ?? 0;
+            function checkSpvNotifications() {
+                fetch('/system_ordering/public/notifications.php')
+                    .then(res => {
+                        if (!res.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return res.json();
+                    })
+                    .then(data => {
+                        console.log('SPV notif data:', data);
 
-                    console.log('Notif data:', data);
+                        if (data.new && data.id && !shownNotifications.includes(data.id)) {
+                            let title = (data.kind === 'approval') ? 'Pengajuan Approval Baru' : 'Notifikasi';
 
-                    if (data.new && data.id && data.id !== lastNotifId) {
-                        lastNotifId = data.id;
-                        Swal.fire({
-                            icon: data.type ?? 'info',
-                            title: 'Pengajuan Approval Baru',
-                            html: data.message,
-                            confirmButtonText: 'OK'
-                        });
-                    }
-                })
-                .catch(err => console.error('Notif error:', err));
-        }
+                            Swal.fire({
+                                icon: data.type ?? 'info',
+                                title: title,
+                                html: data.message,
+                                confirmButtonText: 'OK'
+                            }).then(() => {
+                                markNotificationRead(data.id);
 
-        // Jalankan polling hanya kalau masih ada WO waiting
-        if (typeof spvPendingCount !== 'undefined' && spvPendingCount > 0) {
-            setInterval(checkNotifications, 10000);
-        }
+                                shownNotifications.push(data.id);
+                                localStorage.setItem('shownNotifications_spv', JSON.stringify(shownNotifications));
+                            });
+                        }
+                    })
+                    .catch(err => {
+                        console.error('SPV notif error:', err);
+                    });
+            }
+
+            // Jalankan pertama kali
+            checkSpvNotifications();
+
+            // Cek setiap 10 detik
+            setInterval(checkSpvNotifications, 10000);
+        })();
     </script>
 <?php endif; ?>
 
 <?php if ($currentRole === 'admin'): ?>
     <script>
-        function checkLowStock() {
-            // Ambil waktu terakhir alert dari localStorage
-            const lastAlert = localStorage.getItem('lastLowStockAlert');
-            const now = Date.now();
+        (function() {
+            // Variabel lokal untuk Admin
+            let shownNotifications = JSON.parse(localStorage.getItem('shownNotifications_admin') || '[]');
 
-            // Kalau belum 1 jam sejak alert terakhir, skip
-            if (lastAlert && (now - parseInt(lastAlert, 10)) < 3600000) {
-                console.log("Skip alert, belum 1 jam");
-                return;
+            function checkAdminNotifications() {
+                fetch('/system_ordering/public/notifications.php')
+                    .then(res => {
+                        if (!res.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return res.json();
+                    })
+                    .then(data => {
+                        console.log('Admin notif data:', data);
+
+                        if (data.new && data.id && !shownNotifications.includes(data.id)) {
+                            let title = 'Notifikasi';
+                            if (data.kind === 'order') title = 'Pesanan Work Order Baru';
+                            else if (data.kind === 'stock_alert') title = 'Stok Produk Rendah';
+
+                            Swal.fire({
+                                icon: data.type ?? 'info',
+                                title: title,
+                                html: data.message,
+                                confirmButtonText: 'OK'
+                            }).then(() => {
+                                markNotificationRead(data.id);
+
+                                shownNotifications.push(data.id);
+                                localStorage.setItem('shownNotifications_admin', JSON.stringify(shownNotifications));
+                            });
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Admin notif error:', err);
+                    });
             }
 
-            fetch('/system_ordering/public/low_stock.php')
-                .then(res => res.json())
-                .then(data => {
-                    console.log('Low stock data:', data);
-                    if (data.alert) {
-                        Swal.fire({
-                            icon: 'warning',
-                            title: 'Pengingat Stok Rendah',
-                            html: data.message,
-                            confirmButtonText: 'OK'
-                        });
-                        // Simpan timestamp alert terakhir
-                        localStorage.setItem('lastLowStockAlert', now.toString());
-                    }
-                })
-                .catch(err => console.error('Low stock error:', err));
-        }
+            function checkLowStock() {
+                const lastAlert = localStorage.getItem('lastLowStockAlert');
+                const now = Date.now();
 
-        // Jalankan saat halaman dibuka
-        checkLowStock();
+                // Cek apakah sudah lewat 1 jam sejak alert terakhir
+                if (lastAlert && (now - parseInt(lastAlert, 10)) < 3600000) {
+                    console.log("Skip low stock alert, belum 1 jam sejak alert terakhir");
+                    return;
+                }
 
-        // Jalankan ulang tiap 1 jam
-        setInterval(checkLowStock, 3600000);
+                fetch('/system_ordering/public/low_stock.php')
+                    .then(res => {
+                        if (!res.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return res.json();
+                    })
+                    .then(data => {
+                        console.log('Low stock data:', data);
+
+                        if (data.alert && data.id && !data.existing) {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Pengingat Stok Rendah',
+                                html: data.message,
+                                confirmButtonText: 'OK'
+                            }).then(() => {
+                                markNotificationRead(data.id);
+                                localStorage.setItem('lastLowStockAlert', now.toString());
+                            });
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Low stock error:', err);
+                    });
+            }
+
+            // Jalankan pertama kali saat halaman load
+            checkAdminNotifications();
+            checkLowStock();
+
+            // Cek notifikasi biasa setiap 10 detik
+            setInterval(checkAdminNotifications, 10000);
+
+            // Cek low stock setiap 1 jam
+            setInterval(checkLowStock, 3600000);
+        })();
     </script>
 <?php endif; ?>

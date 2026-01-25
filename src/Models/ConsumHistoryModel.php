@@ -16,30 +16,33 @@ class ConsumHistoryModel
         $pdo = Database::connect();
 
         $sql = "
-            SELECT 
-                o.id,
-                o.order_code,
-                o.created_at,
-                o.status,
-                o.quantity,
-                o.price,
-                p.name AS product_name,
-                p.image_path AS product_image,
-                p.file_path AS drawing_file,
-                p.item_code,
-                pt.name AS product_type_name,
-                s.name AS section_name,
-                c.name AS customer_name,
-                d.id   AS department_id,
-                d.name AS department,
-                c.line
-            FROM consum_orders o
-            JOIN product_items p   ON o.product_item_id = p.id
-            JOIN product_types pt  ON p.product_type_id = pt.id
-            JOIN sections s        ON pt.section_id = s.id
-            JOIN customers c       ON o.customer_id = c.id
-            LEFT JOIN departments d ON c.department_id = d.id
-            WHERE LOWER(o.status) = 'selesai'
+                SELECT 
+            o.id,
+            o.order_code,
+            o.created_at,
+            o.status,
+            o.quantity,
+            o.price,
+            o.product_item_id,      -- tambahkan
+            p.product_type_id,      -- tambahkan
+            pt.section_id,          -- tambahkan
+            p.name AS product_name,
+            p.image_path AS product_image,
+            p.file_path AS drawing_file,
+            p.item_code,
+            pt.name AS product_type_name,
+            s.name AS section_name,
+            c.name AS customer_name,
+            d.id   AS department_id,
+            d.name AS department,
+            c.line
+        FROM consum_orders o
+        JOIN product_items p   ON o.product_item_id = p.id
+        JOIN product_types pt  ON p.product_type_id = pt.id
+        JOIN sections s        ON pt.section_id = s.id
+        JOIN customers c       ON o.customer_id = c.id
+        LEFT JOIN departments d ON c.department_id = d.id
+        WHERE LOWER(o.status) = 'selesai'
         ";
 
         $params = [];

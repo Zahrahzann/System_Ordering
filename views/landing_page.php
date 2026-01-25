@@ -1,6 +1,8 @@
 <?php
-$basePath    = '/system_ordering/public';
-
+$basePath = '/system_ordering/public';
+if (!isset($reviews)) {
+    $reviews = [];
+}
 ?>
 
 <!DOCTYPE html>
@@ -46,7 +48,15 @@ $basePath    = '/system_ordering/public';
     <section class="hero" id="home">
         <div class="hero-content">
             <p class="hero-subtitle">Welcome to SOME</p>
-            <h1>SYSTEM ORDERING<br>MANUFACTURE ENGINEERING</h1>
+            <h1>
+                <span class="highlight">
+                    <span class="yellow">S</span>YSTEM
+                    <span class="yellow">O</span>RDERING
+                </span><br>
+                <span class="yellow">M</span>ANUFACTURE 
+                <span class="yellow">E</span>NGINEERING</span>
+            </h1>
+
             <button class="hero-btn" onclick="scrollToSection('services')">Pelajari Lebih Lanjut</button>
         </div>
     </section>
@@ -55,7 +65,6 @@ $basePath    = '/system_ordering/public';
     <div class="services-cards">
         <div class="service-card">
             <div class="service-icon">
-                <!-- Icon: Gear / Settings -->
                 <svg width="30" height="30" viewBox="0 0 24 24" fill="#2746d0">
                     <path
                         d="M19.14,12.94a7.07,7.07,0,0,0,.05-.94,7.07,7.07,0,0,0-.05-.94l2.11-1.65a.5.5,0,0,0,.12-.64l-2-3.46a.5.5,0,0,0-.61-.22l-2.49,1a7.28,7.28,0,0,0-1.63-.94l-.38-2.65A.5.5,0,0,0,13.21,3H10.79a.5.5,0,0,0-.49.42L9.92,6.07a7.28,7.28,0,0,0-1.63.94l-2.49-1a.5.5,0,0,0-.61.22l-2,3.46a.5.5,0,0,0,.12.64L5.42,11.06a7.07,7.07,0,0,0-.05.94,7.07,7.07,0,0,0,.05.94L3.31,14.59a.5.5,0,0,0-.12.64l2,3.46a.5.5,0,0,0,.61.22l2.49-1a7.28,7.28,0,0,0,1.63.94l.38,2.65a.5.5,0,0,0,.49.42h2.42a.5.5,0,0,0,.49-.42l.38-2.65a7.28,7.28,0,0,0,1.63-.94l2.49,1a.5.5,0,0,0,.61-.22l2-3.46a.5.5,0,0,0-.12-.64ZM12,15.5A3.5,3.5,0,1,1,15.5,12,3.5,3.5,0,0,1,12,15.5Z" />
@@ -67,7 +76,6 @@ $basePath    = '/system_ordering/public';
 
         <div class="service-card featured">
             <div class="service-icon">
-                <!-- Icon: Workflow / Process -->
                 <svg width="30" height="30" viewBox="0 0 24 24" fill="white">
                     <path d="M4 4h6v6H4V4zm10 0h6v6h-6V4zM4 14h6v6H4v-6zm10 0h6v6h-6v-6z" />
                 </svg>
@@ -78,7 +86,6 @@ $basePath    = '/system_ordering/public';
 
         <div class="service-card">
             <div class="service-icon">
-                <!-- Icon: Database / Report -->
                 <svg width="30" height="30" viewBox="0 0 24 24" fill="#2746d0">
                     <path
                         d="M12 2C7.58 2 4 3.79 4 6v12c0 2.21 3.58 4 8 4s8-1.79 8-4V6c0-2.21-3.58-4-8-4zm0 2c3.31 0 6 .9 6 2s-2.69 2-6 2-6-.9-6-2 2.69-2 6-2zm0 14c-3.31 0-6-.9-6-2v-2c1.35.84 3.53 1.34 6 1.34s4.65-.5 6-1.34v2c0 1.1-2.69 2-6 2z" />
@@ -187,12 +194,24 @@ $basePath    = '/system_ordering/public';
             </div>
             <div class="reviews-carousel">
                 <div class="reviews-scroll" id="reviewsScroll">
-                    <!-- Reviews will be inserted here by JavaScript -->
+                    <?php if (!empty($reviews)): ?>
+                        <?php foreach ($reviews as $r): ?>
+                            <div class="review-card">
+                                <h5><?= htmlspecialchars($r['customer_name'] ?? 'Anonim') ?></h5>
+                                <p class="stars"><?= str_repeat("★", (int)$r['rating']) ?><?= str_repeat("☆", 5 - (int)$r['rating']) ?></p>
+                                <p class="review-text"><?= htmlspecialchars($r['review']) ?></p>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <p class="no-reviews">Belum ada review dari customer.</p>
+                    <?php endif; ?>
                 </div>
-                <div class="carousel-nav">
-                    <button class="carousel-btn" onclick="scrollReviews('left')">‹</button>
-                    <button class="carousel-btn" onclick="scrollReviews('right')">›</button>
-                </div>
+                <?php if (!empty($reviews)): ?>
+                    <div class="carousel-nav">
+                        <button class="carousel-btn" onclick="scrollReviews('left')">‹</button>
+                        <button class="carousel-btn" onclick="scrollReviews('right')">›</button>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </section>
@@ -342,24 +361,6 @@ $basePath    = '/system_ordering/public';
             }
         ];
 
-        // Reviews Data
-        const reviews = [{
-                name: "Pratama Wijaya",
-                rating: 5,
-                review: "Sistem ordering yang sangat membantu efisiensi produksi kami. Tim support sangat responsif dan profesional!"
-            },
-            {
-                name: "Fajar Rian",
-                rating: 5,
-                review: "Implementasi yang cepat dan mudah. Sangat recommended untuk manufaktur!"
-            },
-            {
-                name: "Kurniawan",
-                rating: 4,
-                review: "Fitur lengkap dan user-friendly. Membantu meningkatkan produktivitas tim secara signifikan."
-            },
-        ];
-
         // Render Team Members
         function renderTeam() {
             const container = document.getElementById('teamScroll');
@@ -371,26 +372,6 @@ $basePath    = '/system_ordering/public';
                     <h3 class="member-name">${member.name}</h3>
                     <p class="member-position">${member.position}</p>
                     <p class="member-quote">"${member.quote}"</p>
-                </div>
-            `).join('');
-        }
-
-        // Render Reviews
-        function renderReviews() {
-            const container = document.getElementById('reviewsScroll');
-            container.innerHTML = reviews.map(review => `
-                <div class="review-card">
-                    <div class="review-header">
-                        <h3 class="review-name">${review.name}</h3>
-                        <div class="stars">
-                            ${[...Array(5)].map((_, i) => `
-                                <svg class="star ${i >= review.rating ? 'empty' : ''}" viewBox="0 0 24 24">
-                                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
-                                </svg>
-                            `).join('')}
-                        </div>
-                    </div>
-                    <p class="review-text">${review.review}</p>
                 </div>
             `).join('');
         }
@@ -430,7 +411,6 @@ $basePath    = '/system_ordering/public';
 
         // Initialize
         renderTeam();
-        renderReviews();
 
         // Navbar background on scroll
         window.addEventListener('scroll', () => {

@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Models\ConsumOrderModel;
 use App\Models\ConsumCartModel;
 use App\Models\ConsumableReportModel;
+use App\Models\NotificationModel;
 use App\Middleware\SessionMiddleware;
 use ManufactureEngineering\SystemOrdering\Config\Database;
 use PDO;
@@ -67,6 +68,22 @@ class ConsumOrderController
     {
         SessionMiddleware::requireAdminLogin();
         ConsumOrderModel::updateStatus($orderId, 'Dikirim');
+
+        // Ambil detail order untuk tahu customer_id
+        $order = ConsumOrderModel::getOrderById($orderId);
+        if ($order) {
+            NotificationModel::createWithOrderId(
+                $order['customer_id'],                                // targetKey
+                "Pesanan Anda #{$order['order_code']} sedang dikirim 🚚", // message
+                'fas fa-truck',                                       // icon
+                'info',                                               // color
+                'shipping',                                           // type
+                'customer',                                           // role
+                $orderId                                              // orderI
+            );
+        }
+
+        // Admin tetap dapat popup internal
         header('Location: /system_ordering/public/admin/shared/consumable/orders?status=shipping');
         exit;
     }
@@ -74,25 +91,38 @@ class ConsumOrderController
     /** Admin: tandai pesanan selesai */
     public static function completeOrder($orderId)
     {
-        SessionMiddleware::requireAdminLogin(); // Update status order ke selesai 
-        ConsumOrderModel::updateStatus($orderId, 'Selesai'); // Ambil detail order 
+        SessionMiddleware::requireAdminLogin();
+        ConsumOrderModel::updateStatus($orderId, 'Selesai');
         $order = ConsumOrderModel::getOrderById($orderId);
-
-        // echo "<pre>";
-        // echo "DEBUG: Isi \$order setelah getOrderById:\n";
-        // print_r($order);
-        // echo "</pre>";
-        // exit;
 
         if ($order && !empty($order['items'])) {
             $month = (int)date('n');
             $year = (int)date('Y');
             foreach ($order['items'] as $item) {
-                ConsumableReportModel::saveQty($item['section_id'], $item['product_type_id'], $item['product_item_id'], $month, $year, (int)$item['quantity']);
+                ConsumableReportModel::saveQty(
+                    $item['section_id'],
+                    $item['product_type_id'],
+                    $item['product_item_id'],
+                    $month,
+                    $year,
+                    (int)$item['quantity']
+                );
             }
+
+            // Tambahkan notifikasi untuk customer
+            NotificationModel::createWithOrderId(
+                $order['customer_id'],
+                "Pesanan Anda #{$order['order_code']} sudah selesai 🎉",
+                'fas fa-check-circle',
+                'success',
+                'completed',
+                'customer',
+                $orderId
+            );
         }
-        $role = $_SESSION['user_data']['role'] ?? 'customer';
-        header("Location: /system_ordering/public/{$role}/consumable/history?status=completed");
+
+        // Admin tetap dapat popup internal
+        header("Location: /system_ordering/public/admin/consumable/history?status=completed");
         exit;
     }
 
@@ -136,48 +166,46 @@ class ConsumOrderController
         SessionMiddleware::requireCustomerLogin();
         $customerId = $_SESSION['user_data']['id'] ?? null;
 
-        $orderId   = $_POST['order_id'] ?? null;
-        $quantity  = isset($_POST['quantity']) ? (int)$_POST['quantity'] : 1;
-        $orderCode = 'ORD-' . date('Ymd') . '-' . rand(1000, 9999);
+        $orderId        = $_POST['order_id'] ?? null;
+        $productItemId  = $_POST['product_item_id'] ?? null;
+        $productTypeId  = $_POST['product_type_id'] ?? null;
+        $sectionId      = $_POST['section_id'] ?? null;
+        $price          = $_POST['price'] ?? null;
+        $quantity       = isset($_POST['quantity']) ? (int)$_POST['quantity'] : 1;
+        $orderCode      = 'ORD-' . date('Ymd') . '-' . rand(1000, 9999);
 
-        if (!$orderId || !$customerId) {
-            header('Location: /system_ordering/public/customer/shared/consumable/orders?status=reorder_failed');
-            exit;
-        }
-
-        $oldOrder = ConsumOrderModel::getOrderById($orderId);
-        if (!$oldOrder) {
+        if (!$orderId || !$customerId || !$productItemId || !$productTypeId || !$sectionId || !$price) {
             header('Location: /system_ordering/public/customer/shared/consumable/orders?status=reorder_failed');
             exit;
         }
 
         $pdo = Database::connect();
         $stmt = $pdo->prepare("SELECT stock FROM product_items WHERE id = ?");
-        $stmt->execute([$oldOrder['product_item_id']]);
+        $stmt->execute([$productItemId]);
         $product = $stmt->fetch(PDO::FETCH_ASSOC);
 
         $stock  = (int)($product['stock'] ?? 0);
         $status = ($stock >= $quantity) ? 'Ready' : 'Pending';
 
         $stmt = $pdo->prepare("
-            INSERT INTO consum_orders 
-                (order_code, customer_id, product_item_id, product_type_id, section_id, quantity, price, status, created_at, updated_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
-        ");
+        INSERT INTO consum_orders 
+            (order_code, customer_id, product_item_id, product_type_id, section_id, quantity, price, status, created_at, updated_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+    ");
         $stmt->execute([
             $orderCode,
             $customerId,
-            $oldOrder['product_item_id'],
-            $oldOrder['product_type_id'],
-            $oldOrder['section_id'],
+            $productItemId,
+            $productTypeId,
+            $sectionId,
             $quantity,
-            $oldOrder['price'],
+            $price,
             $status
         ]);
 
         if ($status === 'Ready') {
             $updateStock = $pdo->prepare("UPDATE product_items SET stock = stock - ? WHERE id = ?");
-            $updateStock->execute([$quantity, $oldOrder['product_item_id']]);
+            $updateStock->execute([$quantity, $productItemId]);
         }
 
         header('Location: /system_ordering/public/customer/shared/consumable/orders?status=reorder_success');

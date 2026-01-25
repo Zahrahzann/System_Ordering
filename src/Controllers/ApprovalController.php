@@ -5,6 +5,7 @@ namespace App\Controllers;
 use App\Models\ApprovalModel;
 use App\Middleware\SessionMiddleware;
 use App\Models\NotificationModel;
+use App\Models\UserModel;
 
 class ApprovalController
 {
@@ -93,7 +94,7 @@ class ApprovalController
                         : 'Pesanan ditolak oleh Supervisor.'
                 ];
 
-                // Buat notif untuk customer
+                // === Notifikasi untuk Customer ===
                 if ($customerId) {
                     $message = $action === 'approve'
                         ? "Yeayy!! Pesanan anda sudah disetujui oleh SPV🎉 <br> Silakan lihat halaman Tracking WO!"
@@ -118,6 +119,35 @@ class ApprovalController
                             'order_status',
                             'customer'
                         );
+                    }
+                }
+
+                // === Notifikasi untuk Admin (hanya kalo approve) ===
+                if ($action === 'approve') {
+                    $adminMessage = "Pesanan Work Order #{$orderId} sudah disetujui SPV dan siap diproses oleh Admin.";
+                    $adminIcon    = 'fas fa-clipboard-check';
+                    $adminColor   = 'info';
+
+                    // contoh: ambil semua admin dari tabel users
+                    $admins = UserModel::getAllAdmins();
+                    foreach ($admins as $admin) {
+                        $existingAdminNotif = NotificationModel::findUnreadByMessage(
+                            $admin['id'],
+                            'admin',
+                            'order_status',
+                            $adminMessage
+                        );
+
+                        if (!$existingAdminNotif) {
+                            NotificationModel::create(
+                                $admin['id'],
+                                $adminMessage,
+                                $adminIcon,
+                                $adminColor,
+                                'order_status',
+                                'admin'
+                            );
+                        }
                     }
                 }
             } else {

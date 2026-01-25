@@ -39,6 +39,7 @@ use App\Controllers\ConsumHistoryController;
 use App\Controllers\MaterialController;
 use App\Controllers\WorkOrderCostController;
 use App\Controllers\ConsumableReportController;
+use App\Controllers\LandingController;
 
 // =====================
 // ROUTING DINAMIS (Regex)
@@ -92,10 +93,11 @@ if ($route === '/admin/consumable/report/save' && $_SERVER['REQUEST_METHOD'] ===
 // ROUTES UTAMA
 // =====================
 switch (true) {
-    // Root route → Landing Page 
     case ($route === '/'):
-        require __DIR__ . '/../views/landing_page.php';
+        $controller = new LandingController();
+        $controller->index();
         break;
+
 
     // Logout
     case ($route === '/logout'):

@@ -148,6 +148,22 @@ body {
     margin-top: 75px;
 }
 
+/* Hero Text (Judul) */
+.hero h1 .yellow {
+    color: yellow;
+    font-weight: 700;
+    font-size: 1.3em;
+
+}
+
+.hero h1 .normal {
+    color: white;
+}
+
+.hero h1 .highlight {
+    color: white;
+}
+
 .hero-content {
     max-width: 900px;
     padding: 0 20px;
@@ -488,12 +504,16 @@ section {
 
 .reviews-scroll {
     display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 180px;
     gap: 30px;
     overflow-x: auto;
     scroll-behavior: smooth;
     padding: 20px 0;
     scrollbar-width: none;
 }
+
 
 .reviews-scroll::-webkit-scrollbar {
     display: none;
@@ -519,6 +539,16 @@ section {
     color: #0e2f59;
     font-weight: 600;
 }
+
+.no-reviews {
+    flex: 1;
+    text-align: center;
+    font-style: italic;
+    color: #777;
+    font-size: 1.1rem;
+    padding: 40px 20px;
+}
+
 
 .stars {
     display: flex;

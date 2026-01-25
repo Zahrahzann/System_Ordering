@@ -10,6 +10,11 @@ use App\Middleware\SessionMiddleware;
 
 class TrackingController
 {
+    public static function index()
+    {
+        self::showTrackingPage();
+    }
+
     /**
      * Menampilkan halaman tracking (multi-role)
      */
@@ -65,7 +70,6 @@ class TrackingController
             }
         }
 
-        // Kirim $grouped ke view
         $orders = array_values($grouped);
 
         require_once __DIR__ . '/../../views/shared/tracking_order.php';
@@ -77,30 +81,27 @@ class TrackingController
     public static function updateItemDetails($itemId)
     {
         SessionMiddleware::requireAdminLogin();
+
         $newStatus = $_POST['status'] ?? '';
         $picMfg    = trim($_POST['pic_mfg'] ?? '');
         $estimasi  = trim($_POST['estimasi_pengerjaan'] ?? '');
-
         $validStatuses = ['pending', 'on_progress', 'finish', 'completed'];
 
-        // Ambil item sebelum update
         $item = TrackingModel::findItemById($itemId);
+        if (!$item) {
+            return self::respondUpdate(false, 'Item tidak ditemukan');
+        }
         $oldStatus = $item['production_status'] ?? null;
 
-        // Validasi status
         if (!in_array($newStatus, $validStatuses)) {
-            header('Location: /system_ordering/public/admin/tracking');
-            exit;
+            return self::respondUpdate(false, 'Status tidak valid');
         }
 
         // Update status
         if ($oldStatus === 'pending' && $newStatus === 'on_progress') {
             $pdo = \ManufactureEngineering\SystemOrdering\Config\Database::connect();
             $stmt = $pdo->prepare("UPDATE items 
-                SET pic_mfg = ?, 
-                    production_status = ?, 
-                    estimasi_pengerjaan = ?, 
-                    updated_at = NOW() 
+                SET pic_mfg = ?, production_status = ?, estimasi_pengerjaan = ?, updated_at = NOW() 
                 WHERE id = ?");
             $stmt->execute([$picMfg, $newStatus, $estimasi, $itemId]);
         } else {
@@ -110,17 +111,59 @@ class TrackingController
         // Refresh item setelah update
         $item = TrackingModel::findItemById($itemId);
 
+        // ========================================
+        // NOTIFIKASI SYSTEM - ON PROGRESS
+        // ========================================
+        if ($oldStatus === 'pending' && $newStatus === 'on_progress') {
+            $customerId   = $item['customer_id'];
+            $departmentId = $item['department_id'];
+            $orderId      = $item['order_id'];
+            $itemName     = $item['product_name'] ?? $item['name'] ?? 'Item';
+            $adminId      = 7; // atau ambil dari config/session
+
+            // 1. Notifikasi untuk ADMIN
+            NotificationModel::create(
+                $adminId,
+                "Item '{$itemName}' dari Order #{$orderId} telah dimulai produksi (On Progress)",
+                'fas fa-cogs',
+                'primary',
+                'order',
+                'admin'
+            );
+
+            // 2. Notifikasi untuk SPV
+            if ($departmentId) {
+                NotificationModel::create(
+                    $departmentId,
+                    "Item '{$itemName}' dari Order #{$orderId} sedang dalam proses produksi",
+                    'fas fa-cogs',
+                    'primary',
+                    'order',
+                    'spv'
+                );
+            }
+
+            // 3. Notifikasi untuk CUSTOMER
+            NotificationModel::create(
+                $customerId,
+                "Pesanan Anda '{$itemName}' (Order #{$orderId}) sedang dalam proses produksi! ⚙️",
+                'fas fa-cogs',
+                'primary',
+                'order',
+                'customer'
+            );
+
+            error_log("Notifikasi On Progress dibuat untuk Order #{$orderId}");
+        }
+
         // Hitung durasi kalau status berubah ke finish
         if ($oldStatus === 'on_progress' && $newStatus === 'finish') {
             $startTime  = !empty($item['updated_at']) ? strtotime($item['updated_at']) : null;
             $finishTime = time();
-
-            if ($startTime && $finishTime > $startTime) {
-                $durationMinutes = round(($finishTime - $startTime) / 60);
-                TrackingModel::updateItemDuration($itemId, $durationMinutes);
-            } else {
-                TrackingModel::updateItemDuration($itemId, 0);
-            }
+            $durationMinutes = ($startTime && $finishTime > $startTime)
+                ? round(($finishTime - $startTime) / 60)
+                : 0;
+            TrackingModel::updateItemDuration($itemId, $durationMinutes);
         }
 
         // Fallback: langsung pending → finish
@@ -128,18 +171,75 @@ class TrackingController
             TrackingModel::updateItemDuration($itemId, 0);
         }
 
-        // Jika status berubah ke finish → kirim notifikasi + flag review
+        // ========================================
+        // NOTIFIKASI SYSTEM - FINISH
+        // ========================================
         if ($newStatus === 'finish') {
+            $customerId   = $item['customer_id'];
+            $departmentId = $item['department_id'];
+            $orderId      = $item['order_id'];
+            $itemName     = $item['item_name'] ?? $item['name'] ?? 'Item';
+            $adminId      = 7; // atau ambil dari config/session
+
+            // 1. Notifikasi untuk ADMIN
             NotificationModel::create(
-                $item['customer_id'], 
-                'Pesanan #' . $item['order_id'] . ' HALOO!! Work Order kamu sudah selesai, segera ambil barang di ME ya, Terima kasih sudah menggunakan SOME. Mohon untuk isi Rating dan Reviewnya yaaa~~ , ', // message
+                $adminId,
+                "Item '{$itemName}' dari Order #{$orderId} telah selesai diproduksi",
                 'fas fa-check-circle',
-                'success',            
-                'order',              
-                'customer'             
+                'success',
+                'order',
+                'admin'
             );
 
-            ReviewModel::markPendingReview($item['order_id'], $item['customer_id']);
+            // 2. Notifikasi untuk SPV
+            if ($departmentId) {
+                NotificationModel::create(
+                    $departmentId,
+                    "Item '{$itemName}' dari Order #{$orderId} telah selesai diproduksi",
+                    'fas fa-check-circle',
+                    'success',
+                    'order',
+                    'spv'
+                );
+            }
+
+            // 3. Notifikasi untuk CUSTOMER dengan order_id untuk review
+            $message = "Pesanan Anda '{$itemName}' sudah selesai diproduksi! 🎉\n\nSilakan ambil barang Anda dan berikan rating & review untuk membantu kami meningkatkan layanan.";
+
+            NotificationModel::createWithOrderId(
+                $customerId,
+                $message,
+                'fas fa-star',
+                'success',
+                'order',
+                'customer',
+                $orderId
+            );
+
+            // Mark pending review (opsional, tergantung kebutuhan)
+            // ReviewModel::markPendingReview($orderId, $customerId);
+
+            error_log("Notifikasi Finish dibuat untuk Order #{$orderId} (dengan review prompt untuk customer)");
+        }
+
+        return self::respondUpdate(true, 'Update berhasil');
+    }
+
+    /**
+     * Helper respon: AJAX → JSON, Form → redirect
+     */
+    private static function respondUpdate(bool $ok, string $message)
+    {
+        $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
+            strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest';
+
+        if ($isAjax) {
+            header('Content-Type: application/json');
+            echo json_encode([
+                'status'  => $ok ? 'success' : 'error',
+                'message' => $message
+            ]);
+            exit;
         }
 
         header('Location: /system_ordering/public/admin/tracking');
@@ -206,11 +306,64 @@ class TrackingController
             die('Item tidak valid atau bukan milik Anda.');
         }
 
-        // Simpan data ke session untuk prefill form
         $_SESSION['reorder_item'] = $item;
 
-        // Redirect ke form WO
         header('Location: /system_ordering/public/customer/work_order/form?reorder=1');
         exit;
+    }
+
+    /**
+     * Customer submit review & rating
+     */
+    public static function submitReview()
+    {
+        SessionMiddleware::requireCustomerLogin();
+
+        $orderId    = $_POST['order_id'] ?? null;
+        $customerId = $_SESSION['user_data']['id'];
+        $rating     = $_POST['rating'] ?? null;
+        $review     = $_POST['review'] ?? null;
+
+        header('Content-Type: application/json');
+
+        if (!$orderId || !$rating || !$review) {
+            http_response_code(400);
+            echo json_encode([
+                'status'  => 'error',
+                'message' => 'Data review tidak lengkap.'
+            ]);
+            return;
+        }
+
+        try {
+            $existing = ReviewModel::checkExisting($orderId, $customerId);
+            if ($existing) {
+                echo json_encode([
+                    'status'  => 'error',
+                    'message' => 'Anda sudah memberikan review untuk pesanan ini.'
+                ]);
+                return;
+            }
+
+            ReviewModel::submitReview($orderId, $customerId, $rating, $review);
+
+            echo json_encode([
+                'status'  => 'success',
+                'message' => 'Terima kasih! Review Anda sudah tersimpan 🙏',
+                'data'    => [
+                    'order_id'    => $orderId,
+                    'customer_id' => $customerId,
+                    'rating'      => $rating,
+                    'review'      => $review
+                ]
+            ]);
+        } catch (\Exception $e) {
+            error_log("Submit review error: " . $e->getMessage());
+            http_response_code(500);
+            echo json_encode([
+                'status'  => 'error',
+                'message' => 'Terjadi kesalahan saat menyimpan review.'
+            ]);
+        }
     }
 }

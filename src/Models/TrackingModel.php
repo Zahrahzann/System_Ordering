@@ -178,7 +178,10 @@ class TrackingModel
     public static function findItemById($itemId)
     {
         $pdo = Database::connect();
-        $sql = "SELECT * FROM items WHERE id = ?";
+        $sql = "SELECT i.*, o.department AS department_id
+            FROM items i
+            JOIN orders o ON i.order_id = o.id
+            WHERE i.id = ?";
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$itemId]);
         return $stmt->fetch(PDO::FETCH_ASSOC);

@@ -271,7 +271,7 @@ $productTypeId   = $productType['id'] ?? null;
                                 </div>
 
                                 <div class="form-group">
-                                    <label>File Tambahan</label>
+                                    <label>File Drawing</label>
                                     <input type="file" name="file_path" class="form-control">
                                 </div>
                             </div>
@@ -372,6 +372,30 @@ $productTypeId   = $productType['id'] ?? null;
                     }
                 });
             </script>
+
+            <?php if (isset($_GET['status']) && $_GET['status'] === 'item_added'): ?>
+                <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+                <script>
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Berhasil!',
+                        text: 'Produk berhasil ditambahkan ke keranjang.',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                </script>
+            <?php endif; ?>
+
+            <?php if (isset($_GET['status']) && $_GET['status'] === 'add_failed'): ?>
+                <script>
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Gagal!',
+                        text: 'Produk gagal ditambahkan ke keranjang.'
+                    });
+                </script>
+            <?php endif; ?>
+
 </body>
 
 </html>

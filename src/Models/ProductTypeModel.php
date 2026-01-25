@@ -7,7 +7,6 @@ use ManufactureEngineering\SystemOrdering\Config\Database;
 use App\Helpers\CodeGenerator;
 use PDO;
 
-
 class ProductTypeModel
 {
     // List semua jenis produk dalam section
@@ -77,8 +76,8 @@ class ProductTypeModel
         WHERE id=?
     ");
         $stmt->execute([
-            $old['section_id'],              // pakai section_id lama
-            $old['product_code'],            // pakai product_code lama
+            $old['section_id'],             
+            $old['product_code'],            
             $data['name'],
             !empty($data['price']) ? $data['price'] : null,
             $data['description'],

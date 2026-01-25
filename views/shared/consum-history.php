@@ -204,6 +204,10 @@ $currentRole = $_SESSION['user_data']['role'] ?? 'customer';
                             <div class="modal-body">
                                 <form id="reorderForm" method="POST" action="<?= $basePath ?>/customer/shared/consumable/reorder">
                                     <input type="hidden" name="order_id" id="reorder_order_id">
+                                    <input type="hidden" name="product_item_id" id="reorder_product_item_id">
+                                    <input type="hidden" name="product_type_id" id="reorder_product_type_id">
+                                    <input type="hidden" name="section_id" id="reorder_section_id">
+                                    <input type="hidden" name="price" id="reorder_price_value">
 
                                     <div class="detail-row">
                                         <strong>Produk</strong>
@@ -341,15 +345,19 @@ $currentRole = $_SESSION['user_data']['role'] ?? 'customer';
 
         function openReorderModal(order) {
             document.getElementById('reorder_order_id').value = order.id;
+            document.getElementById('reorder_product_item_id').value = order.product_item_id;
+            document.getElementById('reorder_product_type_id').value = order.product_type_id;
+            document.getElementById('reorder_section_id').value = order.section_id;
+            document.getElementById('reorder_price_value').value = order.price;
+
             document.getElementById('reorder_product').innerText = order.product_name;
             document.getElementById('reorder_quantity').value = order.quantity;
 
-            reorderUnitPrice = order.price; // simpan harga satuan
-            document.getElementById('reorder_price').innerText = "Rp " + new Intl.NumberFormat('id-ID').format(reorderUnitPrice);
+            reorderUnitPrice = order.price;
+            document.getElementById('reorder_price').innerText =
+                "Rp " + new Intl.NumberFormat('id-ID').format(reorderUnitPrice);
 
-            // hitung total awal
             updateReorderTotal();
-
             document.getElementById('reorderModal').classList.add('active');
         }
 

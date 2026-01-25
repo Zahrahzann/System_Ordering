@@ -30,7 +30,7 @@ $currentRole = $_SESSION['user_data']['role'] ?? 'customer';
                         <h1 class="page-title">Tracking Pesanan Consumable</h1>
                         <p class="page-subtitle">
                             <?php if ($currentRole === 'admin'): ?>
-                                Pantau status pesanan customer terbaru, kelola pengembalian dengan mudah, dan dapatkan insight berharga  
+                                Pantau status pesanan customer terbaru, kelola pengembalian dengan mudah, dan dapatkan insight berharga
                             <?php elseif ($currentRole === 'spv'): ?>
                                 Pantau status pesanan consumable terbaru pada departemen Anda
                             <?php else: ?>
@@ -46,7 +46,7 @@ $currentRole = $_SESSION['user_data']['role'] ?? 'customer';
                             <i class="fas fa-box-open fa-3x"></i>
                             <h4>Belum ada pesanan</h4>
                             <p>Silakan checkout dari keranjang untuk membuat pesanan baru.</p>
-                            <a href="<?= $basePath ?>/shared/consumable/product-items/" class="btn-primary">
+                            <a href="<?= $basePath ?>/admin/consumable/sections" class="btn-primary">
                                 Lihat Katalog
                             </a>
                         </div>
@@ -261,6 +261,66 @@ $currentRole = $_SESSION['user_data']['role'] ?? 'customer';
             }
         });
     </script>
+
+    <!-- POP UP NOTIFICATION -->
+    <?php if (isset($_GET['status'])): ?>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+            const status = "<?= $_GET['status'] ?>";
+            let config = {};
+
+            switch (status) {
+                case 'checkout_success':
+                    config = {
+                        icon: 'success',
+                        title: 'Checkout Berhasil!',
+                        text: 'Pesanan dari keranjang berhasil dibuat.',
+                        timer: 2000,
+                        showConfirmButton: false
+                    };
+                    break;
+                case 'checkout_failed':
+                    config = {
+                        icon: 'error',
+                        title: 'Checkout Gagal!',
+                        text: 'Pesanan tidak bisa diproses.'
+                    };
+                    break;
+                case 'order_success':
+                    config = {
+                        icon: 'success',
+                        title: 'Order Berhasil!',
+                        text: 'Pesanan langsung dari katalog berhasil dibuat.',
+                        timer: 2000,
+                        showConfirmButton: false
+                    };
+                    break;
+                case 'reorder_success':
+                    config = {
+                        icon: 'success',
+                        title: 'Reorder Berhasil!',
+                        text: 'Pesanan ulang berhasil dibuat.',
+                        timer: 2000,
+                        showConfirmButton: false
+                    };
+                    break;
+                case 'completed':
+                    config = {
+                        icon: 'success',
+                        title: 'Order Selesai!',
+                        text: 'Pesanan sudah ditandai selesai.',
+                        timer: 2000,
+                        showConfirmButton: false
+                    };
+                    break;
+            }
+
+            if (config.title) {
+                Swal.fire(config);
+            }
+        </script>
+    <?php endif; ?>
+
 </body>
 
 </html>

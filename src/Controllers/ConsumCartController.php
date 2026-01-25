@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Models\ConsumCartModel;
+use App\Models\ProductItemModel;
 use App\Middleware\SessionMiddleware;
 
 class ConsumCartController
@@ -34,31 +35,23 @@ class ConsumCartController
     /** Tambah item ke cart (dari katalog) */
     public static function processAdd()
     {
-        // SessionMiddleware::requireCustomerLogin();
-        // echo "<pre>";
-        // print_r($_POST);
-        // echo "</pre>";
-        // exit;
-
         SessionMiddleware::requireCustomerLogin();
         $customerId = $_SESSION['user_data']['id'] ?? null;
-
         if (!$customerId) {
             header('Location: /system_ordering/public/customer/login');
             exit;
         }
-
         $itemId = $_POST['product_item_id'] ?? null;
-        $qty    = isset($_POST['quantity']) ? (int)$_POST['quantity'] : 1;
-        $qty    = max(1, $qty);
-
+        $qty = isset($_POST['quantity']) ? (int)$_POST['quantity'] : 1;
+        $qty = max(1, $qty);
         if (!$itemId) {
-            header('Location: /system_ordering/public/customer/consumable/cart?status=missing_item');
+            header('Location: /system_ordering/public/shared/consumable/product-items?status=missing_item');
             exit;
         }
-
-        $ok = ConsumCartModel::addItem($customerId, (int)$itemId, $qty);
-        header('Location: /system_ordering/public/customer/consumable/cart?status=' . ($ok ? 'item_added' : 'add_failed'));
+        $ok = ConsumCartModel::addItem($customerId, (int)$itemId, $qty); // ambil typeId dari product item 
+        $item = ProductItemModel::find((int)$itemId);
+        $typeId = $item['product_type_id'] ?? null;
+        header("Location: /system_ordering/public/shared/consumable/product-items/{$typeId}?status=" . ($ok ? 'item_added' : 'add_failed'));
         exit;
     }
 
