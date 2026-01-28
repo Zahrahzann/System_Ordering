@@ -12,6 +12,8 @@ use App\Controllers\ConsumableController;
 use App\Controllers\ConsumCartController;
 use App\Controllers\ConsumOrderController;
 use App\Controllers\MaterialController;
+use App\Controllers\ReviewController;
+use App\Models\NotificationModel;
 
 // ROUTING DINAMIS (pakai preg_match di luar switch)
 $matches = [];
@@ -93,7 +95,24 @@ switch ($route) {
         MaterialController::index();
         break;
 
-    // --- PESAN ERROR ---
+    // --- NOTIFICATIONS --- 
+    case '/customer/notification/mark':
+        $id = $_POST['id'] ?? null;
+        if ($id) {
+            NotificationModel::markAsRead($id);
+            echo json_encode(['success' => true]);
+        } else {
+            http_response_code(400);
+            echo json_encode(['error' => 'ID notifikasi kosong']);
+        }
+        exit;
+
+    // --- REVIEWS ---
+    case '/customer/review/submit':
+        ReviewController::submit();
+        exit;
+
+        // --- PESAN ERROR ---
     default:
         http_response_code(404);
         echo "404 Not Found :) <br>";

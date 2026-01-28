@@ -31,22 +31,22 @@ class NotificationModel
         $pdo = Database::connect();
         switch ($role) {
             case 'spv':
-                $sql = "SELECT id, message, created_at AS date, icon, color, type
-                        FROM notifications 
-                        WHERE department = ? AND is_read = 0
-                        ORDER BY created_at DESC LIMIT 1";
+                $sql = "SELECT id, message, created_at AS date, icon, color, type, order_id
+                    FROM notifications 
+                    WHERE department = ? AND is_read = 0
+                    ORDER BY created_at DESC LIMIT 1";
                 break;
             case 'admin':
-                $sql = "SELECT id, message, created_at AS date, icon, color, type
-                        FROM notifications 
-                        WHERE user_id = ? AND is_read = 0
-                        ORDER BY created_at DESC LIMIT 1";
+                $sql = "SELECT id, message, created_at AS date, icon, color, type, order_id
+                    FROM notifications 
+                    WHERE user_id = ? AND is_read = 0
+                    ORDER BY created_at DESC LIMIT 1";
                 break;
             default: // customer
-                $sql = "SELECT id, message, created_at AS date, icon, color, type
-                        FROM notifications 
-                        WHERE customer_id = ? AND is_read = 0
-                        ORDER BY created_at DESC LIMIT 1";
+                $sql = "SELECT id, message, created_at AS date, icon, color, type, order_id
+                    FROM notifications 
+                    WHERE customer_id = ? AND is_read = 0
+                    ORDER BY created_at DESC LIMIT 1";
         }
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$targetKey]);

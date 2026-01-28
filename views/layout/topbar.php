@@ -19,14 +19,15 @@ $alerts     = [];
 if ($currentRole === 'spv') {
     $department = $userData['department_id'] ?? null;
     $alertCount = NotificationModel::countUnread($department, 'spv');
-    $alerts     = NotificationModel::getLatest($department, 'spv');
+    $alerts     = NotificationModel::getUnreadList($department, 'spv', 10);
 } elseif ($currentRole === 'customer') {
     $alertCount = NotificationModel::countUnread($userId, 'customer');
-    $alerts     = NotificationModel::getLatest($userId, 'customer');
+    $alerts     = NotificationModel::getUnreadList($userId, 'customer', 10);
 } elseif ($currentRole === 'admin') {
     $alertCount = NotificationModel::countUnread($userId, 'admin');
-    $alerts     = NotificationModel::getLatest($userId, 'admin');
+    $alerts     = NotificationModel::getUnreadList($userId, 'admin', 10);
 }
+
 
 // Pesan (sementara kosong dulu kalau belum ada MessageModel)
 $messageCount = 0;
@@ -72,6 +73,30 @@ $messages     = [];
             body.sidebar-toggled #content-wrapper {
                 padding-left: 0;
             }
+        }
+
+        .rating-stars {
+            display: flex;
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+            margin-bottom: 1rem;
+        }
+
+        .rating-stars input[type="radio"] {
+            display: none;
+        }
+
+        .rating-stars label {
+            font-size: 2rem;
+            color: #ccc;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .rating-stars input[type="radio"]:checked~label,
+        .rating-stars label:hover,
+        .rating-stars label:hover~label {
+            color: gold;
         }
     </style>
 </head>
@@ -254,30 +279,24 @@ $messages     = [];
 <div class="modal fade" id="ratingReviewModal" tabindex="-1" aria-labelledby="ratingReviewLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form id="reviewForm" method="post" action="/system_ordering/public/customer/review/submit">
+            <form id="reviewForm" method="post" action="/customer/review/submit">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="ratingReviewLabel">Isi Rating & Review</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                    <h5 class="modal-title" id="ratingReviewLabel">Isi Rating & Review</h5> <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
                 </div>
-                <div class="modal-body">
-                    <!-- order_id akan diisi via JS saat notif diklik -->
-                    <input type="hidden" name="order_id" id="orderIdInput" value="">
-
-                    <label for="rating">Rating:</label>
-                    <select name="rating" id="rating" class="form-control" required>
-                        <option value="5">★★★★★</option>
-                        <option value="4">★★★★</option>
-                        <option value="3">★★★</option>
-                        <option value="2">★★</option>
-                        <option value="1">★</option>
-                    </select>
-
-                    <label for="review" class="mt-3">Review:</label>
+                <div class="modal-body"> <!-- order_id akan diisi via JS saat notif diklik -->
+                    <input type="hidden" name="order_id" id="orderIdInput" value=""> <label class="form-label">Rating:</label>
+                    <div class="rating-stars">
+                        <input type="radio" name="rating" id="star5" value="5"><label for="star5">★</label>
+                        <input type="radio" name="rating" id="star4" value="4"><label for="star4">★</label>
+                        <input type="radio" name="rating" id="star3" value="3"><label for="star3">★</label>
+                        <input type="radio" name="rating" id="star2" value="2"><label for="star2">★</label>
+                        <input type="radio" name="rating" id="star1" value="1"><label for="star1">★</label>
+                    </div>
+                    <label for="review" class="form-label">Review:</label>
                     <textarea name="review" id="review" class="form-control" rows="4" placeholder="Tulis ulasanmu di sini..." required></textarea>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary">Kirim</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-primary">Kirim</button> <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
                 </div>
             </form>
         </div>
@@ -364,6 +383,7 @@ $messages     = [];
     });
 </script>
 
+<!-- Notif Consumable (Admin Only) -->
 <?php if (!empty($_GET['status'])): ?>
     <script>
         (function() {
@@ -436,6 +456,7 @@ $messages     = [];
     </script>
 <?php endif; ?>
 
+<!-- Notifikasi Order Consumable (Custmer Only) -->
 <?php if ($currentRole === 'customer'): ?>
     <script>
         (function() {
@@ -475,7 +496,7 @@ $messages     = [];
     </script>
 <?php endif; ?>
 
-
+<!-- Notifikasi Work Order (Customer Only) -->
 <?php if ($currentRole === 'customer'): ?>
     <script>
         (function() {
@@ -550,7 +571,7 @@ $messages     = [];
                         })
                         .then(response => response.json())
                         .then(result => {
-                            if (result.status === 'success') {
+                            if (result.success) {
                                 const modalEl = document.getElementById('ratingReviewModal');
                                 const modal = bootstrap.Modal.getInstance(modalEl);
                                 if (modal) modal.hide();
@@ -561,7 +582,6 @@ $messages     = [];
                                     text: 'Review Anda telah terkirim. Kami menunggu pesananmu yang lainnya lagi~!'
                                 });
 
-                                // Reset form
                                 reviewForm.reset();
                             } else {
                                 Swal.fire({
@@ -585,6 +605,7 @@ $messages     = [];
     </script>
 <?php endif; ?>
 
+<!-- Notifikasi Work Order Approval (SPV Only) -->
 <?php if ($currentRole === 'spv'): ?>
     <script>
         (function() {
@@ -632,6 +653,7 @@ $messages     = [];
     </script>
 <?php endif; ?>
 
+<!-- Notif stock consumable -->
 <?php if ($currentRole === 'admin'): ?>
     <script>
         (function() {
@@ -718,6 +740,44 @@ $messages     = [];
 
             // Cek low stock setiap 1 jam
             setInterval(checkLowStock, 3600000);
+        })();
+    </script>
+<?php endif; ?>
+
+<!-- Notif Low Material Stock -->
+<?php if ($currentRole === 'admin'): ?>
+    <script>
+        (function() {
+            function checkLowStockMaterial() {
+                const lastAlert = localStorage.getItem('lastLowStockMaterialAlert');
+                const now = Date.now();
+
+                // skip kalau belum 1 jam sejak alert terakhir
+                if (lastAlert && (now - parseInt(lastAlert, 10)) < 3600000) {
+                    return;
+                }
+
+                fetch('/system_ordering/public/low_stock_material.php')
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.alert) {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Pengingat Stok Material Rendah',
+                                html: data.message,
+                                confirmButtonText: 'OK'
+                            }).then(() => {
+                                localStorage.setItem('lastLowStockMaterialAlert', now.toString());
+                            });
+                        }
+                    })
+                    .catch(err => console.error('Low stock material error:', err));
+            }
+
+            // jalankan pertama kali saat halaman load
+            checkLowStockMaterial();
+            // cek tiap 1 jam (3600000 ms)
+            setInterval(checkLowStockMaterial, 3600000);
         })();
     </script>
 <?php endif; ?>

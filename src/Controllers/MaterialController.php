@@ -14,8 +14,15 @@ class MaterialController
     {
         SessionMiddleware::requireLogin();
 
-        $title      = "Kelola Material";
-        $types      = MaterialTypeModel::getAll();
+        $title    = "Kelola Material";
+        $search   = $_GET['search'] ?? '';
+
+        if ($search) {
+            $types = MaterialTypeModel::search($search);
+        } else {
+            $types = MaterialTypeModel::getAll();
+        }
+
         $dimensions = MaterialDimensionModel::getAllGrouped();
         $basePath   = "/system_ordering/public";
 
@@ -68,7 +75,8 @@ class MaterialController
             MaterialDimensionModel::create([
                 'material_type_id' => (int)$_POST['material_type_id'],
                 'dimension'        => $_POST['dimension'],
-                'stock'            => (float)$_POST['stock']
+                'stock'            => (float)$_POST['stock'],
+                'minimum_stock'    => (float)($_POST['minimum_stock'] ?? 0)   // tambahkan ini
             ]);
 
             $_SESSION['flash_notification'] = [
@@ -86,15 +94,17 @@ class MaterialController
         SessionMiddleware::requireAdminLogin();
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $old = MaterialDimensionModel::getById((int)$id);
-            $newStock = (float)($_POST['stock'] ?? 0);
+            $newStock     = (float)($_POST['stock'] ?? 0);
+            $minimumStock = (float)($_POST['minimum_stock'] ?? 0);
 
-            // Update stok
+            // Update stok + minimum stock
             MaterialDimensionModel::update((int)$id, [
-                'dimension' => $_POST['dimension'] ?? '',
-                'stock'     => $newStock
+                'dimension'     => $_POST['dimension'] ?? '',
+                'stock'         => $newStock,
+                'minimum_stock' => $minimumStock
             ]);
 
-            // Catat log stok
+            // Catat log stok jika berubah
             if ($newStock != $old['stock']) {
                 $changeType = $newStock > $old['stock'] ? 'IN' : 'OUT';
                 $quantity   = abs($newStock - $old['stock']);
@@ -194,6 +204,45 @@ class MaterialController
         try {
             $dimensions = MaterialDimensionModel::getByType((int)$typeId);
             echo json_encode($dimensions);
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            echo json_encode(['error' => 'Gagal ambil data', 'detail' => $e->getMessage()]);
+        }
+        exit;
+    }
+
+    /** Cari material berdasarkan nama atau nomor */
+    public static function search()
+    {
+        SessionMiddleware::requireLogin();
+        header('Content-Type: application/json');
+
+        $keyword = $_GET['keyword'] ?? '';
+
+        if (strlen($keyword) < 3) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Minimal 3 karakter untuk pencarian']);
+            exit;
+        }
+
+        try {
+            $pdo = \ManufactureEngineering\SystemOrdering\Config\Database::connect();
+            $like = "%$keyword%";
+            $prefix = substr($keyword, 0, 3) . '%';
+
+            $stmt = $pdo->prepare("
+    SELECT id, material_number, name
+    FROM material_types
+    WHERE name LIKE :like
+       OR material_number LIKE :like
+       OR material_number LIKE :prefix
+    ORDER BY name ASC
+");
+            $stmt->bindParam(':like', $like);
+            $stmt->bindParam(':prefix', $prefix);
+            $stmt->execute();
+
+            echo json_encode($stmt->fetchAll(\PDO::FETCH_ASSOC));
         } catch (\Throwable $e) {
             http_response_code(500);
             echo json_encode(['error' => 'Gagal ambil data', 'detail' => $e->getMessage()]);

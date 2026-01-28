@@ -37,13 +37,15 @@ class MaterialDimensionModel
     {
         $pdo = Database::connect();
         $stmt = $pdo->prepare("
-            INSERT INTO material_dimensions (material_type_id, dimension, stock)
-            VALUES (:material_type_id, :dimension, :stock)
+            INSERT INTO material_dimensions (material_type_id, dimension, stock, minimum_stock)
+            VALUES (:material_type_id, :dimension, :stock, :minimum_stock)
         ");
         $stmt->bindParam(':material_type_id', $data['material_type_id']);
         $stmt->bindParam(':dimension', $data['dimension']);
         $stmt->bindParam(':stock', $data['stock']);
-        return $stmt->execute();
+        $stmt->bindParam(':minimum_stock', $data['minimum_stock']);
+        $stmt->execute();
+        return $pdo->lastInsertId();
     }
 
     public static function update($id, $data)
@@ -51,11 +53,12 @@ class MaterialDimensionModel
         $pdo = Database::connect();
         $stmt = $pdo->prepare("
             UPDATE material_dimensions
-            SET dimension = :dimension, stock = :stock
+            SET dimension = :dimension, stock = :stock, minimum_stock = :minimum_stock
             WHERE id = :id
         ");
         $stmt->bindParam(':dimension', $data['dimension']);
         $stmt->bindParam(':stock', $data['stock']);
+        $stmt->bindParam(':minimum_stock', $data['minimum_stock']);
         $stmt->bindParam(':id', $id, PDO::PARAM_INT);
         return $stmt->execute();
     }
@@ -68,7 +71,6 @@ class MaterialDimensionModel
         return $stmt->execute();
     }
 
-    /** Hapus semua dimension berdasarkan type */
     public static function deleteByType($typeId)
     {
         $pdo = Database::connect();
@@ -81,12 +83,13 @@ class MaterialDimensionModel
     {
         $pdo = Database::connect();
         $stmt = $pdo->prepare("
-            SELECT id, dimension, stock 
-            FROM material_dimensions 
-            WHERE material_type_id = ? 
+            SELECT id, dimension, stock, minimum_stock
+            FROM material_dimensions
+            WHERE material_type_id = :typeId
             ORDER BY dimension ASC
         ");
-        $stmt->execute([$typeId]);
+        $stmt->bindParam(':typeId', $typeId, PDO::PARAM_INT);
+        $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }

@@ -496,6 +496,12 @@ section {
 }
 
 /* Reviews Carousel */
+.stars {
+    color: gold;
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+}
+
 .reviews-carousel {
     position: relative;
     overflow: hidden;
@@ -549,6 +555,12 @@ section {
     padding: 40px 20px;
 }
 
+@media (max-width: 480px) {
+    .review-card {
+        min-width: 280px;
+        padding: 20px;
+    }
+}
 
 .stars {
     display: flex;

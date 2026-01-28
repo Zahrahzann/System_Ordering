@@ -23,7 +23,7 @@ class MaterialTypeModel
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    /** Create type baru, return ID untuk dipakai insert dimension */
+    /** Create type baru */
     public static function create($data)
     {
         $pdo = Database::connect();
@@ -57,5 +57,26 @@ class MaterialTypeModel
         $stmt = $pdo->prepare("DELETE FROM material_types WHERE id = :id");
         $stmt->bindParam(':id', $id, PDO::PARAM_INT);
         return $stmt->execute();
+    }
+
+    public static function search($keyword)
+    {
+        $pdo = Database::connect();
+        $like   = "%$keyword%";
+        $prefix = substr($keyword, 0, 3) . '%';
+
+        $stmt = $pdo->prepare("
+        SELECT id, material_number, name
+        FROM material_types
+        WHERE name LIKE :like
+           OR material_number LIKE :like
+           OR material_number LIKE :prefix
+        ORDER BY name ASC
+    ");
+        $stmt->bindParam(':like', $like);
+        $stmt->bindParam(':prefix', $prefix);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }

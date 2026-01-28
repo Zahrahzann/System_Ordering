@@ -133,6 +133,19 @@ class ReviewModel
           AND status = 'submitted'
     ");
         $stmt->execute([$orderId, $customerId]);
-        return $stmt->fetch(PDO::FETCH_ASSOC); // return row kalau ada, null kalau tidak
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+    public static function getAverageRatingByMonth($month)
+    {
+        $pdo = Database::connect();
+        $stmt = $pdo->prepare("
+        SELECT AVG(rating) as avg_rating
+        FROM reviews
+        WHERE status = 'submitted'
+          AND DATE_FORMAT(created_at, '%Y-%m') = ?
+    ");
+        $stmt->execute([$month]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $row && $row['avg_rating'] !== null ? round($row['avg_rating'], 2) : null;
     }
 }

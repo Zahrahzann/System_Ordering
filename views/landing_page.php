@@ -53,7 +53,7 @@ if (!isset($reviews)) {
                     <span class="yellow">S</span>YSTEM
                     <span class="yellow">O</span>RDERING
                 </span><br>
-                <span class="yellow">M</span>ANUFACTURE 
+                <span class="yellow">M</span>ANUFACTURE
                 <span class="yellow">E</span>NGINEERING</span>
             </h1>
 
@@ -188,17 +188,28 @@ if (!isset($reviews)) {
     <!-- Reviews Section -->
     <section id="reviews" class="section-light">
         <div class="container">
-            <div class="section-header">
+            <div class="section-header text-center">
                 <p class="section-subtitle">Review Customer Kami</p>
                 <h2 class="section-title">Apa Kata Customer Kami?</h2>
+                <?php
+                // ambil rata-rata rating bulan ini
+                $avgRating = \App\Models\ReviewModel::getAverageRatingByMonth(date('Y-m'));
+                ?>
+                <?php if ($avgRating): ?>
+                    <p class="section-subtitle">Rata-rata bulan ini: <?= $avgRating ?>/5</p>
+                <?php endif; ?>
             </div>
+
             <div class="reviews-carousel">
                 <div class="reviews-scroll" id="reviewsScroll">
                     <?php if (!empty($reviews)): ?>
                         <?php foreach ($reviews as $r): ?>
                             <div class="review-card">
                                 <h5><?= htmlspecialchars($r['customer_name'] ?? 'Anonim') ?></h5>
-                                <p class="stars"><?= str_repeat("★", (int)$r['rating']) ?><?= str_repeat("☆", 5 - (int)$r['rating']) ?></p>
+                                <p class="stars">
+                                    <?= str_repeat("★", (int)$r['rating']) ?>
+                                    <?= str_repeat("☆", 5 - (int)$r['rating']) ?>
+                                </p>
                                 <p class="review-text"><?= htmlspecialchars($r['review']) ?></p>
                             </div>
                         <?php endforeach; ?>
@@ -206,15 +217,28 @@ if (!isset($reviews)) {
                         <p class="no-reviews">Belum ada review dari customer.</p>
                     <?php endif; ?>
                 </div>
+
                 <?php if (!empty($reviews)): ?>
-                    <div class="carousel-nav">
-                        <button class="carousel-btn" onclick="scrollReviews('left')">‹</button>
-                        <button class="carousel-btn" onclick="scrollReviews('right')">›</button>
+                    <div class="carousel-nav text-center mt-3">
+                        <button class="carousel-btn" onclick="scrollReviews('left')" aria-label="Scroll left">‹</button>
+                        <button class="carousel-btn" onclick="scrollReviews('right')" aria-label="Scroll right">›</button>
                     </div>
                 <?php endif; ?>
             </div>
         </div>
     </section>
+
+    <script>
+        function scrollReviews(direction) {
+            const container = document.getElementById('reviewsScroll');
+            const card = container.querySelector('.review-card');
+            const scrollAmount = card ? card.offsetWidth + 16 : 300; // card width + gap
+            container.scrollBy({
+                left: direction === 'left' ? -scrollAmount : scrollAmount,
+                behavior: 'smooth'
+            });
+        }
+    </script>
 
     <!-- Map Section -->
     <section class="map-section" id="contact">

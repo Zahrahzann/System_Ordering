@@ -3,7 +3,7 @@
 
     <div class="container-fluid my-auto">
         <div class="copyright text-center my-auto">
-            <span> &copy; Designed by: Zahrah Annisa Ramadhani - Manufacture Engineering</span>
+            <span> &copy; Manufacture Engineering</span>
         </div>
     </div>
 </footer>

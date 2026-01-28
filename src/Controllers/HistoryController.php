@@ -32,8 +32,8 @@ class HistoryController
         $machineRates  = [];
         $manpowerRates = [];
 
-        // ✅ log setelah variabel diisi
-        error_log("🟢 Masuk ke HistoryController::showHistoryPage, role=$role, year=$year, month=$month");
+        // log setelah variabel diisi
+        error_log("Masuk ke HistoryController::showHistoryPage, role=$role, year=$year, month=$month");
 
         try {
             switch ($role) {

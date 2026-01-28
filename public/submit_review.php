@@ -5,7 +5,7 @@ require_once __DIR__ . '/../src/Models/ReviewModel.php';
 
 use App\Models\ReviewModel;
 
-header('Content-Type: application/json'); // penting supaya JS tahu ini JSON
+header('Content-Type: application/json'); 
 
 $orderId    = $_POST['order_id'] ?? null;
 $rating     = $_POST['rating'] ?? null;
