@@ -211,7 +211,7 @@ class TrackingController
                 $message,
                 'fas fa-star',
                 'success',
-                'order',
+                'review',
                 'customer',
                 $orderId
             );

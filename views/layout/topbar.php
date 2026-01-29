@@ -200,13 +200,6 @@ $messages     = [];
                             <?php endif; ?>
                         </div>
                     <?php endif; ?>
-
-                    <!-- Footer aksi: tandai semua dibaca -->
-                    <div class="dropdown-item text-center">
-                        <button id="markAllRead" class="btn btn-sm btn-secondary">
-                            <i class="fas fa-check"></i> Tandai Semua Dibaca
-                        </button>
-                    </div>
                 </div>
             </li>
         <?php endif; ?>
@@ -526,8 +519,6 @@ $messages     = [];
                                 title: title,
                                 html: data.message,
                                 confirmButtonText: 'OKE',
-                                showCancelButton: true,
-                                // cancelButtonText: 'Nanti Saja'
                             }).then((result) => {
                                 // Mark sebagai sudah dibaca
                                 markNotificationRead(data.id);
@@ -536,7 +527,7 @@ $messages     = [];
                                 shownNotifications.push(data.id);
                                 localStorage.setItem('shownNotifications_customer', JSON.stringify(shownNotifications));
 
-                                if (result.isConfirmed) {
+                                if (result.isConfirmed && data.kind === 'review') {
                                     document.getElementById('orderIdInput').value = data.order_id || '';
                                     const modalEl = document.getElementById('ratingReviewModal');
                                     const modal = new bootstrap.Modal(modalEl);

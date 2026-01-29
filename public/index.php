@@ -14,10 +14,8 @@ $dotenv->load();
 // --- ROUTING ---
 $requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
-// Hilangkan prefix /system_ordering/public
 $route = str_replace('/system_ordering/public', '', $requestUri);
 
-// Normalisasi route kosong atau /index.php jadi root /
 if ($route === '' || $route === false || $route === '/index.php') {
     $route = '/';
 }

@@ -233,4 +233,38 @@ class NotificationModel
 
         return $pdo->lastInsertId();
     }
+
+    public static function findUnreadByType($targetKey, $role, $type)
+    {
+        $pdo = Database::connect();
+        switch ($role) {
+            case 'spv':
+                $stmt = $pdo->prepare("SELECT COUNT(*) FROM notifications WHERE department = ? AND type = ? AND is_read = 0");
+                break;
+            case 'admin':
+                $stmt = $pdo->prepare("SELECT COUNT(*) FROM notifications WHERE user_id = ? AND type = ? AND is_read = 0");
+                break;
+            default: // customer
+                $stmt = $pdo->prepare("SELECT COUNT(*) FROM notifications WHERE customer_id = ? AND type = ? AND is_read = 0");
+        }
+        $stmt->execute([$targetKey, $type]);
+        return (int) $stmt->fetchColumn() > 0;
+    }
+
+    public static function markTypeAsRead($targetKey, $role, $type)
+    {
+        $pdo = Database::connect();
+        switch ($role) {
+            case 'spv':
+                $stmt = $pdo->prepare("UPDATE notifications SET is_read = 1 WHERE department = ? AND type = ? AND is_read = 0");
+                break;
+            case 'admin':
+                $stmt = $pdo->prepare("UPDATE notifications SET is_read = 1 WHERE user_id = ? AND type = ? AND is_read = 0");
+                break;
+            default: // customer
+                $stmt = $pdo->prepare("UPDATE notifications SET is_read = 1 WHERE customer_id = ? AND type = ? AND is_read = 0");
+        }
+        $stmt->execute([$targetKey, $type]);
+        return $stmt->rowCount();
+    }
 }
