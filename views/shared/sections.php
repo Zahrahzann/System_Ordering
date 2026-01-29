@@ -101,34 +101,6 @@ $isEditMode = isset($_GET['edit']) && $editData !== null;
                                 $icon = $icons[$index % count($icons)];
                                 $index++;
                             ?>
-                                <div class="section-card">
-                                    <div class="section-image" style="background-image:url('<?= $basePath ?>/assets/img/section.jpeg');"></div>
-                                    <div class="section-content">
-                                        <div class="item-count"><i class="fas fa-cube"></i><span>12 items</span></div>
-                                        <div class="section-icon"><i class="fas fa-<?= $icon ?>"></i></div>
-                                        <div class="section-info">
-                                            <div class="section-name"><?= strtoupper(htmlspecialchars($sec['name'])) ?></div>
-                                            <div class="section-desc">
-                                                Klik untuk melihat semua produk dalam section.
-                                            </div>
-                                            <a href="<?= $basePath ?>/shared/consumable/product-types/<?= urlencode($sec['id']) ?>" class="view-button">
-                                                <i class="fas fa-arrow-right"></i><span> Lihat Produk</span>
-                                            </a>
-
-                                            <!-- Admin: edit/delete -->
-                                            <?php if ($currentRole === 'admin'): ?>
-                                                <div class="section-actions">
-                                                    <a href="<?= $basePath ?>/admin/consumable/sections?edit=<?= $sec['id'] ?>">
-                                                        <i class="fas fa-edit"> Edit</i>
-                                                    </a>
-                                                    <button onclick="confirmDelete(<?= $sec['id'] ?>)">
-                                                        <i class="fas fa-trash"> Hapus</i>
-                                                    </button>
-                                                </div>
-                                            <?php endif; ?>
-                                        </div>
-                                    </div>
-                                </div>
                             <?php endforeach; ?>
                         </div>
                     <?php endif; ?>

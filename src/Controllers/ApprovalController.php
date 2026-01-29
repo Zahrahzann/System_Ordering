@@ -23,6 +23,9 @@ class ApprovalController
         require_once __DIR__ . '/../../views/spv/work_order/approval_wo.php';
     }
 
+    /**
+     * Dashboard SPV: tampilkan summary + recent orders.
+     */
     public static function showDashboard()
     {
         SessionMiddleware::requireSpvLogin();
@@ -49,6 +52,10 @@ class ApprovalController
             'plant'      => $_SESSION['user_data']['plant'] ?? 'Unknown'
         ];
 
+        // 🔥 Tambahan: ambil recent orders untuk tabel "Work Order Terbaru"
+        $recentOrders = ApprovalModel::getRecentOrdersForSpv($spvId);
+
+        // Kirim ke view
         require_once __DIR__ . '/../../views/spv/dashboard.php';
     }
 
@@ -128,7 +135,6 @@ class ApprovalController
                     $adminIcon    = 'fas fa-clipboard-check';
                     $adminColor   = 'info';
 
-                    // contoh: ambil semua admin dari tabel users
                     $admins = UserModel::getAllAdmins();
                     foreach ($admins as $admin) {
                         $existingAdminNotif = NotificationModel::findUnreadByMessage(

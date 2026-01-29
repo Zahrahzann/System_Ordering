@@ -225,4 +225,36 @@ class ApprovalModel
 
         return true;
     }
+
+    /**
+     * Work Order terbaru untuk SPV (limit 5).
+     */
+    public static function getRecentOrdersForSpv($spvId, $limit = 5)
+    {
+        $pdo = Database::connect();
+
+        // Ambil departemen SPV
+        $sqlDept = "SELECT department_id FROM users WHERE id = ?";
+        $stmtDept = $pdo->prepare($sqlDept);
+        $stmtDept->execute([$spvId]);
+        $departmentId = $stmtDept->fetchColumn();
+
+        // Ambil order terbaru berdasarkan departemen SPV
+        $sql = "SELECT 
+                o.id AS code,   -- pakai id sebagai kode order
+                DATE_FORMAT(o.created_at, '%Y-%m-%d') AS date,
+                o.approval_status AS status,
+                c.name AS requested_by
+            FROM orders o
+            JOIN customers c ON o.customer_id = c.id
+            WHERE c.department_id = ?
+            ORDER BY o.created_at DESC
+            LIMIT ?";
+        $stmt = $pdo->prepare($sql);
+        $stmt->bindValue(1, $departmentId, PDO::PARAM_INT);
+        $stmt->bindValue(2, $limit, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

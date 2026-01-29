@@ -6,11 +6,11 @@ $basePath = '/system_ordering/public';
 
 if (session_status() === PHP_SESSION_NONE) session_start();
 
-// Ambil notifikasi dari session (misalnya pesanan baru waiting approval)
+// Ambil notifikasi dari session (pesanan baru waiting approval)
 $notif = null;
 if (isset($_SESSION['flash_notification'])) {
     $notif = $_SESSION['flash_notification'];
-    unset($_SESSION['flash_notification']); // supaya tidak muncul lagi saat refresh
+    unset($_SESSION['flash_notification']);
 }
 ?>
 <!DOCTYPE html>
