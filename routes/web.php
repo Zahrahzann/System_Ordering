@@ -120,7 +120,19 @@ switch (true) {
         HistoryController::showHistoryPage();
         break;
 
-    // Consumable sections
+    // MANAGEMENT CONSUMABLE (admin only)
+    case ($route === '/admin/consumable/sections/add' && $requestMethod === 'POST'):
+        ConsumableController::addSection();
+        break;
+
+    case ($route === '/admin/consumable/sections/edit' && $requestMethod === 'POST'):
+        ConsumableController::editSection($_POST['id']);
+        break;
+
+    case ($route === '/admin/consumable/sections/delete' && $requestMethod === 'GET'):
+        ConsumableController::deleteSection($_GET['id']);
+        break;
+
     case ($route === '/customer/consumable/sections' || $route === '/spv/consumable/sections' || $route === '/admin/consumable/sections'):
         ConsumableController::listSection();
         break;
@@ -139,6 +151,7 @@ switch (true) {
     case preg_match('#^/materials/dimension/(\d+)$#', $route, $matches):
         MaterialController::showDimension($matches[1]);
         break;
+
 
     // =====================
     // PRODUCT TYPE ROUTES

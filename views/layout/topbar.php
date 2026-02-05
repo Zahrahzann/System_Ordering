@@ -277,6 +277,7 @@ $messages     = [];
                     <h5 class="modal-title" id="ratingReviewLabel">Isi Rating & Review</h5> <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
                 </div>
                 <div class="modal-body"> <!-- order_id akan diisi via JS saat notif diklik -->
+                    <input type="hidden" name="customer_id" value="<?= $_SESSION['user_data']['id'] ?>">
                     <input type="hidden" name="order_id" id="orderIdInput" value=""> <label class="form-label">Rating:</label>
                     <div class="rating-stars">
                         <input type="radio" name="rating" id="star5" value="5"><label for="star5">★</label>
@@ -303,7 +304,7 @@ $messages     = [];
     function markNotificationRead(notifId) {
         if (!notifId) return Promise.resolve();
 
-        return fetch('/system_ordering/public/mark_notification.php', {
+        return fetch('/mark_notification.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

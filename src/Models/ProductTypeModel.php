@@ -76,8 +76,8 @@ class ProductTypeModel
         WHERE id=?
     ");
         $stmt->execute([
-            $old['section_id'],             
-            $old['product_code'],            
+            $old['section_id'],
+            $old['product_code'],
             $data['name'],
             !empty($data['price']) ? $data['price'] : null,
             $data['description'],
@@ -114,5 +114,14 @@ class ProductTypeModel
         $target = $targetDir . basename($file['name']);
         move_uploaded_file($file['tmp_name'], $target);
         return '/uploads/consum-product-type/' . basename($file['name']);
+    }
+
+    // Hitung jumlah product type dalam section
+    public static function countBySection($sectionId)
+    {
+        $pdo = Database::connect();
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM product_types WHERE section_id = ?");
+        $stmt->execute([$sectionId]);
+        return (int) $stmt->fetchColumn();
     }
 }

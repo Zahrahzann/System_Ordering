@@ -11,25 +11,27 @@ class ReviewController
     {
         SessionMiddleware::requireLogin();
 
-        // --- DEBUG: cek isi POST dan SESSION ---
-        error_log("REVIEW POST: " . print_r($_POST, true));
-        error_log("REVIEW SESSION: " . print_r($_SESSION, true));
+        header('Content-Type: application/json');
 
         $orderId    = $_POST['order_id'] ?? null;
-        $rating     = $_POST['rating'] ?? null;
-        $review     = $_POST['review'] ?? null;
+        $rating     = trim($_POST['rating'] ?? '');
+        $review     = trim($_POST['review'] ?? '');
         $customerId = $_SESSION['user_data']['id'] ?? null;
 
-        // Validasi input
         if (!$orderId || !$rating || !$review || !$customerId) {
             http_response_code(400);
-            echo json_encode(['error' => 'Data tidak lengkap']);
+            echo json_encode(['success' => false, 'message' => 'Data tidak lengkap']);
             exit;
         }
 
-        ReviewModel::submitReview($orderId, $customerId, $rating, $review);
+        $ok = ReviewModel::submitReview($orderId, $customerId, $rating, $review);
 
-        echo json_encode(['success' => true]);
+        if ($ok) {
+            echo json_encode(['success' => true]);
+        } else {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Gagal menyimpan review']);
+        }
         exit;
     }
 }

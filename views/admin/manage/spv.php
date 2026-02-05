@@ -135,7 +135,9 @@ $basePath = '/system_ordering/public';
                                         </div>
                                     </div>
                                     <div class="spv-actions">
-                                        <a href="#" class="btn btn-danger" onclick="return confirm('Apakah Anda yakin ingin menghapus supervisor ini?')">
+                                        <a href="/system_ordering/public/admin/delete-spv?id=<?= $user['id'] ?>"
+                                            class="btn btn-danger"
+                                            onclick="return confirm('Apakah Anda yakin ingin menghapus supervisor ini?')">
                                             <i class="fas fa-trash"></i> Delete
                                         </a>
                                     </div>

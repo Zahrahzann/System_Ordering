@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Dec 16, 2025 at 03:17 AM
+-- Generation Time: Feb 05, 2026 at 03:34 AM
 -- Server version: 8.0.30
 -- PHP Version: 7.4.33
 
@@ -37,19 +37,6 @@ CREATE TABLE `approvals` (
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
---
--- Dumping data for table `approvals`
---
-
-INSERT INTO `approvals` (`id`, `order_id`, `spv_id`, `approval_status`, `comments`, `created_at`, `updated_at`) VALUES
-(1, 1, 8, 'approve', 'Mohon Bantuannya', '2025-11-21 05:30:07', '2025-11-21 05:30:32'),
-(2, 2, 8, 'approve', '', '2025-11-21 06:14:46', '2025-11-21 06:17:21'),
-(3, 3, 8, 'approve', '', '2025-11-21 06:28:50', '2025-11-21 06:29:04'),
-(4, 4, 8, 'approve', '', '2025-11-21 06:49:39', '2025-11-21 06:49:48'),
-(5, 5, 8, 'approve', '', '2025-11-21 07:10:16', '2025-11-21 07:12:38'),
-(6, 6, 8, 'approve', '', '2025-12-02 15:31:01', '2025-12-03 00:43:07'),
-(7, 7, 8, 'approve', '', '2025-12-14 15:10:10', '2025-12-14 15:10:52');
-
 -- --------------------------------------------------------
 
 --
@@ -61,6 +48,26 @@ CREATE TABLE `cart_items` (
   `customer_id` int NOT NULL,
   `product_item_id` int NOT NULL,
   `quantity` int DEFAULT '1',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `consumable_reports`
+--
+
+CREATE TABLE `consumable_reports` (
+  `id` int NOT NULL,
+  `section_id` int NOT NULL,
+  `product_type_id` int NOT NULL,
+  `product_item_id` int NOT NULL,
+  `month` int NOT NULL,
+  `year` int NOT NULL,
+  `qty` int NOT NULL,
+  `inhouse_price` decimal(12,2) DEFAULT '0.00',
+  `maker_price` decimal(12,2) DEFAULT '0.00',
+  `benefit` decimal(12,2) GENERATED ALWAYS AS ((`inhouse_price` - `maker_price`)) STORED,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
@@ -101,24 +108,6 @@ CREATE TABLE `consum_orders` (
   `updated_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
---
--- Dumping data for table `consum_orders`
---
-
-INSERT INTO `consum_orders` (`id`, `customer_id`, `product_type_id`, `product_item_id`, `section_id`, `quantity`, `price`, `order_code`, `status`, `created_at`, `updated_at`) VALUES
-(2, 1, 10, 23, 1, 1, '10000.00', 'ORD-20251208-1630', 'Ready', '2025-12-08 08:09:58', '2025-12-08 08:09:58'),
-(3, 1, 10, 23, 1, 9, '10000.00', 'ORD-20251208-7466', 'Selesai', '2025-12-08 08:38:17', '2025-12-09 13:19:27'),
-(5, 1, 11, 26, 2, 5, '1000000.00', 'ORD-20251208-7606', 'Dikirim', '2025-12-08 13:36:51', '2025-12-09 07:09:56'),
-(6, 1, 10, 23, 1, 4, '10000.00', 'ORD-20251209-2810', 'Selesai', '2025-12-09 07:30:02', '2025-12-09 13:36:37'),
-(7, 1, 10, 24, 1, 1, '20000.00', 'ORD-20251209-9154', 'Selesai', '2025-12-09 07:30:02', '2025-12-09 13:23:18'),
-(9, 1, 10, 23, 1, 2, '10000.00', 'ORD-20251209-1996', 'Selesai', '2025-12-09 10:30:52', '2025-12-10 10:32:54'),
-(10, 1, 10, 23, 1, 3, '10000.00', 'ORD-20251209-9694', 'Selesai', '2025-12-09 10:51:49', '2025-12-09 14:49:37'),
-(15, 1, 10, 24, 1, 15, '20000.00', 'ORD-20251210-2488', 'Ready', '2025-12-10 13:04:07', '2025-12-10 13:05:07'),
-(17, 1, 11, 26, 2, 3, '1000000.00', 'ORD-20251210-2326', 'Ready', '2025-12-10 13:45:31', '2025-12-10 13:45:31'),
-(18, 1, 11, 26, 2, 10, '1000000.00', 'ORD-20251210-4957', 'Selesai', '2025-12-10 13:46:34', '2025-12-10 13:47:00'),
-(19, 1, 11, 26, 2, 5, '1000000.00', 'ORD-20251210-9192', 'Ready', '2025-12-10 13:49:27', '2025-12-10 13:49:27'),
-(20, 1, 12, 27, 3, 3, '100000.00', 'ORD-20251212-8875', 'Selesai', '2025-12-12 13:30:32', '2025-12-12 13:38:57');
-
 -- --------------------------------------------------------
 
 --
@@ -142,10 +131,7 @@ CREATE TABLE `customers` (
 --
 
 INSERT INTO `customers` (`id`, `name`, `npk`, `phone`, `plant_id`, `department_id`, `line`, `created_at`, `updated_at`) VALUES
-(1, 'Zahrah Annisa Ramadhani', '444444', '085697612586', 2, 3, 'Manufacture Engineering', '2025-10-19 04:25:45', '2025-10-19 04:25:45'),
-(2, 'Regita Rizkie Fannisyah', '111111', '081574817104', 2, 1, 'K-line 3', '2025-10-19 06:37:47', '2025-10-19 06:37:47'),
-(4, 'Customer Satu', '222222', '123456789011', 2, 3, 'K-Line 2', '2025-10-22 07:37:57', '2025-10-22 07:37:57'),
-(6, 'Zanni', '5555555', '12345', 2, 1, 'K-Line 2', '2025-10-27 03:39:16', '2025-10-27 03:39:16');
+(12, 'Zahrah Annisa Ramadhani', '444444', '085697612586', 2, 3, 'Manufacture Engineering', '2026-01-19 08:49:23', '2026-01-19 08:49:23');
 
 -- --------------------------------------------------------
 
@@ -167,8 +153,7 @@ INSERT INTO `departments` (`id`, `name`) VALUES
 (2, 'Quality'),
 (3, 'Maintenance'),
 (4, 'PCL'),
-(5, 'Export-Import'),
-(6, 'PE');
+(5, 'Export-Import');
 
 -- --------------------------------------------------------
 
@@ -182,6 +167,7 @@ CREATE TABLE `items` (
   `order_id` int DEFAULT NULL,
   `item_type` enum('work_order','consumable') NOT NULL,
   `quantity` int NOT NULL,
+  `estimasi_pengerjaan` varchar(100) DEFAULT NULL,
   `note` text,
   `needed_date` date NOT NULL,
   `is_emergency` tinyint(1) NOT NULL DEFAULT '0',
@@ -191,48 +177,139 @@ CREATE TABLE `items` (
   `category` enum('sparepart','improvement','project','regular') DEFAULT NULL,
   `pic_mfg` varchar(100) DEFAULT NULL,
   `production_status` enum('pending','on_progress','finish','completed') NOT NULL DEFAULT 'pending',
-  `material` enum('ordered','ready') DEFAULT NULL,
-  `material_type` varchar(255) NOT NULL COMMENT 'wajib diisi',
+  `actual_duration_minutes` int DEFAULT NULL,
+  `material_status` enum('ordered','ready') NOT NULL,
+  `material_dimension_id` int NOT NULL,
   `file_path` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+-- --------------------------------------------------------
+
 --
--- Dumping data for table `items`
+-- Table structure for table `machine_rates`
 --
 
-INSERT INTO `items` (`id`, `customer_id`, `order_id`, `item_type`, `quantity`, `note`, `needed_date`, `is_emergency`, `emergency_type`, `product_id`, `item_name`, `category`, `pic_mfg`, `production_status`, `material`, `material_type`, `file_path`, `created_at`, `updated_at`) VALUES
-(1, 1, 1, 'work_order', 18, 'Catatan', '2025-11-30', 0, NULL, NULL, 'PART', 'regular', 'Zanni', 'completed', 'ready', 'stainless steel', '[\"\\/system_ordering\\/public\\/uploads\\/drawings\\/drawing_691ff8d8b2de47.38758967.pdf\"]', '2025-11-21 05:30:00', '2025-11-21 05:32:53'),
-(2, 1, 2, 'work_order', 12, 'Contoh', '2025-11-28', 1, 'line_stop', NULL, 'SLIPER', 'improvement', '', 'finish', 'ready', 'Bolt M6', '[\"\\/system_ordering\\/public\\/uploads\\/drawings\\/drawing_6920035003ac32.01717194.pdf\"]', '2025-11-21 06:14:40', '2025-12-09 00:38:32'),
-(3, 1, NULL, 'work_order', 18, 'Catatan', '2025-11-30', 1, 'safety', NULL, 'PART', 'regular', NULL, 'pending', 'ready', 'stainless steel', '[\"\\/system_ordering\\/public\\/uploads\\/drawings\\/drawing_691ff8d8b2de47.38758967.pdf\"]', '2025-11-21 06:25:21', '2025-11-21 06:25:21'),
-(4, 1, 6, 'work_order', 18, 'Catatan', '2025-11-30', 1, 'safety', NULL, 'PART', 'regular', NULL, 'pending', 'ready', 'stainless steel', '[\"\\/system_ordering\\/public\\/uploads\\/drawings\\/drawing_691ff8d8b2de47.38758967.pdf\"]', '2025-11-21 06:25:24', '2025-12-02 15:31:01'),
-(5, 1, 3, 'work_order', 18, 'Catatan', '2025-11-30', 1, 'safety', NULL, 'PART', 'regular', NULL, 'pending', 'ready', 'stainless steel', '[\"\\/system_ordering\\/public\\/uploads\\/drawings\\/drawing_691ff8d8b2de47.38758967.pdf\"]', '2025-11-21 06:28:33', '2025-11-21 06:28:50'),
-(6, 1, 4, 'work_order', 18, 'Catatan', '2025-11-30', 0, NULL, NULL, 'PART', 'improvement', '', 'on_progress', 'ready', 'stainless steel', '[\"\\/system_ordering\\/public\\/uploads\\/drawings\\/drawing_691ff8d8b2de47.38758967.pdf\"]', '2025-11-21 06:49:16', '2025-12-15 01:58:15'),
-(7, 1, 5, 'work_order', 2, 'Catatan', '2025-11-23', 1, 'line_stop', NULL, 'PAD 1', 'regular', 'Zanni', 'completed', 'ordered', 'Bolt M6', '[\"\\/system_ordering\\/public\\/uploads\\/drawings\\/drawing_692010157b4ee7.39063466.pdf\"]', '2025-11-21 07:09:09', '2025-11-21 07:18:51'),
-(8, 1, NULL, 'work_order', 1, 'dxfcgvhjk', '2025-12-12', 0, NULL, NULL, 'PAD 1', 'improvement', NULL, 'pending', 'ordered', 'stainless steel', '[\"\\/system_ordering\\/public\\/uploads\\/drawings\\/drawing_692f061cd039c9.48140176.pdf\"]', '2025-12-02 15:30:36', '2025-12-02 15:30:36'),
-(9, 1, 7, 'work_order', 2, 'CONTOH', '2025-12-18', 1, 'line_stop', NULL, 'SLIPER A', 'improvement', 'Zanni', 'completed', 'ordered', 'Bolt M6', '[\"\\/system_ordering\\/public\\/uploads\\/drawings\\/drawing_693ecfed628540.02232307.pdf\"]', '2025-12-14 14:55:41', '2025-12-14 15:16:01');
+CREATE TABLE `machine_rates` (
+  `id` int NOT NULL,
+  `process_name` varchar(100) NOT NULL,
+  `price_per_minute` decimal(10,2) NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `machine_rates`
+--
+
+INSERT INTO `machine_rates` (`id`, `process_name`, `price_per_minute`, `created_at`) VALUES
+(1, 'Study dan Admin', '0.00', '2026-01-06 06:12:24'),
+(2, 'Cutting Saw', '500.00', '2026-01-06 06:12:24'),
+(3, 'Cutting Plasma', '3000.00', '2026-01-06 06:12:24'),
+(4, 'Cutting Wheel', '500.00', '2026-01-06 06:12:24'),
+(5, 'Milling I', '905.00', '2026-01-06 06:12:24'),
+(6, 'Milling II', '905.00', '2026-01-06 06:12:24'),
+(7, 'Milling III', '905.00', '2026-01-06 06:12:24'),
+(8, 'Milling IV', '905.00', '2026-01-06 06:12:24'),
+(9, 'Milling V', '905.00', '2026-01-06 06:12:24'),
+(10, 'Turning Feller', '1436.00', '2026-01-06 06:12:24'),
+(11, 'Konvensional', '1436.00', '2026-01-06 06:12:24'),
+(12, 'Hardening', '2703.00', '2026-01-06 06:12:24'),
+(13, 'EDM', '925.00', '2026-01-06 06:12:24'),
+(14, 'Welding', '500.00', '2026-01-06 06:12:24'),
+(15, 'Assembling', '0.00', '2026-01-06 06:12:24'),
+(16, 'Others', '0.00', '2026-01-06 06:12:24'),
+(17, 'Finishing', '0.00', '2026-01-06 06:12:24');
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `materials`
+-- Table structure for table `manpower_rates`
 --
 
-CREATE TABLE `materials` (
+CREATE TABLE `manpower_rates` (
   `id` int NOT NULL,
-  `name` varchar(100) NOT NULL,
-  `dimension` varchar(50) NOT NULL,
-  `stock` int NOT NULL DEFAULT '0',
-  `status` enum('Ordered','Ready') DEFAULT 'Ready'
+  `process_name` varchar(100) NOT NULL,
+  `price_per_minute` decimal(10,2) NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
--- Dumping data for table `materials`
+-- Dumping data for table `manpower_rates`
 --
 
-INSERT INTO `materials` (`id`, `name`, `dimension`, `stock`, `status`) VALUES
-(1, 'Stainless stel', '2000 x 5000', 10, NULL);
+INSERT INTO `manpower_rates` (`id`, `process_name`, `price_per_minute`, `created_at`) VALUES
+(1, 'Study & Admin', '1819.00', '2026-01-06 06:15:30'),
+(2, 'Cutting Saw', '1819.00', '2026-01-06 06:15:30'),
+(3, 'Cutting Plasma', '1819.00', '2026-01-06 06:15:30'),
+(4, 'Cutting Wheel', '1819.00', '2026-01-06 06:15:30'),
+(5, 'Milling I', '1819.00', '2026-01-06 06:15:30'),
+(6, 'Milling II', '1819.00', '2026-01-06 06:15:30'),
+(7, 'Milling III', '1819.00', '2026-01-06 06:15:30'),
+(8, 'Milling IV', '1819.00', '2026-01-06 06:15:30'),
+(9, 'Milling V', '1819.00', '2026-01-06 06:15:30'),
+(10, 'Turning Feller', '1819.00', '2026-01-06 06:15:30'),
+(11, 'Konvensional', '1819.00', '2026-01-06 06:15:30'),
+(12, 'Hardening', '1819.00', '2026-01-06 06:15:30'),
+(13, 'EDM', '1819.00', '2026-01-06 06:15:30'),
+(14, 'Welding', '1819.00', '2026-01-06 06:15:30'),
+(15, 'Assembling', '1819.00', '2026-01-06 06:15:30'),
+(16, 'Others', '1819.00', '2026-01-06 06:15:30'),
+(17, 'Finishing', '1819.00', '2026-01-06 06:15:30');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `material_dimensions`
+--
+
+CREATE TABLE `material_dimensions` (
+  `id` int NOT NULL,
+  `material_type_id` int NOT NULL,
+  `dimension` varchar(50) NOT NULL,
+  `stock` decimal(10,4) NOT NULL DEFAULT '0.0000',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `minimum_stock` float DEFAULT '0'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `material_stock_logs`
+--
+
+CREATE TABLE `material_stock_logs` (
+  `id` int NOT NULL,
+  `material_dimension_id` int NOT NULL,
+  `change_type` enum('IN','OUT') NOT NULL,
+  `quantity` float NOT NULL,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `material_types`
+--
+
+CREATE TABLE `material_types` (
+  `id` int NOT NULL,
+  `material_number` varchar(50) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `material_types`
+--
+
+INSERT INTO `material_types` (`id`, `material_number`, `name`, `created_at`, `updated_at`) VALUES
+(7, '900045321', 'STEEL', '2026-01-15 04:06:42', '2026-01-15 04:06:42'),
+(8, '900012265', 'URETHANE					 					', '2026-01-15 04:07:09', '2026-01-15 04:07:09'),
+(9, '900076545', 'POM', '2026-01-15 04:07:47', '2026-01-15 04:07:47'),
+(10, '900087788', 'NC BLUE					 					', '2026-01-15 04:08:09', '2026-01-26 02:44:28');
 
 -- --------------------------------------------------------
 
@@ -245,23 +322,14 @@ CREATE TABLE `notifications` (
   `customer_id` int DEFAULT NULL,
   `user_id` int DEFAULT NULL,
   `type` varchar(50) NOT NULL,
+  `order_id` int DEFAULT NULL,
   `message` varchar(255) NOT NULL,
   `is_read` tinyint(1) DEFAULT '0',
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `icon` varchar(50) DEFAULT 'fas fa-info-circle',
-  `color` varchar(20) DEFAULT 'primary'
+  `color` varchar(20) DEFAULT 'primary',
+  `department` varchar(50) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Dumping data for table `notifications`
---
-
-INSERT INTO `notifications` (`id`, `customer_id`, `user_id`, `type`, `message`, `is_read`, `created_at`, `icon`, `color`) VALUES
-(1, 1, NULL, 'work_order', 'Item \'PART\' berhasil ditambahkan ke Work Order', 0, '2025-11-21 06:28:33', 'fas fa-clipboard-list', 'success'),
-(2, 1, NULL, 'work_order', 'Item \'PART\' berhasil ditambahkan ke Work Order', 0, '2025-11-21 06:49:16', 'fas fa-clipboard-list', 'success'),
-(3, 1, NULL, 'work_order', 'Item \'PAD 1\' berhasil ditambahkan ke Work Order', 0, '2025-11-21 07:09:09', 'fas fa-clipboard-list', 'success'),
-(4, 1, NULL, 'work_order', 'Item \'PAD 1\' berhasil ditambahkan ke Work Order', 0, '2025-12-02 15:30:36', 'fas fa-clipboard-list', 'success'),
-(5, 1, NULL, 'work_order', 'Item \'SLIPER A\' berhasil ditambahkan ke Work Order', 0, '2025-12-14 14:55:41', 'fas fa-clipboard-list', 'success');
 
 -- --------------------------------------------------------
 
@@ -279,36 +347,6 @@ CREATE TABLE `orders` (
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `approval_status` enum('waiting','approve','reject') DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Dumping data for table `orders`
---
-
-INSERT INTO `orders` (`id`, `order_code`, `customer_id`, `department`, `plant_id`, `repeat_source_order_id`, `created_at`, `updated_at`, `approval_status`) VALUES
-(1, NULL, 1, NULL, 2, NULL, '2025-11-21 05:30:07', '2025-11-21 05:30:32', 'approve'),
-(2, NULL, 1, NULL, 2, NULL, '2025-11-21 06:14:46', '2025-11-21 06:17:21', 'approve'),
-(3, NULL, 1, NULL, 2, NULL, '2025-11-21 06:28:50', '2025-11-21 06:29:04', 'approve'),
-(4, NULL, 1, NULL, 2, NULL, '2025-11-21 06:49:39', '2025-11-21 06:49:48', 'approve'),
-(5, NULL, 1, NULL, 2, NULL, '2025-11-21 07:10:16', '2025-11-21 07:12:38', 'approve'),
-(6, NULL, 1, NULL, 2, NULL, '2025-12-02 15:31:01', '2025-12-03 00:43:07', 'approve'),
-(7, NULL, 1, NULL, 2, NULL, '2025-12-14 15:10:10', '2025-12-14 15:10:52', 'approve');
-
--- --------------------------------------------------------
-
---
--- Table structure for table `order_histories`
---
-
-CREATE TABLE `order_histories` (
-  `id` int NOT NULL,
-  `order_id` int NOT NULL,
-  `item_id` int NOT NULL,
-  `unit_price` decimal(15,2) NOT NULL,
-  `total_price` decimal(15,2) NOT NULL,
-  `vendor_price` decimal(15,2) NOT NULL,
-  `cost_benefit` decimal(15,2) NOT NULL,
-  `completed_date` date NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
@@ -382,19 +420,9 @@ CREATE TABLE `product_items` (
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `stock` int DEFAULT '0',
-  `section_id` int DEFAULT NULL
+  `section_id` int DEFAULT NULL,
+  `maker_price` decimal(12,2) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Dumping data for table `product_items`
---
-
-INSERT INTO `product_items` (`id`, `product_type_id`, `item_code`, `name`, `price`, `description`, `image_path`, `file_path`, `created_at`, `updated_at`, `stock`, `section_id`) VALUES
-(23, 10, 'PRODU-1638-CRSH', 'Produk 1', '10000.00', 'wsrxdctfgvybhuj', '/uploads/consum-katalog-item/gear.jpeg', '/uploads/consum-katalog-item/Prototype Work Order.pdf', '2025-12-08 01:07:38', '2025-12-10 06:44:50', 25, 1),
-(24, 10, 'PRODU-2230-CRSH', 'Produk 2', '20000.00', 'aewsrdtfgyuhi', '/uploads/consum-katalog-item/Sistem_Microprocessor.jpg', '/uploads/consum-katalog-item/Prototype Work Order.pdf', '2025-12-08 01:08:51', '2025-12-10 06:44:46', 22, 1),
-(25, 10, 'PRODU-6138-CRSH', 'Produk 3', '50000.00', 'sxdcfgtuyhij', '/uploads/consum-katalog-item/sparepart.jpg', '/uploads/consum-katalog-item/download (48).jpg', '2025-12-08 01:09:27', '2025-12-08 01:09:27', 50, 1),
-(26, 11, 'CONTO-6341-CYH', 'Contoh CYH', '1000000.00', 'Hahahha contoh', '/uploads/consum-katalog-item/p-parts.png', '/uploads/consum-katalog-item/Sistem_Microprocessor.jpg', '2025-12-08 06:35:55', '2025-12-10 06:49:27', 77, 2),
-(27, 12, 'PRODU-9848-CONNT', 'Produk Contoh', '100000.00', 'sedtrfytguyhiu', '/uploads/consum-katalog-item/[CITYPNG.COM]HD Daihatsu Company Logo PNG - 3000x3000.png', '/uploads/consum-katalog-item/logo_daihatsu.png', '2025-12-12 06:29:10', '2025-12-12 06:30:32', 43, 3);
 
 -- --------------------------------------------------------
 
@@ -415,16 +443,21 @@ CREATE TABLE `product_types` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+-- --------------------------------------------------------
+
 --
--- Dumping data for table `product_types`
+-- Table structure for table `reviews`
 --
 
-INSERT INTO `product_types` (`id`, `section_id`, `product_code`, `name`, `price`, `description`, `image_path`, `file_path`, `created_at`, `updated_at`) VALUES
-(7, 1, 'PRESU-3512-CYH', 'CYH', '0.00', 'xdtcfgvhbjn', '/uploads/consum-product-type/gear.jpeg', '/uploads/consum-product-type/Sistem_Microprocessor.jpg', '2025-12-02 04:08:21', '2025-12-02 04:08:21'),
-(9, 1, 'PRESU-1774-CYB', 'CYB', NULL, 'cfgvbhjnk', '/uploads/consum-product-type/Sistem_Microprocessor.jpg', '/uploads/consum-product-type/gear.jpeg', '2025-12-02 06:03:36', '2025-12-02 06:03:36'),
-(10, 1, 'PRESU-9699-CRSH', 'CRSH', '100000.00', 'SRXDTCFYVGUBHINJ', '/uploads/consum-product-type/gear.jpeg', '/uploads/consum-product-type/Sistem_Microprocessor.jpg', '2025-12-02 07:37:23', '2025-12-02 07:37:34'),
-(11, 2, 'K-LIN-2074-CYH', 'CYH', NULL, 'EDRTFGYUHIJ', '/uploads/consum-product-type/contoh.jpg', '/uploads/consum-product-type/Sistem_Microprocessor.jpg', '2025-12-08 06:35:05', '2025-12-08 06:35:05'),
-(12, 3, 'K-LIN-3808-CONNT', 'conntoh', NULL, 'Percobaan', '/uploads/consum-product-type/qrcode_localhost.png', NULL, '2025-12-12 06:28:05', '2025-12-12 06:28:05');
+CREATE TABLE `reviews` (
+  `id` int NOT NULL,
+  `order_id` int NOT NULL,
+  `customer_id` int NOT NULL,
+  `rating` int DEFAULT NULL,
+  `review` text,
+  `status` varchar(20) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -437,19 +470,9 @@ CREATE TABLE `sections` (
   `name` varchar(50) NOT NULL,
   `description` text,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `image` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Dumping data for table `sections`
---
-
-INSERT INTO `sections` (`id`, `name`, `description`, `created_at`, `updated_at`) VALUES
-(1, 'Presub', 'Klik untuk melihat semua produk dalam section ini.', '2025-11-17 10:23:54', '2025-12-01 11:29:32'),
-(2, 'K-Line 3', 'Klik untuk melihat semua produk dalam section ini.', '2025-11-17 10:23:54', '2025-12-01 11:29:23'),
-(3, 'K-Line 4 SPS', 'Klik untuk melihat semua produk dalam section ini.', '2025-11-17 10:23:54', '2025-12-11 11:07:53'),
-(4, 'K-Line 5', 'Klik untuk melihat semua produk dalam section ini.\r\n', '2025-11-17 10:23:54', '2025-12-01 11:29:01'),
-(5, 'Delivery', 'Klik untuk melihat semua produk dalam section ini.', '2025-12-02 08:34:58', '2025-12-11 11:07:04');
 
 -- --------------------------------------------------------
 
@@ -471,13 +494,53 @@ CREATE TABLE `users` (
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+-- --------------------------------------------------------
+
 --
--- Dumping data for table `users`
+-- Table structure for table `workorder_costs`
 --
 
-INSERT INTO `users` (`id`, `name`, `npk`, `phone`, `email`, `password`, `role`, `department_id`, `plant_id`, `created_at`, `updated_at`) VALUES
-(7, 'AdminME', '111111', '08123456789', 'adminsatu@email.com', '$2y$10$s3vbpPoce6Iz0qvHvcQtfeLmyIEdXPIa/Vp1rpclXA.xqr.SM7stS', 'admin', NULL, NULL, '2025-11-21 01:49:55', '2025-11-21 01:49:55'),
-(8, 'SupervisorMaintenance', '999999', '08987654321', 'supervisormtn@email.com', '$2y$10$VAsQFv.DmSdo3dcwEr0uNuHExplW2zhKKqit593irw.pw4BiyR.ru', 'spv', 3, 2, '2025-11-21 01:51:51', '2025-11-21 01:51:51');
+CREATE TABLE `workorder_costs` (
+  `id` int NOT NULL,
+  `order_id` int NOT NULL,
+  `item_name` varchar(255) DEFAULT NULL,
+  `qty` int NOT NULL,
+  `cost_material` decimal(15,2) DEFAULT '0.00',
+  `cost_machine_tool_electric` decimal(15,2) DEFAULT '0.00',
+  `cost_manpower` decimal(15,2) DEFAULT '0.00',
+  `overhead` decimal(15,2) DEFAULT '0.00',
+  `cost_per_pcs` decimal(15,2) DEFAULT '0.00',
+  `cost_inhouse_total` decimal(15,2) DEFAULT '0.00',
+  `vendor_price_per_pcs` decimal(15,2) DEFAULT '0.00',
+  `vendor_price_total` decimal(15,2) DEFAULT '0.00',
+  `benefit` decimal(15,2) DEFAULT '0.00',
+  `status` varchar(50) DEFAULT 'on_progress',
+  `report_year` int DEFAULT NULL,
+  `department_id` varchar(100) NOT NULL,
+  `customer_id` int DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `workorder_processes`
+--
+
+CREATE TABLE `workorder_processes` (
+  `id` int NOT NULL,
+  `order_id` int NOT NULL,
+  `machine_process` varchar(255) DEFAULT NULL,
+  `machine_time` int DEFAULT NULL,
+  `machine_cost` decimal(15,2) DEFAULT NULL,
+  `manpower_process` varchar(255) DEFAULT NULL,
+  `manpower_time` int DEFAULT NULL,
+  `manpower_cost` decimal(15,2) DEFAULT NULL,
+  `material_cost` decimal(15,2) DEFAULT NULL,
+  `vendor_price_per_pcs` decimal(15,2) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Indexes for dumped tables
@@ -495,6 +558,12 @@ ALTER TABLE `approvals`
 -- Indexes for table `cart_items`
 --
 ALTER TABLE `cart_items`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `consumable_reports`
+--
+ALTER TABLE `consumable_reports`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -535,13 +604,41 @@ ALTER TABLE `items`
   ADD PRIMARY KEY (`id`),
   ADD KEY `customer_id` (`customer_id`),
   ADD KEY `order_id` (`order_id`),
-  ADD KEY `product_id` (`product_id`);
+  ADD KEY `product_id` (`product_id`),
+  ADD KEY `fk_items_dimension` (`material_dimension_id`);
 
 --
--- Indexes for table `materials`
+-- Indexes for table `machine_rates`
 --
-ALTER TABLE `materials`
+ALTER TABLE `machine_rates`
   ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `manpower_rates`
+--
+ALTER TABLE `manpower_rates`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `material_dimensions`
+--
+ALTER TABLE `material_dimensions`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `material_dimensions_ibfk_1` (`material_type_id`);
+
+--
+-- Indexes for table `material_stock_logs`
+--
+ALTER TABLE `material_stock_logs`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `material_dimension_id` (`material_dimension_id`);
+
+--
+-- Indexes for table `material_types`
+--
+ALTER TABLE `material_types`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `material_number` (`material_number`);
 
 --
 -- Indexes for table `notifications`
@@ -559,14 +656,6 @@ ALTER TABLE `orders`
   ADD UNIQUE KEY `order_code` (`order_code`),
   ADD KEY `customer_id` (`customer_id`),
   ADD KEY `repeat_source_order_id` (`repeat_source_order_id`);
-
---
--- Indexes for table `order_histories`
---
-ALTER TABLE `order_histories`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `order_id` (`order_id`),
-  ADD KEY `item_id` (`item_id`);
 
 --
 -- Indexes for table `password_reset_tokens`
@@ -606,6 +695,13 @@ ALTER TABLE `product_types`
   ADD KEY `section_id` (`section_id`);
 
 --
+-- Indexes for table `reviews`
+--
+ALTER TABLE `reviews`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `order_id` (`order_id`,`customer_id`);
+
+--
 -- Indexes for table `sections`
 --
 ALTER TABLE `sections`
@@ -622,6 +718,18 @@ ALTER TABLE `users`
   ADD KEY `plant_id` (`plant_id`);
 
 --
+-- Indexes for table `workorder_costs`
+--
+ALTER TABLE `workorder_costs`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `workorder_processes`
+--
+ALTER TABLE `workorder_processes`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- AUTO_INCREMENT for dumped tables
 --
 
@@ -629,7 +737,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `approvals`
 --
 ALTER TABLE `approvals`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `cart_items`
@@ -638,57 +746,81 @@ ALTER TABLE `cart_items`
   MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `consumable_reports`
+--
+ALTER TABLE `consumable_reports`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `consum_cart`
 --
 ALTER TABLE `consum_cart`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=50;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `consum_orders`
 --
 ALTER TABLE `consum_orders`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `customers`
 --
 ALTER TABLE `customers`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `departments`
 --
 ALTER TABLE `departments`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `items`
 --
 ALTER TABLE `items`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `materials`
+-- AUTO_INCREMENT for table `machine_rates`
 --
-ALTER TABLE `materials`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+ALTER TABLE `machine_rates`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+
+--
+-- AUTO_INCREMENT for table `manpower_rates`
+--
+ALTER TABLE `manpower_rates`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+
+--
+-- AUTO_INCREMENT for table `material_dimensions`
+--
+ALTER TABLE `material_dimensions`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `material_stock_logs`
+--
+ALTER TABLE `material_stock_logs`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `material_types`
+--
+ALTER TABLE `material_types`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `notifications`
 --
 ALTER TABLE `notifications`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
-
---
--- AUTO_INCREMENT for table `order_histories`
---
-ALTER TABLE `order_histories`
   MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
@@ -707,25 +839,43 @@ ALTER TABLE `products`
 -- AUTO_INCREMENT for table `product_items`
 --
 ALTER TABLE `product_items`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `product_types`
 --
 ALTER TABLE `product_types`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `reviews`
+--
+ALTER TABLE `reviews`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `sections`
 --
 ALTER TABLE `sections`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `workorder_costs`
+--
+ALTER TABLE `workorder_costs`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `workorder_processes`
+--
+ALTER TABLE `workorder_processes`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- Constraints for dumped tables
@@ -756,9 +906,22 @@ ALTER TABLE `customers`
 -- Constraints for table `items`
 --
 ALTER TABLE `items`
+  ADD CONSTRAINT `fk_items_dimension` FOREIGN KEY (`material_dimension_id`) REFERENCES `material_dimensions` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
   ADD CONSTRAINT `items_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `items_ibfk_2` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `items_ibfk_3` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `material_dimensions`
+--
+ALTER TABLE `material_dimensions`
+  ADD CONSTRAINT `material_dimensions_ibfk_1` FOREIGN KEY (`material_type_id`) REFERENCES `material_types` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `material_stock_logs`
+--
+ALTER TABLE `material_stock_logs`
+  ADD CONSTRAINT `material_stock_logs_ibfk_1` FOREIGN KEY (`material_dimension_id`) REFERENCES `material_dimensions` (`id`);
 
 --
 -- Constraints for table `notifications`
@@ -773,13 +936,6 @@ ALTER TABLE `notifications`
 ALTER TABLE `orders`
   ADD CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customers` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `orders_ibfk_2` FOREIGN KEY (`repeat_source_order_id`) REFERENCES `orders` (`id`) ON DELETE SET NULL;
-
---
--- Constraints for table `order_histories`
---
-ALTER TABLE `order_histories`
-  ADD CONSTRAINT `order_histories_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `order_histories_ibfk_2` FOREIGN KEY (`item_id`) REFERENCES `items` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `products`

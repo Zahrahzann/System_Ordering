@@ -142,11 +142,8 @@ $basePath = '/system_ordering/public';
                                             </div>
                                         </div>
                                     </div>
-
                                     <div class="user-actions">
-                                        <a href="#" class="btn btn-danger" onclick="return confirm('Apakah Anda yakin ingin menghapus user ini?')">
-                                            <i class="fas fa-trash"></i> Delete
-                                        </a>
+                                        <a href="/system_ordering/public/admin/delete-customer?id=<?= $user['id'] ?>" class="btn btn-danger" onclick="return confirm('Apakah Anda yakin ingin menghapus customer ini?')"> <i class="fas fa-trash"></i> Delete </a>
                                     </div>
                                 </div>
                             <?php endforeach; ?>

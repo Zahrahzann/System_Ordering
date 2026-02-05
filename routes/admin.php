@@ -53,32 +53,16 @@ switch ($route) {
         UserManagementController::listCustomers();
         break;
 
-    // MANAGEMENT CONSUMABLE (admin only)
-    case '/admin/consumable/sections':
-        ConsumableController::listSection();
+    case '/admin/delete-customer':
+        UserManagementController::deleteCustomer();
         break;
 
-    case '/admin/consumable/sections/add':
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            ConsumableController::addSection();
-        }
-        break;
-
-    case '/admin/consumable/sections/edit':
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            ConsumableController::editSection($_POST['id']);
-        }
-        break;
-
-    case '/admin/consumable/sections/delete':
-        if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-            ConsumableController::deleteSection($_GET['id']);
-        }
+    case '/admin/delete-spv':
+        UserManagementController::deleteSpv();
         break;
 
     // 404 NOT FOUND RESPON (untuk route statis)
     default:
-        // jangan langsung exit, biarkan switch (true) di bawah bisa jalan
         break;
 }
 

@@ -36,7 +36,6 @@ if (!isset($reviews)) {
             <div class="nav-login">
                 <button class="login-btn" id="loginBtn">Login ▾</button>
                 <div class="login-dropdown" id="loginDropdown">
-                    <a href="<?= $basePath ?>/admin/login">Admin</a>
                     <a href="<?= $basePath ?>/spv/login">Supervisor</a>
                     <a href="<?= $basePath ?>/customer/login">Customer</a>
                 </div>
@@ -330,7 +329,7 @@ if (!isset($reviews)) {
 
         // Team Members Data
         const teamMembers = [{
-                name: "DETALANA NUGRAHA",
+                name: "DETALANA NUGROHO",
                 position: "Manager Maintenance",
                 photo: `${basePath}/uploads/member/detalana.jpg`,
                 quote: "Semangat tim tumbuh dari keberanian, dedikasi, dan tekad untuk mencapai yang terbaik"

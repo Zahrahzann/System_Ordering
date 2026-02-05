@@ -63,14 +63,14 @@ class ReviewModel
             SET rating = ?, review = ?, status = 'submitted', created_at = NOW()
             WHERE order_id = ? AND customer_id = ?
         ");
-            $stmt->execute([$rating, $review, $orderId, $customerId]);
+            return $stmt->execute([$rating, $review, $orderId, $customerId]);
         } else {
             // Belum ada → insert baru
             $stmt = $pdo->prepare("
             INSERT INTO reviews (order_id, customer_id, rating, review, status, created_at)
             VALUES (?, ?, ?, ?, 'submitted', NOW())
         ");
-            $stmt->execute([$orderId, $customerId, $rating, $review]);
+            return $stmt->execute([$orderId, $customerId, $rating, $review]);
         }
     }
 

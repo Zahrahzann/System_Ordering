@@ -53,7 +53,7 @@ class UserManagementModel
                 FROM customers c
                 LEFT JOIN departments d ON c.department_id = d.id
                 LEFT JOIN plants p ON c.plant_id = p.id
-                WHERE 1=1"; 
+                WHERE 1=1";
 
         if (!empty($departmentId)) {
             $sql .= " AND c.department_id = ?";
@@ -85,5 +85,18 @@ class UserManagementModel
         $stmt = $pdo->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public static function deleteCustomerById($id)
+    {
+        $pdo = Database::connect();
+        $stmt = $pdo->prepare("DELETE FROM customers WHERE id = ?");
+        return $stmt->execute([$id]);
+    }
+    public static function deleteSpvById($id)
+    {
+        $pdo = Database::connect();
+        $stmt = $pdo->prepare("DELETE FROM users WHERE id = ? AND role = 'spv'");
+        return $stmt->execute([$id]);
     }
 }

@@ -3,29 +3,31 @@
 namespace App\Controllers;
 
 use App\Models\SectionModel;
+use App\Models\ProductTypeModel;
 
 class ConsumableController
 {
-    // List Section (semua role bisa lihat)
     public static function listSection()
     {
         if (session_status() === PHP_SESSION_NONE) session_start();
-
         $sections = SectionModel::getAll();
         $currentRole = $_SESSION['user_data']['role'] ?? 'customer';
 
-        // Tambahan: handle edit mode (khusus admin)
+        foreach ($sections as $i => $sec) {
+            $sections[$i]['item_count'] = ProductTypeModel::countBySection($sec['id']);
+        }
+
         $isEditMode = false;
         $editData = null;
+
         if ($currentRole === 'admin' && isset($_GET['edit']) && is_numeric($_GET['edit'])) {
-            $isEditMode = true;
             $editData = SectionModel::find($_GET['edit']);
+            $isEditMode = $editData !== null;
         }
 
         require_once __DIR__ . '/../../views/shared/sections.php';
     }
 
-    // Tambah Section (admin only)
     public static function addSection()
     {
         if (session_status() === PHP_SESSION_NONE) session_start();
@@ -38,21 +40,26 @@ class ConsumableController
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            // Proses tambah
-            $name = $_POST['name'] ?? '';
+            $name        = trim($_POST['name'] ?? '');
             $description = $_POST['description'] ?? null;
 
-            SectionModel::create($name, $description);
+            if ($name === '') {
+                $_SESSION['errors'][] = "Nama section tidak boleh kosong.";
+            } else {
+                // kirim $_FILES ke model untuk handle upload gambar
+                $ok = SectionModel::create($name, $description, $_FILES);
+                if ($ok) {
+                    header('Location: /system_ordering/public/admin/consumable/sections');
+                    exit;
+                }
+            }
+
             header('Location: /system_ordering/public/admin/consumable/sections');
             exit;
-        } else {
-            // GET → tampilkan form create
-            require_once __DIR__ . '/../../views/shared/section_form.php';
         }
     }
 
-    // Edit Section (admin only)
-    public static function editSection($id)
+    public static function editSection()
     {
         if (session_status() === PHP_SESSION_NONE) session_start();
         $currentRole = $_SESSION['user_data']['role'] ?? null;
@@ -64,22 +71,28 @@ class ConsumableController
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            // Proses update
-            $name = $_POST['name'] ?? '';
+            $id          = $_POST['id'] ?? null;
+            $name        = trim($_POST['name'] ?? '');
             $description = $_POST['description'] ?? null;
+            $oldImage    = $_POST['old_image'] ?? null;
 
-            SectionModel::update($id, $name, $description);
+            if (!$id || $name === '') {
+                $_SESSION['errors'][] = "Data edit tidak valid.";
+            } else {
+                // kirim $_FILES + oldImage ke model
+                $ok = SectionModel::update($id, $name, $description, $_FILES, $oldImage);
+                if ($ok) {
+                    header('Location: /system_ordering/public/admin/consumable/sections');
+                    exit;
+                }
+            }
+
             header('Location: /system_ordering/public/admin/consumable/sections');
             exit;
-        } else {
-            // GET → tampilkan form edit
-            $section = SectionModel::find($id);
-            require_once __DIR__ . '/../../views/shared/section_form.php';
         }
     }
 
-    // Hapus Section (admin only)
-    public static function deleteSection($id)
+    public static function deleteSection()
     {
         if (session_status() === PHP_SESSION_NONE) session_start();
         $currentRole = $_SESSION['user_data']['role'] ?? null;
@@ -90,8 +103,14 @@ class ConsumableController
             exit;
         }
 
-        // Delete via GET (konfirmasi sudah di view)
-        SectionModel::delete($id);
+        $id = $_GET['id'] ?? null;
+
+        if ($id && is_numeric($id)) {
+            SectionModel::delete($id);
+        } else {
+            $_SESSION['errors'][] = "ID section tidak valid.";
+        }
+
         header('Location: /system_ordering/public/admin/consumable/sections');
         exit;
     }

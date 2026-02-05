@@ -17,7 +17,6 @@ $isEditMode = isset($_GET['edit']) && $editData !== null;
     <link href="<?= $basePath ?>/assets/vendor/fontawesome-free/css/all.min.css" rel="stylesheet">
     <link href="<?= $basePath ?>/assets/css/sb-admin-2.min.css" rel="stylesheet">
     <link href="<?= $basePath ?>/assets/css/admin/consumable/section.css?v=<?= time() ?>" rel="stylesheet">
-
 </head>
 
 <body id="page-top">
@@ -42,7 +41,6 @@ $isEditMode = isset($_GET['edit']) && $editData !== null;
                         </p>
                     </div>
 
-
                     <!-- Admin: tombol toggle form -->
                     <?php if ($currentRole === 'admin'): ?>
                         <div class="mb-3">
@@ -66,14 +64,22 @@ $isEditMode = isset($_GET['edit']) && $editData !== null;
                     <?php if ($currentRole === 'admin'): ?>
                         <div id="sectionForm" class="card mb-4" style="<?= !$isEditMode ? 'display:none;' : '' ?>">
                             <div class="card-body">
-                                <form method="POST" action="<?= $basePath ?>/admin/consumable/sections/<?= $isEditMode ? 'edit' : 'add' ?>">
+                                <form method="POST" enctype="multipart/form-data" action="<?= $basePath ?>/admin/consumable/sections/<?= $isEditMode ? 'edit' : 'add' ?>">
                                     <?php if ($isEditMode): ?>
-                                        <input type="hidden" name="id" value="<?= $editData['id'] ?>">
+                                        <input type="hidden" name="id" value="<?= htmlspecialchars($editData['id']) ?>">
                                     <?php endif; ?>
                                     <div class="form-group">
                                         <label>Nama Section</label>
                                         <input type="text" name="name" class="form-control" required
                                             value="<?= $isEditMode ? htmlspecialchars($editData['name']) : '' ?>">
+                                        <label>Deskripsi</label>
+                                        <textarea name="description" class="form-control"><?= $isEditMode ? htmlspecialchars($editData['description']) : '' ?></textarea>
+                                        <label>Foto Sampul</label>
+                                        <input type="file" name="image" class="form-control" accept="image/*">
+                                        <?php if ($isEditMode && !empty($editData['image'])): ?>
+                                            <img src="<?= $basePath . '/' . htmlspecialchars($editData['image']) ?>" alt="Current Image" style="max-width:150px;margin-top:10px;">
+                                            <input type="hidden" name="old_image" value="<?= htmlspecialchars($editData['image']) ?>">
+                                        <?php endif; ?>
                                     </div>
                                     <button type="submit" class="btn btn-<?= $isEditMode ? 'primary' : 'success' ?>">
                                         <i class="fas fa-<?= $isEditMode ? 'save' : 'plus' ?>"></i>
@@ -101,6 +107,38 @@ $isEditMode = isset($_GET['edit']) && $editData !== null;
                                 $icon = $icons[$index % count($icons)];
                                 $index++;
                             ?>
+                                <div class="section-card">
+                                    <div class="section-image" style="background-image:url('<?= !empty($sec['image']) ? $basePath . '/' . htmlspecialchars($sec['image']) : $basePath . '/assets/img/section.jpeg' ?>');"></div>
+                                    <div class="section-content">
+                                        <div class="item-count">
+                                            <i class="fas fa-cube"></i>
+                                            <span><?= htmlspecialchars($sec['item_count']) ?> items</span>
+                                        </div>
+                                        <div class="section-icon"><i class="fas fa-<?= $icon ?>"></i></div>
+                                        <div class="section-info">
+                                            <div class="section-name"><?= strtoupper(htmlspecialchars($sec['name'])) ?></div>
+                                            <div class="section-desc">
+                                                <?= !empty($sec['description']) ? htmlspecialchars($sec['description']) : 'Klik untuk melihat semua produk dalam section.' ?>
+                                            </div>
+
+                                            <a href="<?= $basePath ?>/shared/consumable/product-types/<?= urlencode($sec['id']) ?>" class="view-button">
+                                                <i class="fas fa-arrow-right"></i><span> Lihat Produk</span>
+                                            </a>
+
+                                            <!-- Admin: edit/delete -->
+                                            <?php if ($currentRole === 'admin'): ?>
+                                                <div class="section-actions">
+                                                    <a href="<?= $basePath ?>/admin/consumable/sections?edit=<?= urlencode($sec['id']) ?>">
+                                                        <i class="fas fa-edit"></i> Edit
+                                                    </a>
+                                                    <button onclick="confirmDelete(<?= htmlspecialchars($sec['id']) ?>)">
+                                                        <i class="fas fa-trash"></i> Hapus
+                                                    </button>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                </div>
                             <?php endforeach; ?>
                         </div>
                     <?php endif; ?>
@@ -125,14 +163,6 @@ $isEditMode = isset($_GET['edit']) && $editData !== null;
             if (confirm("Yakin ingin menghapus section ini?")) {
                 window.location.href = "<?= $basePath ?>/admin/consumable/sections/delete?id=" + id;
             }
-        }
-
-        function addToCart(sectionId) {
-            window.location.href = "<?= $basePath ?>/customer/cart/add?section=" + sectionId;
-        }
-
-        function orderNow(sectionId) {
-            window.location.href = "<?= $basePath ?>/customer/order/create?section=" + sectionId;
         }
     </script>
 </body>

@@ -76,6 +76,17 @@ if (!isset($order) || !isset($items) || !isset($approval)) {
                                     <div class="info-label">Tanggal Order</div>
                                     <div class="info-value"><?= date('d F Y H:i', strtotime($order['created_at'])) ?></div>
                                 </div>
+                                <div class="info-item">
+                                    <div class="info-label">Tanggal Dibutuhkan</div>
+                                    <div class="info-value">
+                                        <i class="far fa-calendar" style="color: #667eea;"></i>
+                                        <?php if (!empty($items) && !empty($items[0]['needed_date'])): ?>
+                                            <?= date('d F Y', strtotime($items[0]['needed_date'])) ?>
+                                        <?php else: ?>
+                                            <span class="text-muted">Belum ditentukan</span>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
